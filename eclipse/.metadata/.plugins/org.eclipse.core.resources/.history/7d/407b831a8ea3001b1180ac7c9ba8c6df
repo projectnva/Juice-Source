@@ -1,0 +1,18 @@
+package clientname.basicgui.elements;
+
+import clientname.basicgui.HUDElement;
+import clientname.basicgui.HUDElementCategory;
+import net.minecraft.client.Minecraft;
+
+public class Coords extends HUDElement {
+
+	public Coords() {
+		super("Coords", "1.1", HUDElementCategory.INFO);
+		setEnabled(true);
+	}
+	
+	public void draw() {
+		Minecraft.getMinecraft().fontRendererObj.drawString("Coords", 4, 4, -1);
+	}
+	
+}

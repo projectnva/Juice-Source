@@ -1,0 +1,55 @@
+package com.github.lunatrius.schematica.command.client;
+
+import com.github.lunatrius.schematica.block.state.pattern.BlockStateReplacer;
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import com.github.lunatrius.schematica.command.CommandSchematicaBase;
+import com.github.lunatrius.schematica.proxy.ClientProxy;
+import com.github.lunatrius.schematica.reference.Reference;
+import java.util.List;
+import net.minecraft.block.state.pattern.BlockStateHelper;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import net.minecraftforge.fml.common.registry.GameData;
+
+public class CommandSchematicaReplace extends CommandSchematicaBase {
+
+    private static final FMLControlledNamespacedRegistry BLOCK_REGISTRY = GameData.getBlockRegistry();
+
+    public String getCommandName() {
+        return "schematicaReplace";
+    }
+
+    public String getCommandUsage(ICommandSender sender) {
+        return "schematica.command.replace.usage";
+    }
+
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+        return args.length < 3 ? getListOfStringsMatchingLastWord(args, CommandSchematicaReplace.BLOCK_REGISTRY.getKeys()) : null;
+    }
+
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+        SchematicWorld schematic = ClientProxy.schematic;
+
+        if (schematic == null) {
+            throw new CommandException("schematica.command.replace.noSchematic", new Object[0]);
+        } else if (args.length != 2) {
+            throw new CommandException("schematica.command.replace.usage", new Object[0]);
+        } else {
+            try {
+                BlockStateReplacer.BlockStateInfo e = BlockStateReplacer.fromString(args[0]);
+                BlockStateHelper matcher = BlockStateReplacer.getMatcher(e);
+                BlockStateReplacer.BlockStateInfo replacementInfo = BlockStateReplacer.fromString(args[1]);
+                BlockStateReplacer replacer = BlockStateReplacer.forBlockState(replacementInfo.block.getDefaultState());
+                int count = schematic.replaceBlock(matcher, replacer, replacementInfo.stateData);
+
+                sender.addChatMessage(new ChatComponentTranslation("schematica.command.replace.success", new Object[] { Integer.valueOf(count)}));
+            } catch (Exception exception) {
+                Reference.logger.error("Something went wrong!", exception);
+                throw new CommandException(exception.getMessage(), new Object[0]);
+            }
+        }
+    }
+}

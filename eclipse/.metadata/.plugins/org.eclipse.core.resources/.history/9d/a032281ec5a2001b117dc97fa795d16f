@@ -1,0 +1,14 @@
+package clientname.gui.clickgui.monsoon.newgui.theme.themes;
+
+import java.awt.Color;
+
+import clientname.gui.clickgui.monsoon.newgui.theme.Theme;
+import net.minecraft.util.ResourceLocation;
+
+public class NormalTheme extends Theme {
+
+	public NormalTheme() {
+		super("Normal", 0.1, new ResourceLocation("clientname/bg.png"), new Color(0, 255, 255, 255).getRGB(), -1);
+	}
+
+}

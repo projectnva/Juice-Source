@@ -1,0 +1,163 @@
+package com.github.lunatrius.core.version;
+
+import com.github.lunatrius.core.reference.Reference;
+import com.google.common.base.Joiner;
+import com.google.common.io.ByteStreams;
+import com.google.gson.Gson;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import net.minecraftforge.common.ForgeModContainer;
+import net.minecraftforge.common.ForgeVersion.Status;
+import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.common.ModMetadata;
+import net.minecraftforge.fml.common.versioning.ComparableVersion;
+
+public class VersionChecker {
+
+    public static final String VER_CHECK_API_URL = "http://mc.lunatri.us/json?v=%d&mc=%s&limit=5";
+    public static final int VER_CHECK_API_VER = 2;
+    public static final String UPDATE_URL = "https://mods.io/mods?author=Lunatrius";
+    private static final List REGISTERED_MODS = new ArrayList();
+    private static final Joiner NEWLINE_JOINER = Joiner.on('\n');
+
+    public static void registerMod(ModContainer container, String forgeVersion) {
+        VersionChecker.REGISTERED_MODS.add(container);
+        ModMetadata metadata = container.getMetadata();
+
+        if (metadata.description != null) {
+            metadata.description = metadata.description + "\n---\nCompiled against Forge " + forgeVersion;
+        }
+
+    }
+
+    public static void startVersionCheck() {
+        (new Thread("LunatriusCore Version Check") {
+            public void run() {
+                try {
+                    if ("null".equals("1.8.9")) {
+                        Reference.logger.error("Minecraft version is null! This is a bug!");
+                        return;
+                    }
+
+                    URL t = new URL(String.format("http://mc.lunatri.us/json?v=%d&mc=%s&limit=5", new Object[] { Integer.valueOf(2), "1.8.9"}));
+                    URLConnection connection = t.openConnection();
+
+                    connection.addRequestProperty("User-Agent", "LunatriusCore/1.8.8.git");
+                    InputStream inputStream = connection.getInputStream();
+                    String data = new String(ByteStreams.toByteArray(inputStream));
+
+                    inputStream.close();
+                    this.process((VersionChecker.VersionData) (new Gson()).fromJson(data, VersionChecker.VersionData.class));
+                } catch (Throwable throwable) {
+                    Reference.logger.error("Something went wrong!", throwable);
+                }
+
+            }
+
+            private void process(VersionChecker.VersionData versionData) {
+                if (versionData.version == 2) {
+                    if (versionData.mods != null) {
+                        Iterator iterator = VersionChecker.REGISTERED_MODS.iterator();
+
+                        while (iterator.hasNext()) {
+                            ModContainer container = (ModContainer) iterator.next();
+                            String modid = container.getModId();
+
+                            if (!VersionChecker.isAllowedToCheck(modid)) {
+                                Reference.logger.info("Skipped version check for {}", new Object[] { modid});
+                            } else {
+                                VersionChecker.ModData modData = (VersionChecker.ModData) versionData.mods.get(modid);
+
+                                if (modData != null && modData.latest != null) {
+                                    this.processMod(container, modData);
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            private void processMod(ModContainer container, VersionChecker.ModData modData) {
+                VersionChecker.BuildData latestBuild = modData.latest;
+                ComparableVersion versionRemote = latestBuild.getVersion();
+                String version = container.getVersion();
+                ComparableVersion versionLocal = new ComparableVersion(version);
+                Status status = ForgeVersionCheck.getStatus(versionRemote, versionLocal);
+                ComparableVersion target = latestBuild.getVersion();
+                Map changes = modData.getAllChanges();
+                String url = "https://mods.io/mods?author=Lunatrius";
+
+                ForgeVersionCheck.notify(container, status, target, changes, "https://mods.io/mods?author=Lunatrius");
+            }
+        }).start();
+    }
+
+    public static boolean isAllowedToCheck(String scope) {
+        return ForgeModContainer.getConfig().get("version_checking", scope, true).getBoolean();
+    }
+
+    public static class BuildData {
+
+        public String mc;
+        public String version;
+        public int build;
+        public List changes;
+
+        public ComparableVersion getVersion() {
+            return new ComparableVersion(this.version);
+        }
+
+        public String getChanges() {
+            return this.changes == null ? "" : VersionChecker.NEWLINE_JOINER.join(this.changes);
+        }
+    }
+
+    public static class ModData {
+
+        public VersionChecker.BuildData latest;
+        public List builds;
+
+        public Map getAllChanges() {
+            LinkedHashMap changes = new LinkedHashMap();
+
+            if (this.builds == null) {
+                if (this.latest != null) {
+                    changes.put(this.latest.getVersion(), this.latest.getChanges());
+                    return changes;
+                } else {
+                    return changes;
+                }
+            } else {
+                Collections.sort(this.builds, new Comparator() {
+                    public int compare(VersionChecker.BuildData a, VersionChecker.BuildData b) {
+                        return b.getVersion().compareTo(a.getVersion());
+                    }
+                });
+                Iterator iterator = this.builds.iterator();
+
+                while (iterator.hasNext()) {
+                    VersionChecker.BuildData build = (VersionChecker.BuildData) iterator.next();
+
+                    changes.put(build.getVersion(), build.getChanges());
+                }
+
+                return changes;
+            }
+        }
+    }
+
+    public static class VersionData {
+
+        public int version;
+        public Map mods;
+    }
+}

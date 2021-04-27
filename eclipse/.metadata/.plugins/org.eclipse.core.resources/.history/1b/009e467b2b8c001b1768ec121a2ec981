@@ -1,0 +1,84 @@
+package com.github.lunatrius.schematica.block.state;
+
+import com.google.common.collect.UnmodifiableIterator;
+import com.orbitclient.imsoogood.ez.orbitclient.modules.FixDispensers;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockDispenser;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.EnumFacing;
+
+public class BlockStateHelper {
+
+    public static IProperty getProperty(IBlockState blockState, String name) {
+        Iterator iterator = blockState.getPropertyNames().iterator();
+
+        IProperty prop;
+
+        do {
+            if (!iterator.hasNext()) {
+                return null;
+            }
+
+            prop = (IProperty) iterator.next();
+        } while (!prop.getName().equals(name));
+
+        return prop;
+    }
+
+    public static Comparable getPropertyValue(IBlockState blockState, String name) {
+        IProperty property = getProperty(blockState, name);
+
+        if (property == null) {
+            throw new IllegalArgumentException(name + " does not exist in " + blockState);
+        } else {
+            return blockState.getValue(property);
+        }
+    }
+
+    public static List getFormattedProperties(IBlockState blockState) {
+        ArrayList list = new ArrayList();
+
+        IProperty key;
+        String formattedValue;
+
+        for (UnmodifiableIterator unmodifiableiterator = blockState.getProperties().entrySet().iterator(); unmodifiableiterator.hasNext(); list.add(key.getName() + ": " + formattedValue)) {
+            Entry entry = (Entry) unmodifiableiterator.next();
+
+            key = (IProperty) entry.getKey();
+            Comparable value = (Comparable) entry.getValue();
+
+            formattedValue = value.toString();
+            if (Boolean.TRUE.equals(value)) {
+                formattedValue = EnumChatFormatting.GREEN + formattedValue + EnumChatFormatting.RESET;
+            } else if (Boolean.FALSE.equals(value)) {
+                formattedValue = EnumChatFormatting.RED + formattedValue + EnumChatFormatting.RESET;
+            }
+        }
+
+        return list;
+    }
+
+    public static boolean areBlockStatesEqual(IBlockState blockStateA, IBlockState blockStateB) {
+        if (blockStateA == blockStateB) {
+            return true;
+        } else {
+            Block blockA = blockStateA.getBlock();
+            Block blockB = blockStateB.getBlock();
+
+            return FixDispensers.INSTANCE.isEnabled() && blockA instanceof BlockDispenser && blockB instanceof BlockDispenser ? blockA == blockB && getFixedDispenserMeta((BlockDispenser) blockA, blockStateA) == getFixedDispenserMeta((BlockDispenser) blockB, blockStateB) : blockA == blockB && blockA.getMetaFromState(blockStateA) == blockB.getMetaFromState(blockStateB);
+        }
+    }
+
+    public static int getFixedDispenserMeta(BlockDispenser blockDispenser, IBlockState blockState) {
+        byte lvt_2_1_ = 0;
+        int lvt_2_1_1 = lvt_2_1_ | ((EnumFacing) blockState.getValue(BlockDispenser.FACING)).getIndex();
+
+        return lvt_2_1_1;
+    }
+}

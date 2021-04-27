@@ -1,0 +1,20 @@
+package clientname.basicgui.settings;
+
+import clientname.mods.ModDraggable;
+
+public class BooleanSetting extends Setting<Boolean> {
+	
+	public BooleanSetting(String name, ModDraggable parent, boolean defaultValue) {
+		this.name = name;
+		this.element = parent;
+		this.value = defaultValue;
+	}
+	
+	public boolean getValue() {
+		return value;
+	}
+	
+	public void setValue(boolean value) {
+		this.value = value;
+	}
+}

@@ -1,0 +1,41 @@
+package com.orbitclient.imsoogood.ez.orbitclient.util;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+
+public class ColorMap {
+
+    public static HashMap colors = new HashMap();
+    public static ColorMap INSTANCE = new ColorMap();
+
+    public ColorMap() {
+        ColorMap.colors.put("Black", Color.BLACK);
+        ColorMap.colors.put("White", Color.WHITE);
+        ColorMap.colors.put("Light Gray", Color.LIGHT_GRAY);
+        ColorMap.colors.put("Gray", Color.GRAY);
+        ColorMap.colors.put("Dark Gray", Color.DARK_GRAY);
+        ColorMap.colors.put("Red", Color.RED);
+        ColorMap.colors.put("Pink", Color.PINK);
+        ColorMap.colors.put("Orange", Color.ORANGE);
+        ColorMap.colors.put("Yellow", Color.YELLOW);
+        ColorMap.colors.put("Green", Color.GREEN);
+        ColorMap.colors.put("Magenta", Color.MAGENTA);
+        ColorMap.colors.put("Cyan", Color.CYAN);
+        ColorMap.colors.put("Blue", Color.BLUE);
+    }
+
+    public static ArrayList getColorArray() {
+        ArrayList stringArrayList = new ArrayList();
+        Iterator iterator = ColorMap.colors.keySet().iterator();
+
+        while (iterator.hasNext()) {
+            String key = (String) iterator.next();
+
+            stringArrayList.add(key);
+        }
+
+        return stringArrayList;
+    }
+}

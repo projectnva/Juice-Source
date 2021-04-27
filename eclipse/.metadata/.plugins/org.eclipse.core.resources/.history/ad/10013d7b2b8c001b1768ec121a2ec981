@@ -1,0 +1,348 @@
+package com.github.lunatrius.schematica.client.printer.registry;
+
+import com.github.lunatrius.schematica.block.state.BlockStateHelper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockButton;
+import net.minecraft.block.BlockChest;
+import net.minecraft.block.BlockDispenser;
+import net.minecraft.block.BlockDoor;
+import net.minecraft.block.BlockEnderChest;
+import net.minecraft.block.BlockFenceGate;
+import net.minecraft.block.BlockFurnace;
+import net.minecraft.block.BlockHopper;
+import net.minecraft.block.BlockLever;
+import net.minecraft.block.BlockLog;
+import net.minecraft.block.BlockPistonBase;
+import net.minecraft.block.BlockPumpkin;
+import net.minecraft.block.BlockQuartz;
+import net.minecraft.block.BlockRotatedPillar;
+import net.minecraft.block.BlockSlab;
+import net.minecraft.block.BlockStairs;
+import net.minecraft.block.BlockStandingSign;
+import net.minecraft.block.BlockTorch;
+import net.minecraft.block.BlockTrapDoor;
+import net.minecraft.block.BlockLever.EnumOrientation;
+import net.minecraft.block.BlockLog.EnumAxis;
+import net.minecraft.block.BlockQuartz.EnumType;
+import net.minecraft.block.BlockSlab.EnumBlockHalf;
+import net.minecraft.block.BlockStairs.EnumHalf;
+import net.minecraft.block.BlockTrapDoor.DoorHalf;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumFacing.Axis;
+import net.minecraft.world.World;
+
+public class PlacementRegistry {
+
+    public static final PlacementRegistry INSTANCE = new PlacementRegistry();
+    private final Map classPlacementMap = new LinkedHashMap();
+    private final Map blockPlacementMap = new HashMap();
+    private final Map itemPlacementMap = new HashMap();
+
+    private void populateMappings() {
+        this.classPlacementMap.clear();
+        this.blockPlacementMap.clear();
+        this.itemPlacementMap.clear();
+        IValidPlayerFacing playerFacingEntity = new IValidPlayerFacing() {
+            public boolean isValid(IBlockState blockState, EntityPlayer player, BlockPos pos, World world) {
+                EnumFacing facing = (EnumFacing) BlockStateHelper.getPropertyValue(blockState, "facing");
+
+                return facing == player.getHorizontalFacing();
+            }
+        };
+        IValidPlayerFacing playerFacingEntityOpposite = new IValidPlayerFacing() {
+            public boolean isValid(IBlockState blockState, EntityPlayer player, BlockPos pos, World world) {
+                EnumFacing facing = (EnumFacing) BlockStateHelper.getPropertyValue(blockState, "facing");
+
+                return facing == player.getHorizontalFacing().getOpposite();
+            }
+        };
+        IValidPlayerFacing playerFacingPiston = new IValidPlayerFacing() {
+            public boolean isValid(IBlockState blockState, EntityPlayer player, BlockPos pos, World world) {
+                EnumFacing facing = (EnumFacing) BlockStateHelper.getPropertyValue(blockState, "facing");
+
+                return facing == BlockPistonBase.getFacingFromEntity(world, pos, player);
+            }
+        };
+        IValidPlayerFacing playerFacingRotateY = new IValidPlayerFacing() {
+            public boolean isValid(IBlockState blockState, EntityPlayer player, BlockPos pos, World world) {
+                EnumFacing facing = (EnumFacing) BlockStateHelper.getPropertyValue(blockState, "facing");
+
+                return facing == player.getHorizontalFacing().rotateY();
+            }
+        };
+        IValidPlayerFacing playerFacingLever = new IValidPlayerFacing() {
+            public boolean isValid(IBlockState blockState, EntityPlayer player, BlockPos pos, World world) {
+                EnumOrientation value = (EnumOrientation) blockState.getValue(BlockLever.FACING);
+
+                return !value.getFacing().getAxis().isVertical() || EnumOrientation.forFacings(value.getFacing(), player.getHorizontalFacing()) == value;
+            }
+        };
+        IValidPlayerFacing playerFacingStandingSign = new IValidPlayerFacing() {
+            public boolean isValid(IBlockState blockState, EntityPlayer player, BlockPos pos, World world) {
+                int value = ((Integer) blockState.getValue(BlockStandingSign.ROTATION)).intValue();
+                int facing = MathHelper.floor_double(((double) player.rotationYaw + 180.0D) * 16.0D / 360.0D + 0.5D) & 15;
+
+                return value == facing;
+            }
+        };
+        IValidPlayerFacing playerFacingIgnore = new IValidPlayerFacing() {
+            public boolean isValid(IBlockState blockState, EntityPlayer player, BlockPos pos, World world) {
+                return false;
+            }
+        };
+        IOffset offsetSlab = new IOffset() {
+            public float getOffset(IBlockState blockState) {
+                if (!((BlockSlab) blockState.getBlock()).isDouble()) {
+                    EnumBlockHalf half = (EnumBlockHalf) blockState.getValue(BlockSlab.HALF);
+
+                    return half == EnumBlockHalf.TOP ? 1.0F : 0.0F;
+                } else {
+                    return 0.0F;
+                }
+            }
+        };
+        IOffset offsetStairs = new IOffset() {
+            public float getOffset(IBlockState blockState) {
+                EnumHalf half = (EnumHalf) blockState.getValue(BlockStairs.HALF);
+
+                return half == EnumHalf.TOP ? 1.0F : 0.0F;
+            }
+        };
+        IOffset offsetTrapDoor = new IOffset() {
+            public float getOffset(IBlockState blockState) {
+                DoorHalf half = (DoorHalf) blockState.getValue(BlockTrapDoor.HALF);
+
+                return half == DoorHalf.TOP ? 1.0F : 0.0F;
+            }
+        };
+        IValidBlockFacing blockFacingLog = new IValidBlockFacing() {
+            public List getValidBlockFacings(List solidSides, IBlockState blockState) {
+                ArrayList list = new ArrayList();
+                EnumAxis axis = (EnumAxis) blockState.getValue(BlockLog.LOG_AXIS);
+                Iterator iterator = solidSides.iterator();
+
+                while (iterator.hasNext()) {
+                    EnumFacing side = (EnumFacing) iterator.next();
+
+                    if (axis == EnumAxis.fromFacingAxis(side.getAxis())) {
+                        list.add(side);
+                    }
+                }
+
+                return list;
+            }
+        };
+        IValidBlockFacing blockFacingPillar = new IValidBlockFacing() {
+            public List getValidBlockFacings(List solidSides, IBlockState blockState) {
+                ArrayList list = new ArrayList();
+                Axis axis = (Axis) blockState.getValue(BlockRotatedPillar.AXIS);
+                Iterator iterator = solidSides.iterator();
+
+                while (iterator.hasNext()) {
+                    EnumFacing side = (EnumFacing) iterator.next();
+
+                    if (axis == side.getAxis()) {
+                        list.add(side);
+                    }
+                }
+
+                return list;
+            }
+        };
+        IValidBlockFacing blockFacingOpposite = new IValidBlockFacing() {
+            public List getValidBlockFacings(List solidSides, IBlockState blockState) {
+                ArrayList list = new ArrayList();
+                IProperty propertyFacing = BlockStateHelper.getProperty(blockState, "facing");
+
+                if (propertyFacing != null && propertyFacing.getValueClass().equals(EnumFacing.class)) {
+                    EnumFacing facing = (EnumFacing) blockState.getValue(propertyFacing);
+                    Iterator iterator = solidSides.iterator();
+
+                    while (iterator.hasNext()) {
+                        EnumFacing side = (EnumFacing) iterator.next();
+
+                        if (facing.getOpposite() == side) {
+                            list.add(side);
+                        }
+                    }
+                }
+
+                return list;
+            }
+        };
+        IValidBlockFacing blockFacingSame = new IValidBlockFacing() {
+            public List getValidBlockFacings(List solidSides, IBlockState blockState) {
+                ArrayList list = new ArrayList();
+                IProperty propertyFacing = BlockStateHelper.getProperty(blockState, "facing");
+
+                if (propertyFacing != null && propertyFacing.getValueClass().equals(EnumFacing.class)) {
+                    EnumFacing facing = (EnumFacing) blockState.getValue(propertyFacing);
+                    Iterator iterator = solidSides.iterator();
+
+                    while (iterator.hasNext()) {
+                        EnumFacing side = (EnumFacing) iterator.next();
+
+                        if (facing == side) {
+                            list.add(side);
+                        }
+                    }
+                }
+
+                return list;
+            }
+        };
+        IValidBlockFacing blockFacingHopper = new IValidBlockFacing() {
+            public List getValidBlockFacings(List solidSides, IBlockState blockState) {
+                ArrayList list = new ArrayList();
+                EnumFacing facing = (EnumFacing) blockState.getValue(BlockHopper.FACING);
+                Iterator iterator = solidSides.iterator();
+
+                while (iterator.hasNext()) {
+                    EnumFacing side = (EnumFacing) iterator.next();
+
+                    if (facing == side) {
+                        list.add(side);
+                    }
+                }
+
+                return list;
+            }
+        };
+        IValidBlockFacing blockFacingLever = new IValidBlockFacing() {
+            public List getValidBlockFacings(List solidSides, IBlockState blockState) {
+                ArrayList list = new ArrayList();
+                EnumOrientation facing = (EnumOrientation) blockState.getValue(BlockLever.FACING);
+                Iterator iterator = solidSides.iterator();
+
+                while (iterator.hasNext()) {
+                    EnumFacing side = (EnumFacing) iterator.next();
+
+                    if (facing.getFacing().getOpposite() == side) {
+                        list.add(side);
+                    }
+                }
+
+                return list;
+            }
+        };
+        IValidBlockFacing blockFacingQuartz = new IValidBlockFacing() {
+            public List getValidBlockFacings(List solidSides, IBlockState blockState) {
+                ArrayList list = new ArrayList();
+                EnumType enumtype = (EnumType) blockState.getValue(BlockQuartz.VARIANT);
+                Iterator iterator = solidSides.iterator();
+
+                while (iterator.hasNext()) {
+                    EnumFacing side = (EnumFacing) iterator.next();
+
+                    if ((enumtype != EnumType.LINES_X || side.getAxis() == Axis.X) && (enumtype != EnumType.LINES_Y || side.getAxis() == Axis.Y) && (enumtype != EnumType.LINES_Z || side.getAxis() == Axis.Z)) {
+                        list.add(side);
+                    }
+                }
+
+                return list;
+            }
+        };
+        IExtraClick extraClickDoubleSlab = new IExtraClick() {
+            public int getExtraClicks(IBlockState blockState) {
+                return ((BlockSlab) blockState.getBlock()).isDouble() ? 1 : 0;
+            }
+        };
+
+        this.addPlacementMapping(BlockLog.class, new PlacementData(blockFacingLog));
+        this.addPlacementMapping(BlockButton.class, new PlacementData(blockFacingOpposite));
+        this.addPlacementMapping(BlockChest.class, new PlacementData(playerFacingEntityOpposite));
+        this.addPlacementMapping(BlockDispenser.class, new PlacementData(playerFacingPiston));
+        this.addPlacementMapping(BlockDoor.class, new PlacementData(playerFacingEntity));
+        this.addPlacementMapping(BlockEnderChest.class, new PlacementData(playerFacingEntityOpposite));
+        this.addPlacementMapping(BlockFenceGate.class, new PlacementData(playerFacingEntity));
+        this.addPlacementMapping(BlockFurnace.class, new PlacementData(playerFacingEntityOpposite));
+        this.addPlacementMapping(BlockHopper.class, new PlacementData(blockFacingHopper));
+        this.addPlacementMapping(BlockPistonBase.class, new PlacementData(playerFacingPiston));
+        this.addPlacementMapping(BlockPumpkin.class, new PlacementData(playerFacingEntityOpposite));
+        this.addPlacementMapping(BlockRotatedPillar.class, new PlacementData(blockFacingPillar));
+        this.addPlacementMapping(BlockSlab.class, (new PlacementData()).setOffsetY(offsetSlab).setExtraClick(extraClickDoubleSlab));
+        this.addPlacementMapping(BlockStairs.class, (new PlacementData(playerFacingEntity)).setOffsetY(offsetStairs));
+        this.addPlacementMapping(BlockTorch.class, new PlacementData(blockFacingOpposite));
+        this.addPlacementMapping(BlockTrapDoor.class, (new PlacementData(blockFacingOpposite)).setOffsetY(offsetTrapDoor));
+        this.addPlacementMapping(Blocks.anvil, new PlacementData(playerFacingRotateY));
+        this.addPlacementMapping(Blocks.cocoa, new PlacementData(blockFacingSame));
+        this.addPlacementMapping(Blocks.end_portal_frame, new PlacementData(playerFacingEntityOpposite));
+        this.addPlacementMapping(Blocks.ladder, new PlacementData(blockFacingOpposite));
+        this.addPlacementMapping(Blocks.lever, new PlacementData(playerFacingLever, blockFacingLever));
+        this.addPlacementMapping(Blocks.quartz_block, new PlacementData(blockFacingQuartz));
+        this.addPlacementMapping(Blocks.standing_sign, new PlacementData(playerFacingStandingSign));
+        this.addPlacementMapping((Block) Blocks.tripwire_hook, new PlacementData(blockFacingOpposite));
+        this.addPlacementMapping(Blocks.wall_sign, new PlacementData(blockFacingOpposite));
+        this.addPlacementMapping(Items.comparator, new PlacementData(playerFacingEntityOpposite));
+        this.addPlacementMapping(Items.repeater, new PlacementData(playerFacingEntityOpposite));
+        this.addPlacementMapping(Blocks.bed, new PlacementData(playerFacingIgnore));
+        this.addPlacementMapping(Blocks.end_portal, new PlacementData(playerFacingIgnore));
+        this.addPlacementMapping((Block) Blocks.piston_extension, new PlacementData(playerFacingIgnore));
+        this.addPlacementMapping((Block) Blocks.piston_head, new PlacementData(playerFacingIgnore));
+        this.addPlacementMapping((Block) Blocks.portal, new PlacementData(playerFacingIgnore));
+        this.addPlacementMapping((Block) Blocks.skull, new PlacementData(playerFacingIgnore));
+        this.addPlacementMapping(Blocks.standing_banner, new PlacementData(playerFacingIgnore));
+        this.addPlacementMapping(Blocks.wall_banner, new PlacementData(playerFacingIgnore));
+    }
+
+    private PlacementData addPlacementMapping(Class clazz, PlacementData data) {
+        return clazz != null && data != null ? (PlacementData) this.classPlacementMap.put(clazz, data) : null;
+    }
+
+    private PlacementData addPlacementMapping(Block block, PlacementData data) {
+        return block != null && data != null ? (PlacementData) this.blockPlacementMap.put(block, data) : null;
+    }
+
+    private PlacementData addPlacementMapping(Item item, PlacementData data) {
+        return item != null && data != null ? (PlacementData) this.itemPlacementMap.put(item, data) : null;
+    }
+
+    public PlacementData getPlacementData(IBlockState blockState, ItemStack itemStack) {
+        Item item = itemStack.getItem();
+        PlacementData placementDataItem = (PlacementData) this.itemPlacementMap.get(item);
+
+        if (placementDataItem != null) {
+            return placementDataItem;
+        } else {
+            Block block = blockState.getBlock();
+            PlacementData placementDataBlock = (PlacementData) this.blockPlacementMap.get(block);
+
+            if (placementDataBlock != null) {
+                return placementDataBlock;
+            } else {
+                Iterator iterator = this.classPlacementMap.keySet().iterator();
+
+                Class clazz;
+
+                do {
+                    if (!iterator.hasNext()) {
+                        return null;
+                    }
+
+                    clazz = (Class) iterator.next();
+                } while (!clazz.isInstance(block));
+
+                return (PlacementData) this.classPlacementMap.get(clazz);
+            }
+        }
+    }
+
+    static {
+        PlacementRegistry.INSTANCE.populateMappings();
+    }
+}

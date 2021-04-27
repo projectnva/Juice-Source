@@ -1,0 +1,203 @@
+package clientname.mods.impl.crosshairmod.utils;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import sparkless101.crosshairmod.main.CustomCrosshairMod;
+
+public class SaveUtils {
+
+    private static final String SAVE_DIRECTORY = "custom-crosshair-mod_save.txt";
+
+    public static boolean readSaveFile(CustomCrosshairMod crosshairMod) {
+        try {
+            FileReader readingException = new FileReader("custom-crosshair-mod_save.txt");
+            BufferedReader bufferedReader = new BufferedReader(readingException);
+            String line = null;
+
+            while ((line = bufferedReader.readLine()) != null) {
+                if (!line.startsWith("//")) {
+                    String[] splitted = line.split(":");
+
+                    if (splitted.length > 1) {
+                        String attribute = splitted[0].toLowerCase().trim();
+                        String value = splitted[1].toLowerCase().trim();
+
+                        if (attribute.equals("guikeybind")) {
+                            crosshairMod.setGuiKeyBind(value.toUpperCase());
+                        } else if (attribute.equals("crosshairtype")) {
+                            crosshairMod.getCrosshair().setCrosshairType(Integer.parseInt(value));
+                        } else if (attribute.equals("enabled")) {
+                            crosshairMod.getCrosshair().setEnabled(Boolean.parseBoolean(value));
+                        } else if (attribute.equals("colour_red")) {
+                            crosshairMod.getCrosshair().getColour().setRed(Integer.parseInt(value));
+                        } else if (attribute.equals("colour_green")) {
+                            crosshairMod.getCrosshair().getColour().setGreen(Integer.parseInt(value));
+                        } else if (attribute.equals("colour_blue")) {
+                            crosshairMod.getCrosshair().getColour().setBlue(Integer.parseInt(value));
+                        } else if (attribute.equals("colour_opacity")) {
+                            crosshairMod.getCrosshair().getColour().setOpacity(Integer.parseInt(value));
+                        } else if (attribute.equals("visible_default")) {
+                            crosshairMod.getCrosshair().setVisibleDefault(Boolean.parseBoolean(value));
+                        } else if (attribute.equals("visible_hiddengui")) {
+                            crosshairMod.getCrosshair().setVisibleHiddenGui(Boolean.parseBoolean(value));
+                        } else if (attribute.equals("visible_debug")) {
+                            crosshairMod.getCrosshair().setVisibleDebug(Boolean.parseBoolean(value));
+                        } else if (attribute.equals("visible_spectator")) {
+                            crosshairMod.getCrosshair().setVisibleSpectator(Boolean.parseBoolean(value));
+                        } else if (attribute.equals("visible_thirdperson")) {
+                            crosshairMod.getCrosshair().setVisibleThirdPerson(Boolean.parseBoolean(value));
+                        } else if (attribute.equals("outline")) {
+                            crosshairMod.getCrosshair().setOutline(Boolean.parseBoolean(value));
+                        } else if (attribute.equals("outlinecolour_red")) {
+                            crosshairMod.getCrosshair().getOutlineColour().setRed(Integer.parseInt(value));
+                        } else if (attribute.equals("outlinecolour_green")) {
+                            crosshairMod.getCrosshair().getOutlineColour().setGreen(Integer.parseInt(value));
+                        } else if (attribute.equals("outlinecolour_blue")) {
+                            crosshairMod.getCrosshair().getOutlineColour().setBlue(Integer.parseInt(value));
+                        } else if (attribute.equals("outlinecolour_opacity")) {
+                            crosshairMod.getCrosshair().getOutlineColour().setOpacity(Integer.parseInt(value));
+                        } else if (attribute.equals("dot")) {
+                            crosshairMod.getCrosshair().setDot(Boolean.parseBoolean(value));
+                        } else if (attribute.equals("dotcolour_red")) {
+                            crosshairMod.getCrosshair().getDotColour().setRed(Integer.parseInt(value));
+                        } else if (attribute.equals("dotcolour_green")) {
+                            crosshairMod.getCrosshair().getDotColour().setGreen(Integer.parseInt(value));
+                        } else if (attribute.equals("dotcolour_blue")) {
+                            crosshairMod.getCrosshair().getDotColour().setBlue(Integer.parseInt(value));
+                        } else if (attribute.equals("dotcolour_opacity")) {
+                            crosshairMod.getCrosshair().getDotColour().setOpacity(Integer.parseInt(value));
+                        } else if (attribute.equals("width")) {
+                            crosshairMod.getCrosshair().setWidth(Integer.parseInt(value));
+                        } else if (attribute.equals("height")) {
+                            crosshairMod.getCrosshair().setHeight(Integer.parseInt(value));
+                        } else if (attribute.equals("gap")) {
+                            crosshairMod.getCrosshair().setGap(Integer.parseInt(value));
+                        } else if (attribute.equals("thickness")) {
+                            crosshairMod.getCrosshair().setThickness(Integer.parseInt(value));
+                        } else if (attribute.equals("highlight_hostile")) {
+                            crosshairMod.getCrosshair().setHighlightHostile(Boolean.parseBoolean(value));
+                        } else if (attribute.equals("highlighthostilecolour_red")) {
+                            crosshairMod.getCrosshair().getHighlightHostileColour().setRed(Integer.parseInt(value));
+                        } else if (attribute.equals("highlighthostilecolour_green")) {
+                            crosshairMod.getCrosshair().getHighlightHostileColour().setGreen(Integer.parseInt(value));
+                        } else if (attribute.equals("highlighthostilecolour_blue")) {
+                            crosshairMod.getCrosshair().getHighlightHostileColour().setBlue(Integer.parseInt(value));
+                        } else if (attribute.equals("highlighthostilecolour_opacity")) {
+                            crosshairMod.getCrosshair().getHighlightHostileColour().setOpacity(Integer.parseInt(value));
+                        } else if (attribute.equals("highlight_passive")) {
+                            crosshairMod.getCrosshair().setHighlightPassive(Boolean.parseBoolean(value));
+                        } else if (attribute.equals("highlightpassivecolour_red")) {
+                            crosshairMod.getCrosshair().getHighlightPassiveColour().setRed(Integer.parseInt(value));
+                        } else if (attribute.equals("highlightpassivecolour_green")) {
+                            crosshairMod.getCrosshair().getHighlightPassiveColour().setGreen(Integer.parseInt(value));
+                        } else if (attribute.equals("highlightpassivecolour_blue")) {
+                            crosshairMod.getCrosshair().getHighlightPassiveColour().setBlue(Integer.parseInt(value));
+                        } else if (attribute.equals("highlightpassivecolour_opacity")) {
+                            crosshairMod.getCrosshair().getHighlightPassiveColour().setOpacity(Integer.parseInt(value));
+                        } else if (attribute.equals("highlight_player")) {
+                            crosshairMod.getCrosshair().setHighlightPlayer(Boolean.parseBoolean(value));
+                        } else if (attribute.equals("highlightplayercolour_red")) {
+                            crosshairMod.getCrosshair().getHighlightPlayerColour().setRed(Integer.parseInt(value));
+                        } else if (attribute.equals("highlightplayercolour_green")) {
+                            crosshairMod.getCrosshair().getHighlightPlayerColour().setGreen(Integer.parseInt(value));
+                        } else if (attribute.equals("highlightplayercolour_blue")) {
+                            crosshairMod.getCrosshair().getHighlightPlayerColour().setBlue(Integer.parseInt(value));
+                        } else if (attribute.equals("highlightplayercolour_opacity")) {
+                            crosshairMod.getCrosshair().getHighlightPlayerColour().setOpacity(Integer.parseInt(value));
+                        } else if (attribute.equals("dynamic_bow")) {
+                            crosshairMod.getCrosshair().setDynamicBow(Boolean.parseBoolean(value));
+                        }
+                    }
+                }
+            }
+
+            bufferedReader.close();
+            return true;
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    public static boolean writeSaveFile(String guiKeyBind, int crosshairType, boolean enabled, int colour_red, int colour_green, int colour_blue, int colour_opacity, boolean visibleDefault, boolean visibleHiddenGui, boolean visibleDebug, boolean visibleSpectator, boolean visibleThirdPerson, boolean outline, int outlineColour_red, int outlineColour_green, int outlineColour_blue, int outlineColour_opacity, boolean dot, int dotColour_red, int dotColour_green, int dotColour_blue, int dotColour_opacity, int width, int height, int gap, int thickness, boolean highlightHostile, int highlightHostileColour_red, int highlightHostileColour_green, int highlightHostileColour_blue, int highlightHostileColour_opacity, boolean highlightPassive, int highlightPassiveColour_red, int highlightPassiveColour_green, int highlightPassiveColour_blue, int highlightPassiveColour_opacity, boolean highlightPlayer, int highlightPlayerColour_red, int highlightPlayerColour_green, int highlightPlayerColour_blue, int highlightPlayerColour_opacity, boolean dynamicBow) {
+        try {
+            FileWriter exceptionWriting = new FileWriter("custom-crosshair-mod_save.txt");
+            BufferedWriter bufferedWriter = new BufferedWriter(exceptionWriting);
+            ArrayList lines = new ArrayList();
+
+            lines.add("// Custom Crosshair Mod Save File - Made by Sparkless101");
+            lines.add("// ---------------------------------------------------------------------");
+            lines.add("// This file contains the styling for the crosshair.");
+            lines.add("// You may change the contents of this file in order to change the style of the crosshair in-game.");
+            lines.add("// Colours must be an number between 0 and 255.");
+            lines.add("// Boolean values must be \'true\' or \'false\'.");
+            lines.add("//");
+            lines.add("// Visit the MinecraftForum or CurseForge page for crosshair presets:");
+            lines.add("// http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/2637819/");
+            lines.add("// http://www.curseforge.com/projects/242995/");
+            lines.add("// ---------------------------------------------------------------------");
+            lines.add("guiKeyBind:" + guiKeyBind);
+            lines.add("crosshairType:" + crosshairType);
+            lines.add("enabled:" + enabled);
+            lines.add("colour_red:" + colour_red);
+            lines.add("colour_green:" + colour_green);
+            lines.add("colour_blue:" + colour_blue);
+            lines.add("colour_opacity:" + colour_opacity);
+            lines.add("visible_default:" + visibleDefault);
+            lines.add("visible_hiddenGui:" + visibleHiddenGui);
+            lines.add("visible_debug:" + visibleDebug);
+            lines.add("visible_spectator:" + visibleSpectator);
+            lines.add("visible_thirdPerson:" + visibleThirdPerson);
+            lines.add("outline:" + outline);
+            lines.add("outlineColour_red:" + outlineColour_red);
+            lines.add("outlineColour_green:" + outlineColour_green);
+            lines.add("outlineColour_blue:" + outlineColour_blue);
+            lines.add("outlineColour_opacity:" + outlineColour_opacity);
+            lines.add("dot:" + dot);
+            lines.add("dotColour_red:" + dotColour_red);
+            lines.add("dotColour_green:" + dotColour_green);
+            lines.add("dotColour_blue:" + dotColour_blue);
+            lines.add("dotColour_opacity:" + dotColour_opacity);
+            lines.add("width:" + width);
+            lines.add("height:" + height);
+            lines.add("gap:" + gap);
+            lines.add("thickness:" + thickness);
+            lines.add("highlight_hostile:" + highlightHostile);
+            lines.add("highlightHostileColour_red:" + highlightHostileColour_red);
+            lines.add("highlightHostileColour_green:" + highlightHostileColour_green);
+            lines.add("highlightHostileColour_blue:" + highlightHostileColour_blue);
+            lines.add("highlightHostileColour_opacity:" + highlightHostileColour_opacity);
+            lines.add("highlight_passive:" + highlightPassive);
+            lines.add("highlightPassiveColour_red:" + highlightPassiveColour_red);
+            lines.add("highlightPassiveColour_green:" + highlightPassiveColour_green);
+            lines.add("highlightPassiveColour_blue:" + highlightPassiveColour_blue);
+            lines.add("highlightPassiveColour_opacity:" + highlightPassiveColour_opacity);
+            lines.add("highlight_player:" + highlightPlayer);
+            lines.add("highlightPlayerColour_red:" + highlightPlayerColour_red);
+            lines.add("highlightPlayerColour_green:" + highlightPlayerColour_green);
+            lines.add("highlightPlayerColour_blue:" + highlightPlayerColour_blue);
+            lines.add("highlightPlayerColour_opacity:" + highlightPlayerColour_opacity);
+            lines.add("dynamic_bow:" + dynamicBow);
+
+            for (int i = 0; i < lines.size(); ++i) {
+                bufferedWriter.write((String) lines.get(i));
+                bufferedWriter.newLine();
+            }
+
+            bufferedWriter.close();
+            return true;
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    public static boolean writeSaveFileDefault() {
+        return writeSaveFile("GRAVE", 0, true, 255, 255, 255, 255, true, true, true, true, true, true, 0, 0, 0, 255, true, 255, 255, 255, 255, 5, 5, 3, 1, true, 255, 0, 0, 255, true, 0, 255, 0, 255, true, 0, 0, 255, 255, true);
+    }
+
+    public static void saveCurrentCrosshair(CustomCrosshairMod crosshairMod) {
+        writeSaveFile(CustomCrosshairMod.getCrosshairMod().getGuiKeyBind(), crosshairMod.getCrosshair().getCrosshairTypeID(), crosshairMod.getCrosshair().getEnabled(), crosshairMod.getCrosshair().getColour().getRed(), crosshairMod.getCrosshair().getColour().getGreen(), crosshairMod.getCrosshair().getColour().getBlue(), crosshairMod.getCrosshair().getColour().getOpacity(), crosshairMod.getCrosshair().getVisibleDefault(), crosshairMod.getCrosshair().getVisibleHiddenGui(), crosshairMod.getCrosshair().getVisibleDebug(), crosshairMod.getCrosshair().getVisibleSpectator(), crosshairMod.getCrosshair().getVisibleThirdPerson(), crosshairMod.getCrosshair().getOutline(), crosshairMod.getCrosshair().getOutlineColour().getRed(), crosshairMod.getCrosshair().getOutlineColour().getGreen(), crosshairMod.getCrosshair().getOutlineColour().getBlue(), crosshairMod.getCrosshair().getOutlineColour().getOpacity(), crosshairMod.getCrosshair().getDot(), crosshairMod.getCrosshair().getDotColour().getRed(), crosshairMod.getCrosshair().getDotColour().getGreen(), crosshairMod.getCrosshair().getDotColour().getBlue(), crosshairMod.getCrosshair().getDotColour().getOpacity(), crosshairMod.getCrosshair().getWidth(), crosshairMod.getCrosshair().getHeight(), crosshairMod.getCrosshair().getGap(), crosshairMod.getCrosshair().getThickness(), crosshairMod.getCrosshair().getHighlightHostile(), crosshairMod.getCrosshair().getHighlightHostileColour().getRed(), crosshairMod.getCrosshair().getHighlightHostileColour().getGreen(), crosshairMod.getCrosshair().getHighlightHostileColour().getBlue(), crosshairMod.getCrosshair().getHighlightHostileColour().getOpacity(), crosshairMod.getCrosshair().getHighlightPassive(), crosshairMod.getCrosshair().getHighlightPassiveColour().getRed(), crosshairMod.getCrosshair().getHighlightPassiveColour().getGreen(), crosshairMod.getCrosshair().getHighlightPassiveColour().getBlue(), crosshairMod.getCrosshair().getHighlightPassiveColour().getOpacity(), crosshairMod.getCrosshair().getHighlightPlayer(), crosshairMod.getCrosshair().getHighlightPlayerColour().getRed(), crosshairMod.getCrosshair().getHighlightPlayerColour().getGreen(), crosshairMod.getCrosshair().getHighlightPlayerColour().getBlue(), crosshairMod.getCrosshair().getHighlightPlayerColour().getOpacity(), crosshairMod.getCrosshair().getDynamicBow());
+    }
+}

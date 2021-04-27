@@ -1,0 +1,85 @@
+package clientname.mods;
+
+import clientname.gui.hud.HUDManager;
+import clientname.mods.impl.ModArmorStatus;
+import clientname.mods.impl.ModCoords;
+import clientname.mods.impl.ModFPS;
+import clientname.mods.impl.ModFullbright;
+import clientname.mods.impl.ModHealthIndicator;
+import clientname.mods.impl.ModKeystrokes;
+import clientname.mods.impl.ModPerspective;
+import clientname.mods.impl.ModPing;
+import clientname.mods.impl.ModPotionCounter;
+import clientname.mods.impl.ModPotionStatus;
+import clientname.mods.impl.crosshairmod.crosshair.Crosshair;
+import clientname.mods.impl.togglesprintsneak.ModToggleSprintSneak;
+
+public class ModInstances {
+
+	private static ModArmorStatus modArmorStatus;
+	private static ModFPS modFPS;
+	private static ModCoords modCoords;
+	private static ModPotionStatus modPotionStatus;
+	private static ModPing modPing;
+	private static ModKeystrokes modKeystrokes;
+	private static ModFullbright modFullbright;
+	private static Mod mod;
+	private static ModHealthIndicator modHealthIndicator;
+	private static ModPerspective modPerspective;
+	private static ModPotionCounter modPotionCounter;
+	private static ModToggleSprintSneak modToggleSprintSneak;
+	private static Crosshair crosshair;
+	
+	public static void register(HUDManager api) {
+		
+		crosshair = new Crosshair();
+		api.register(crosshair);
+
+		modArmorStatus = new ModArmorStatus();
+		api.register(modArmorStatus);
+		
+		modCoords = new ModCoords();
+		api.register(modCoords);
+		
+		modFPS = new ModFPS();
+		api.register(modFPS);
+		
+		modHealthIndicator = new ModHealthIndicator();
+		api.register(modHealthIndicator);
+		
+		modKeystrokes = new ModKeystrokes();
+		api.register(modKeystrokes);
+		
+		modPing = new ModPing();
+		api.register(modPing);
+		
+		modPotionStatus = new ModPotionStatus();
+		api.register(modPotionStatus);
+		
+		modPerspective = new ModPerspective();
+		api.register(modPerspective);
+		
+		modFullbright = new ModFullbright();
+		api.register(modFullbright);
+		
+		modPotionCounter = new ModPotionCounter();
+		api.register(modPotionCounter);
+		
+		modToggleSprintSneak = new ModToggleSprintSneak();
+		api.register(modToggleSprintSneak);
+					
+	}
+
+	public static ModPerspective getModPerspective() {
+		return modPerspective;
+	}
+
+	public static ModToggleSprintSneak getModToggleSprintSneak() {
+		return modToggleSprintSneak;
+	}
+	
+	public static Crosshair crosshair() {
+		return crosshair;
+	}
+	
+}

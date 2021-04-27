@@ -1,0 +1,28 @@
+package com.github.lunatrius.schematica.client.printer.nbtsync;
+
+import java.util.Arrays;
+import net.minecraft.network.play.client.C12PacketUpdateSign;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.world.World;
+
+public class NBTSyncSign extends NBTSync {
+
+    public boolean execute(World schematic, BlockPos pos, World mcWorld, BlockPos mcPos) {
+        TileEntity tileEntity = schematic.getTileEntity(pos);
+        TileEntity mcTileEntity = mcWorld.getTileEntity(mcPos);
+
+        if (tileEntity instanceof TileEntitySign && mcTileEntity instanceof TileEntitySign) {
+            IChatComponent[] signText = ((TileEntitySign) tileEntity).signText;
+            IChatComponent[] mcSignText = ((TileEntitySign) mcTileEntity).signText;
+
+            if (!Arrays.equals(signText, mcSignText)) {
+                return this.sendPacket(new C12PacketUpdateSign(mcPos, signText));
+            }
+        }
+
+        return false;
+    }
+}

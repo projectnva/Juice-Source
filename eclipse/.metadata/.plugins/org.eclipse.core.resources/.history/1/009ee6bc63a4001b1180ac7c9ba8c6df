@@ -1,0 +1,73 @@
+package clientname.basicgui.comp.impl;
+
+import java.awt.Color;
+
+import clientname.basicgui.SettingsWindow;
+import clientname.basicgui.comp.Component;
+import clientname.basicgui.settings.NumberSetting;
+import clientname.basicgui.utils.Colors;
+import clientname.basicgui.utils.RenderUtils;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
+
+public class Slider extends Component {
+	
+	public int x, y;
+	public NumberSetting set;
+	public SettingsWindow window;
+	
+    public Slider(int x, int y, NumberSetting set, SettingsWindow window) {
+        this.x = x;
+        this.y = y;
+        this.set = set;
+        this.window = window;
+    }
+
+    boolean isSliding = false;
+
+    @Override
+    public void draw(int mouseX, int mouseY) {
+    	FontRenderer ufr = Minecraft.getMinecraft().fontRendererObj;
+        int height = 20;
+        int width = 100;
+        double progress;
+        if (this.isSliding) {
+            progress = (double)mouseX;
+            double mouseProgress = (progress - (double)this.x) / (double)width;
+            this.set.setValue((this.set.getMax().doubleValue() - this.set.getMin().doubleValue()) * mouseProgress);
+        }
+
+        if (this.set.getValue().doubleValue() <= this.set.getMin().doubleValue()) {
+            this.set.setValue(this.set.getMin());
+        }
+
+        if (this.set.getValue().doubleValue() >= this.set.getMax().doubleValue()) {
+            this.set.setValue(this.set.getMax());
+        }
+
+        progress = this.set.getValue().doubleValue() / this.set.getMax().doubleValue();
+        Gui.drawRect(x, y + height / 2 - 1, x + width, y + height / 2 + 1, Colors.getBrighterGuiBackgroundColor());
+        RenderUtils.drawFilledCircle((int) (this.x + (double)width * progress)    , y + height / 2, 3, Color.cyan);
+        ufr.drawString(this.set.getName() + " : " + (double)Math.round(this.set.getValue().doubleValue() * 1000.0D) / 1000.0D, x + width + 5, y + 1, Colors.getTextColor());
+    }
+
+    @Override
+    public void mouseClicked(int mouseX, int mouseY, int button) {
+        if(isWithinComponent(mouseX, mouseY)){
+            this.isSliding = true;
+        }
+    }
+
+    public boolean isWithinComponent(int mouseX, int mouseY){
+        int height = 20;
+        int width = 100;
+        return mouseX > x && x < x + width && mouseY > y && mouseY < y + height;
+    }
+
+    @Override
+    public void mouseReleased(int stae) {
+        isSliding = false;
+    }
+}

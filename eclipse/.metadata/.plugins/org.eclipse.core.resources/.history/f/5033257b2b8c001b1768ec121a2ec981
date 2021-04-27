@@ -1,0 +1,19 @@
+package com.github.lunatrius.schematica.reference;
+
+import java.util.Locale;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+public class Reference {
+
+    public static final String MODID = "OrbitClient";
+    public static final String MODID_LOWER = "OrbitClient".toLowerCase(Locale.ENGLISH);
+    public static final String NAME = "OrbitClient";
+    public static final String VERSION = "1.8.8.git";
+    public static final String FORGE = "11.15.0.1661";
+    public static final String MINECRAFT = "1.8.9";
+    public static final String PROXY_SERVER = "com.github.lunatrius.schematica.proxy.ServerProxy";
+    public static final String PROXY_CLIENT = "com.github.lunatrius.schematica.proxy.ClientProxy";
+    public static final String GUI_FACTORY = "com.github.lunatrius.schematica.client.gui.config.GuiFactory";
+    public static Logger logger = LogManager.getLogger("OrbitClient");
+}

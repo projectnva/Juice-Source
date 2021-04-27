@@ -1,0 +1,27 @@
+/*
+ * Decompiled with CFR 0.150.
+ */
+package clientname.settings;
+
+import org.lwjgl.input.Keyboard;
+
+import clientname.settings.Setting;
+
+public class KeybindSetting
+extends Setting {
+    public int code = Keyboard.KEY_H;
+
+    public int getKeyCode() {
+        return this.code;
+    }
+
+    public KeybindSetting(int n) {
+        this.name = "Bind";
+        this.code = n;
+    }
+
+    public void setKeyCode(int n) {
+        this.code = n;
+    }
+}
+

@@ -1,0 +1,50 @@
+package clientname.mods.impl.togglesprintsneak;
+
+import clientname.gui.hud.ScreenPosition;
+import clientname.mods.ModDraggable;
+import net.minecraft.client.Minecraft;
+
+public class ModToggleSprintSneak extends ModDraggable {
+
+    public static boolean toggleSprint = true;
+
+    public static String current = "starting";
+
+    @Override
+    public int getWidth() {
+        return Minecraft.getMinecraft().fontRendererObj.getStringWidth("[Sprinting (Toggled)]");
+    }
+
+    @Override
+    public int getHeight() {
+        return Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT;
+    }
+
+    @Override
+    public void render(ScreenPosition pos) {
+        Minecraft.getMinecraft().fontRendererObj.drawString(current, pos.getAbsoluteX(), pos.getAbsoluteY(), -1);
+
+        if(!Minecraft.getMinecraft().thePlayer.isSprinting()) {
+            current = "[Walking]";
+        }
+        if(!Minecraft.getMinecraft().thePlayer.isAirBorne) {
+            current = "[Flying]";
+        }
+
+        if(Minecraft.getMinecraft().thePlayer.isSprinting()) {
+            if(toggleSprint = false) {
+                current = "[Sprinting (Key Held)]";
+            }
+
+            if(toggleSprint) {
+                current = "[Sprinting (Toggled)]";
+            }
+
+        }
+
+        }
+    @Override 
+    public void renderDummy(ScreenPosition pos) {
+        Minecraft.getMinecraft().fontRendererObj.drawString("[Sprinting (Toggled)]", pos.getAbsoluteX() + 1, pos.getAbsoluteY() + 1, 0xFF00FF00);
+    }
+}

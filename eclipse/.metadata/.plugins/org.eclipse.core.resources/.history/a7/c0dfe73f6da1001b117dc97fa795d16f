@@ -1,0 +1,14 @@
+package clientname.gui.modmenu;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import clientname.gui.options.ModEntry;
+
+public class ModList{
+	
+	private final List<ModEntry> entrys = new ArrayList<ModEntry>();
+	
+	
+
+}

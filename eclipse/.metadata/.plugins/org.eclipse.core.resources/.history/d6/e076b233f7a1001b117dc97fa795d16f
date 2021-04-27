@@ -1,0 +1,48 @@
+package dev.voyageclient.cosmetic;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+import dev.voyageclient.cosmetic.impl.*;
+import dev.voyageclient.mods.Category;
+import dev.voyageclient.mods.ModDraggable;
+
+public class CosmeticManager {
+	
+	public static ArrayList<Cosmetic> cosmetics = new ArrayList<Cosmetic>();
+	
+	public static BetaCape betaCape;
+	public static QuickCape quickCape;
+	public static RepCape repCape;
+	public static NitroCape nitroCape;
+	public static ozhayCape ozhayCape;
+	
+	public void addCosmetics() {
+		
+		quickCape = new QuickCape(null);
+		cosmetics.add(quickCape);
+		
+		repCape = new RepCape(null);
+		cosmetics.add(repCape);
+		
+		betaCape = new BetaCape(null);
+		cosmetics.add(betaCape);
+		
+		nitroCape = new NitroCape(null);
+		cosmetics.add(nitroCape);
+		
+		ozhayCape = new ozhayCape(null);
+		cosmetics.add(ozhayCape);
+		
+	}
+	
+	public static ArrayList<Cosmetic> getCosmetics() {
+		return cosmetics;
+	}
+	
+	public static ArrayList<Cosmetic> getCosByCategory(Category c){
+		ArrayList<Cosmetic> list = (ArrayList<Cosmetic>) getCosmetics().stream().filter(m -> m.getCategory().equals(c)).collect(Collectors.toList());
+		return list;
+	}
+
+}

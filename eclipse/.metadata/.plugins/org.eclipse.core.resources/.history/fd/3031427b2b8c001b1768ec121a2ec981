@@ -1,0 +1,212 @@
+package com.github.lunatrius.schematica.client.gui.load;
+
+import com.github.lunatrius.core.client.gui.GuiScreenBase;
+import com.github.lunatrius.schematica.Schematica;
+import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.proxy.ClientProxy;
+import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.util.FileFilterSchematic;
+import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
+import com.orbitclient.imsoogood.ez.orbitclient.newgui.CustomFont;
+import com.orbitclient.imsoogood.ez.orbitclient.util.ChatColor;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Predicate;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import org.lwjgl.Sys;
+
+public class GuiSchematicLoad extends GuiScreenBase {
+
+    private static final FileFilterSchematic FILE_FILTER_FOLDER = new FileFilterSchematic(true);
+    private static final FileFilterSchematic FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
+    private GuiSchematicLoadSlot guiSchematicLoadSlot;
+    private GuiButton btnOpenDir = null;
+    private GuiButton btnDone = null;
+    private final String strTitle = I18n.format("schematica.gui.title", new Object[0]);
+    private final String strFolderInfo = I18n.format("schematica.gui.folderInfo", new Object[0]);
+    private final String strNoSchematic = I18n.format("schematica.gui.noschematic", new Object[0]);
+    protected File currentDirectory;
+    protected final List schematicFiles;
+    GuiTextField searchBox;
+    public static ExecutorService workerThread = Executors.newSingleThreadExecutor();
+
+    public GuiSchematicLoad(GuiScreen guiScreen) {
+        super(guiScreen);
+        this.currentDirectory = ConfigurationHandler.schematicDirectory;
+        this.schematicFiles = new ArrayList();
+    }
+
+    public void initGui() {
+        byte id = 0;
+
+        this.searchBox = new GuiTextField(69, CustomFont.INSTANCE, this.width / 2 - 50, 2, 100, 13);
+        int i = id + 1;
+
+        this.btnOpenDir = new GuiButton(id, this.width / 2 - 154, this.height - 36, 150, 20, I18n.format("schematica.gui.openFolder", new Object[0]));
+        this.buttonList.add(this.btnOpenDir);
+        this.btnDone = new GuiButton(i++, this.width / 2 + 4, this.height - 36, 150, 20, I18n.format("schematica.gui.done", new Object[0]));
+        this.buttonList.add(this.btnDone);
+        this.guiSchematicLoadSlot = new GuiSchematicLoadSlot(this);
+        this.reloadSchematics();
+    }
+
+    public void handleMouseInput() throws IOException {
+        super.handleMouseInput();
+        this.guiSchematicLoadSlot.handleMouseInput();
+    }
+
+    protected void mouseClicked(int mouseX, int mouseY, int mouseEvent) throws IOException {
+        super.mouseClicked(mouseX, mouseY, mouseEvent);
+        this.searchBox.mouseClicked(mouseX, mouseY, mouseEvent);
+    }
+
+    protected void keyTyped(char character, int code) throws IOException {
+        super.keyTyped(character, code);
+        this.searchBox.textboxKeyTyped(character, code);
+        if (this.searchBox.getText().isEmpty()) {
+            this.reloadSchematics();
+        } else {
+            this.schematicFiles.removeIf((file) -> {
+                return !file.getName().toLowerCase().startsWith(this.searchBox.getText().toLowerCase());
+            });
+        }
+
+    }
+
+    protected void actionPerformed(GuiButton guiButton) {
+        if (guiButton.enabled) {
+            if (guiButton.id == this.btnOpenDir.id) {
+                boolean retry = false;
+
+                try {
+                    Class e = Class.forName("java.awt.Desktop");
+                    Object m = e.getMethod("getDesktop", new Class[0]).invoke((Object) null, new Object[0]);
+
+                    e.getMethod("browse", new Class[] { URI.class}).invoke(m, new Object[] { ConfigurationHandler.schematicDirectory.toURI()});
+                } catch (Throwable throwable) {
+                    retry = true;
+                }
+
+                if (retry) {
+                    Reference.logger.info("Opening via Sys class!");
+                    Sys.openURL("file://" + ConfigurationHandler.schematicDirectory.getAbsolutePath());
+                }
+            } else if (guiButton.id == this.btnDone.id) {
+                if (Schematica.proxy.isLoadEnabled) {
+                    this.loadSchematic();
+                }
+
+                this.mc.displayGuiScreen(this.parentScreen);
+            } else {
+                this.guiSchematicLoadSlot.actionPerformed(guiButton);
+            }
+        }
+
+    }
+
+    public void drawScreen(int x, int y, float partialTicks) {
+        this.guiSchematicLoadSlot.drawScreen(x, y, partialTicks);
+        this.searchBox.drawTextBox();
+        this.drawCenteredString(this.fontRendererObj, this.strFolderInfo, this.width / 2 - 78, this.height - 12, 8421504);
+        super.drawScreen(x, y, partialTicks);
+    }
+
+    public void onGuiClosed() {}
+
+    protected void changeDirectory(String directory) {
+        this.currentDirectory = new File(this.currentDirectory, directory);
+
+        try {
+            this.currentDirectory = this.currentDirectory.getCanonicalFile();
+        } catch (IOException ioexception) {
+            Reference.logger.error("Failed to canonize directory!", ioexception);
+        }
+
+        this.reloadSchematics();
+    }
+
+    protected void reloadSchematics() {
+        String name = null;
+        Item item = null;
+
+        this.schematicFiles.clear();
+
+        try {
+            if (!this.currentDirectory.getCanonicalPath().equals(ConfigurationHandler.schematicDirectory.getCanonicalPath())) {
+                this.schematicFiles.add(new GuiSchematicEntry("..", Items.lava_bucket, 0, true));
+            }
+        } catch (IOException ioexception) {
+            Reference.logger.error("Failed to add GuiSchematicEntry!", ioexception);
+        }
+
+        File[] filesFolders = this.currentDirectory.listFiles(GuiSchematicLoad.FILE_FILTER_FOLDER);
+        File[] filesSchematics;
+        int i;
+
+        if (filesFolders == null) {
+            Reference.logger.error("listFiles returned null (directory: {})!", new Object[] { this.currentDirectory});
+        } else {
+            filesSchematics = filesFolders;
+            int j = filesFolders.length;
+
+            for (i = 0; i < j; ++i) {
+                File file = filesSchematics[i];
+
+                if (file != null) {
+                    name = file.getName();
+                    File[] file1 = file.listFiles();
+
+                    item = file1 != null && file1.length != 0 ? Items.water_bucket : Items.bucket;
+                    this.schematicFiles.add(new GuiSchematicEntry(name, item, 0, file.isDirectory()));
+                }
+            }
+        }
+
+        filesSchematics = this.currentDirectory.listFiles(GuiSchematicLoad.FILE_FILTER_SCHEMATIC);
+        if (filesSchematics != null && filesSchematics.length != 0) {
+            File[] afile = filesSchematics;
+
+            i = filesSchematics.length;
+
+            for (int k = 0; k < i; ++k) {
+                File file = afile[k];
+
+                name = file.getName();
+                this.schematicFiles.add(new GuiSchematicEntry(name, SchematicUtil.getIconFromFile(file), file.isDirectory()));
+            }
+        } else {
+            this.schematicFiles.add(new GuiSchematicEntry(this.strNoSchematic, Blocks.dirt, 0, false));
+        }
+
+    }
+
+    private void loadSchematic() {
+        int selectedIndex = this.guiSchematicLoadSlot.selectedIndex;
+
+        try {
+            if (selectedIndex >= 0 && selectedIndex < this.schematicFiles.size()) {
+                GuiSchematicEntry e = (GuiSchematicEntry) this.schematicFiles.get(selectedIndex);
+
+                ClientProxy.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7(&9OrbitClient&7) Loading Schematic in background..."), new Object[0]);
+                GuiSchematicLoad.workerThread.submit(() -> {
+                    Schematica.proxy.loadSchematic((EntityPlayer) null, this.currentDirectory, e.getName());
+                });
+            }
+        } catch (Exception exception) {
+            Reference.logger.error("Failed to load schematic!", exception);
+        }
+
+    }
+}

@@ -1,0 +1,7 @@
+package clientname.gui.mainmenu;
+
+import net.minecraft.client.gui.GuiScreen;
+
+public class JuiceMainMenu extends GuiScreen {
+
+}

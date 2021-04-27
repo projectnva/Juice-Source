@@ -1,0 +1,24 @@
+package clientname.mods.impl;
+
+import clientname.gui.hud.ScreenPosition;
+import clientname.mods.ModDraggable;
+
+public class ModProtest extends ModDraggable{
+
+	public static int width = 50;
+	public static int height = 50;
+	
+	public int getWidth() {
+		return width;
+	}
+	
+	public int getHeight() {
+		return height
+	}
+	
+	public void render(ScreenPosition pos) {
+		
+		
+		
+	}
+}

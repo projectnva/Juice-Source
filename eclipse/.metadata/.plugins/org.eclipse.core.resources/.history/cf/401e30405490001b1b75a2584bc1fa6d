@@ -1,0 +1,93 @@
+package clientname.gui.mainmenu;
+
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+
+import clientname.gui.mainmenu.components.MainMenuButton;
+import clientname.gui.mainmenu.components.SmallButton;
+import clientname.gui.mainmenu.components.SquareButton;
+import clientname.util.VoyageFontFromAsset;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiMultiplayer;
+import net.minecraft.client.gui.GuiOptions;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiSelectWorld;
+import net.minecraft.util.ResourceLocation;
+
+public class JuiceMainMenu extends GuiScreen {
+
+	public int fade = 0;
+
+ 	public static VoyageFontFromAsset frsmall = new VoyageFontFromAsset(new ResourceLocation("Voyage/font/AntipastoPro-DemiBold_trial.ttf"), 18.0F);
+ 	
+ 
+    private void drawHollowRect(int x, int y, int w, int h, int color) {
+		this.drawHorizontalLine(x, x+w, y, color);
+		this.drawHorizontalLine(x, x+w, y + h, color);
+		
+		this.drawVerticalLine(x, y + h, y, color);
+		this.drawVerticalLine(x + w, y + h, y, color);
+}
+
+@Override
+public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+	this.mc.getTextureManager().bindTexture(new ResourceLocation("clientname/bg.png"));
+	this.drawModalRectWithCustomSizedTexture(0, 0, 0, 0, this.width, this.height, this.width, this.height);
+	mc.fontRendererObj.drawString("Voyage Client Copyright \u00A9 2021" ,0 + 3, this.height - 15, -1);
+	super.drawScreen(mouseX, mouseY, partialTicks);
+}
+
+@Override
+public void initGui() {
+	super.initGui();
+	
+	this.buttonList.add(new MainMenuButton(0, width /2 - 45, this.height / 2 - 100 + (1 * 30) + 27, "Multiplayer"));
+    this.buttonList.add(new MainMenuButton(1, width /2 - 45, this.height / 2 - 100 + (2 * 30) + 27, "Singleplayer"));
+    this.buttonList.add(new MainMenuButton(3, width /2 - 45, this.height / 2 - 100 + (3 * 30) + 27, "Settings"));
+    this.buttonList.add(new MainMenuButton(4, width /2 - 45, this.height / 2 - 100 + (4 * 30) + 27, "Website"));
+    this.buttonList.add(new SmallButton(69, 0 + 3, this.height - 50, "ZeroTwo"));
+    this.buttonList.add(new SquareButton(10, 5, 5, "X"));
+}
+
+@Override
+protected void actionPerformed(GuiButton button) throws IOException
+{
+    if (button.id == 0)
+    {
+        this.mc.displayGuiScreen(new GuiMultiplayer(this));
+    }
+
+    if (button.id == 1)
+    {
+        this.mc.displayGuiScreen(new GuiSelectWorld(this));
+    }
+
+    if (button.id == 2)
+    {
+       // this.mc.displayGuiScreen(new ClickGUI());
+    }
+    if (button.id == 3)
+    {
+    	this.mc.displayGuiScreen(new GuiOptions(this, this.mc.gameSettings));
+    }
+    if (button.id == 4)
+    {
+	try {
+			  Desktop desktop = java.awt.Desktop.getDesktop();
+			  URI oURL = new URI("http://www.voyageclient.net");
+			  desktop.browse(oURL);
+			} catch (Exception e) {
+			  e.printStackTrace();
+			}
+    }
+    if (button.id == 10)
+    {
+    	this.mc.shutdown();
+    }
+    if (button.id == 69)
+    {
+    	//this.mc.displayGuiScreen(new ZeroTwoMainMenu());
+    }
+}
+}

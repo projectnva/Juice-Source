@@ -1,0 +1,32 @@
+package com.orbitclient.imsoogood.ez.orbitclient.util.patchcrumbsv2;
+
+import com.orbitclient.imsoogood.ez.orbitclient.modules.PatchCrumbsV2;
+import net.minecraft.util.AxisAlignedBB;
+
+public class PatchCrumb {
+
+    public int posX;
+    public int posY;
+    public int posZ;
+    public Direction direction;
+    public long expiresAt;
+    public AxisAlignedBB boundingBOX;
+
+    public PatchCrumb(int x, int y, int z, Direction direction, AxisAlignedBB bb) {
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        this.direction = direction;
+        this.expiresAt = System.currentTimeMillis() + (long) (PatchCrumbsV2.time * 1000);
+        this.boundingBOX = bb;
+    }
+
+    public PatchCrumb(int x, int y, int z) {
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        this.direction = Direction.NORTHSOUTH;
+        this.expiresAt = System.currentTimeMillis() + (long) (PatchCrumbsV2.time * 1000);
+        this.boundingBOX = new AxisAlignedBB((double) x + 0.5D, (double) y + 0.5D, (double) z + 0.5D, (double) x - 0.5D, (double) y - 0.5D, (double) z - 0.5D);
+    }
+}

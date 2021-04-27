@@ -1,0 +1,5 @@
+package me.aycy.blockoverlay.visual;
+
+public class DrawBlockHighlightEvent {
+
+}

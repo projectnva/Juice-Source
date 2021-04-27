@@ -1,0 +1,12 @@
+package clientname.module;
+
+public class Module {
+
+	private String name;
+	private int key;
+	private Catagory cat;
+	
+	public Module(String name, int key, Catagory cat) {
+		
+	}
+}

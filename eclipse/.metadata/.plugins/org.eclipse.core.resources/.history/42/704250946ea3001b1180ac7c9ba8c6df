@@ -1,0 +1,29 @@
+package com.github.energizedab.basicgui.settings;
+
+import java.util.ArrayList;
+
+import com.github.energizedab.pvptube.display.HUDElement;
+
+public class ModeSetting extends Setting<String> {
+	
+	public ArrayList<String> options;
+	
+	public ModeSetting(String name, HUDElement parent, String defaultValue, ArrayList<String> options) {
+		this.name = name;
+		this.element = parent;
+		this.value = defaultValue;
+		this.options = options;
+	}
+	
+	public ArrayList<String> getOptions() {
+		return options;
+	}
+	
+	public String getValue() {
+		return value;
+	}
+	
+	public void setValue(String value) {
+		this.value = value;
+	}
+}

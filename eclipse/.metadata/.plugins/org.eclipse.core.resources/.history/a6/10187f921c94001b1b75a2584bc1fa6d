@@ -1,0 +1,23 @@
+package me.aycy.blockoverlay.utils;
+
+import java.awt.Color;
+import me.aycy.blockoverlay.BlockOverlay;
+import me.aycy.blockoverlay.config.Config;
+
+public class ColorUtil {
+
+    public static Color getChroma() {
+        Config config = BlockOverlay.config;
+        int chromaSpeed = config.getChromaSpeed();
+        double time = (double) ((float) (System.currentTimeMillis() % (18000L / (long) chromaSpeed)) / (18000.0F / (float) chromaSpeed));
+        Color chroma = Color.getHSBColor((float) time, 1.0F, 1.0F);
+
+        return new Color(chroma.getRed(), chroma.getGreen(), chroma.getBlue(), config.getAlpha());
+    }
+
+    public static Color getColor() {
+        Config config = BlockOverlay.config;
+
+        return new Color(config.getRed(), config.getGreen(), config.getBlue(), config.getAlpha());
+    }
+}

@@ -1,0 +1,60 @@
+package com.github.lunatrius.schematica.client.renderer.chunk.proxy;
+
+import com.github.lunatrius.schematica.client.renderer.SchematicRenderCache;
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import net.minecraft.client.renderer.RegionRenderCache;
+import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.client.renderer.chunk.ChunkCompileTaskGenerator;
+import net.minecraft.client.renderer.chunk.CompiledChunk;
+import net.minecraft.client.renderer.chunk.RenderChunk;
+import net.minecraft.client.renderer.chunk.SetVisibility;
+import net.minecraft.client.renderer.chunk.ChunkCompileTaskGenerator.Status;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+@SideOnly(Side.CLIENT)
+public class SchematicRenderChunkVbo extends RenderChunk {
+
+    public SchematicRenderChunkVbo(World world, RenderGlobal renderGlobal, BlockPos pos, int index) {
+        super(world, renderGlobal, pos, index);
+    }
+
+    public void rebuildChunk(float x, float y, float z, ChunkCompileTaskGenerator generator) {
+        generator.getLock().lock();
+
+        label59: {
+            try {
+                if (generator.getStatus() != Status.COMPILING) {
+                    break label59;
+                }
+
+                BlockPos from = this.getPosition();
+                SchematicWorld schematic = (SchematicWorld) this.world;
+
+                if (from.getX() >= 0 && from.getZ() >= 0 && from.getX() < schematic.getWidth() && from.getZ() < schematic.getLength()) {
+                    break label59;
+                }
+
+                SetVisibility visibility = new SetVisibility();
+
+                visibility.setAllVisible(true);
+                CompiledChunk dummy = new CompiledChunk();
+
+                dummy.setVisibility(visibility);
+                generator.setCompiledChunk(dummy);
+            } finally {
+                generator.getLock().unlock();
+            }
+
+            return;
+        }
+
+        super.rebuildChunk(x, y, z, generator);
+    }
+
+    protected RegionRenderCache createRegionRenderCache(World world, BlockPos from, BlockPos to, int subtract) {
+        return new SchematicRenderCache(world, from, to, subtract);
+    }
+}

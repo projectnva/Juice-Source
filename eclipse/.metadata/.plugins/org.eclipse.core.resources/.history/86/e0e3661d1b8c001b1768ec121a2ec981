@@ -1,0 +1,5 @@
+package juiceclient.server.packets.server;
+
+public class SPacket {
+
+}

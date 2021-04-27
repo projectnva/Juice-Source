@@ -1,0 +1,20 @@
+package com.github.energizedab.basicgui.settings;
+
+import com.github.energizedab.pvptube.display.HUDElement;
+
+public class BooleanSetting extends Setting<Boolean> {
+	
+	public BooleanSetting(String name, HUDElement parent, boolean defaultValue) {
+		this.name = name;
+		this.element = parent;
+		this.value = defaultValue;
+	}
+	
+	public boolean getValue() {
+		return value;
+	}
+	
+	public void setValue(boolean value) {
+		this.value = value;
+	}
+}

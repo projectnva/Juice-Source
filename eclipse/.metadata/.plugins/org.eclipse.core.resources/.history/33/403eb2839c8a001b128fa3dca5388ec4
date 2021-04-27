@@ -1,0 +1,44 @@
+package clientname.module;
+
+public class Module {
+
+	private String name;
+	private int key;
+	private Catagory category;
+	private boolean enabled;
+	
+	public Module(String name, int key, Catagory cat) {
+		this.name = name;
+		this.key = key;
+		this.category = cat;
+		enabled = false;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void toggle() {
+		enabled = !enabled;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getKey() {
+		return key;
+	}
+
+	public void setKey(int key) {
+		this.key = key;
+	}
+
+	public Catagory getCategory() {
+		return category;
+	}
+
+	public void setCategory(Catagory category) {
+		this.category = category;
+	}
+}

@@ -1,0 +1,32 @@
+package clientname.basicgui;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import clientname.mods.ModDraggable;
+
+public class HUD {
+
+	public List<ModDraggable> elements = new ArrayList<ModDraggable>();
+	
+	public HUD() {
+		
+	}
+	
+	public void draw() {
+		for(ModDraggable element : elements) {
+			if(element.isEnabled()) {
+				element.draw();
+			}
+		}
+	}
+	
+	public List<ModDraggable> getElements() {
+		return elements;
+	}
+	
+	public void addElement(ModDraggable element) {
+		System.out.println("Registered new Element: " + element.getName());
+		elements.add(element);
+	}
+}

@@ -1,0 +1,44 @@
+package net.minecraft.client.gui;
+
+import java.awt.Color;
+import java.io.IOException;
+
+import tech.lowspeccorgi.Quark.Elements.Element;
+import tech.lowspeccorgi.Quark.Elements.ElementManager;
+import tech.lowspeccorgi.Quark.Elements.impl.CardElement;
+import tech.lowspeccorgi.Quark.Elements.impl.PanelElement;
+import tech.lowspeccorgi.Quark.Style.Anchor;
+import tech.lowspeccorgi.Quark.Style.CornerType;
+import tech.lowspeccorgi.Quark.Style.RectStyle;
+import tech.lowspeccorgi.Quark.Style.RectType;
+import tech.lowspeccorgi.Quark.Style.TextStyle;
+import tech.lowspeccorgi.Quark.primitives.MathHelper;
+
+public class GuiCapeMenu extends GuiScreen{
+	ElementManager em = new ElementManager();
+
+    public GuiCapeMenu() {
+
+    }
+
+    @Override
+    public void initGui() {
+      
+    }
+
+    @Override
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        super.keyTyped(typedChar, keyCode);
+    }
+
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+    }
+}
+

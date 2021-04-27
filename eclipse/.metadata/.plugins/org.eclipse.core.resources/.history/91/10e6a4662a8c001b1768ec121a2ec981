@@ -1,0 +1,26 @@
+package clientname.util.patchcrumbsv2;
+
+
+
+public interface OrbitClientModule {
+
+    void onSocket(String s, JSONObject jsonobject);
+
+    void setEnabled(boolean flag);
+
+    boolean isEnabled();
+
+    void onEnable();
+
+    void onDisable();
+
+    String getName();
+
+    String getDescription();
+
+    String getSection();
+
+    boolean viewable();
+
+    void update();
+}

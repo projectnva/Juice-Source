@@ -1,0 +1,14 @@
+package clientname.theme.themes;
+
+import java.awt.Color;
+
+import clientname.theme.Theme;
+import net.minecraft.util.ResourceLocation;
+
+public class AnimeTheme extends Theme {
+
+	public AnimeTheme() {
+		super("Anime", 0.1, new ResourceLocation("Voyage/background/animebg.png"), new Color(255, 105, 180, 255).getRGB(), -1);
+	}
+
+}

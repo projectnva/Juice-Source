@@ -1,0 +1,20 @@
+package com.github.lunatrius.core.client.gui.config;
+
+import java.util.List;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.common.config.ConfigElement;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.client.config.GuiConfig;
+
+public abstract class GuiConfigSimple extends GuiConfig {
+
+    public GuiConfigSimple(GuiScreen guiScreen, String modID, Configuration configuration, String categoryName) {
+        super(guiScreen, getConfigElements(configuration, categoryName), modID, false, false, GuiConfig.getAbridgedConfigPath(configuration.toString()));
+    }
+
+    private static List getConfigElements(Configuration configuration, String categoryName) {
+        ConfigElement element = new ConfigElement(configuration.getCategory(categoryName));
+
+        return element.getChildElements();
+    }
+}

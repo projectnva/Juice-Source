@@ -1,0 +1,27 @@
+package com.github.lunatrius.schematica.client.printer.nbtsync;
+
+import java.util.HashMap;
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+
+public class SyncRegistry {
+
+    public static final SyncRegistry INSTANCE = new SyncRegistry();
+    private final HashMap map = new HashMap();
+
+    public void register(Block block, NBTSync handler) {
+        if (block != null && handler != null) {
+            this.map.put(block, handler);
+        }
+    }
+
+    public NBTSync getHandler(Block block) {
+        return (NBTSync) this.map.get(block);
+    }
+
+    static {
+        SyncRegistry.INSTANCE.register(Blocks.command_block, new NBTSyncCommandBlock());
+        SyncRegistry.INSTANCE.register(Blocks.standing_sign, new NBTSyncSign());
+        SyncRegistry.INSTANCE.register(Blocks.wall_sign, new NBTSyncSign());
+    }
+}

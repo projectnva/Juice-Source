@@ -1,0 +1,145 @@
+package me.aycy.blockoverlay.config;
+
+import java.io.File;
+import me.aycy.blockoverlay.utils.Overlay;
+import net.minecraftforge.common.config.Configuration;
+
+public class Config extends Configuration {
+
+    private Overlay mode;
+    private boolean isPersistent;
+    private boolean isChroma;
+    private boolean ignoreDepth;
+    private float lineWidth;
+    private int red;
+    private int green;
+    private int blue;
+    private int alpha;
+    private int chromaSpeed;
+
+    public Config(File configFile) {
+        super(configFile);
+        this.sync();
+    }
+
+    private void sync() {
+        super.load();
+        String modeName = super.get("client", "mode", "Default").getString();
+        Overlay[] aoverlay = Overlay.values();
+        int i = aoverlay.length;
+
+        for (int j = 0; j < i; ++j) {
+            Overlay mode = aoverlay[j];
+
+            if (mode.name.equals(modeName)) {
+                this.mode = mode;
+                break;
+            }
+        }
+
+        this.isPersistent = super.get("client", "isPersistent", false).getBoolean();
+        this.isChroma = super.get("client", "isChroma", false).getBoolean();
+        this.ignoreDepth = super.get("client", "ignoreDepth", false).getBoolean();
+        this.lineWidth = (float) super.get("client", "lineWidth", 2.0D).getDouble();
+        this.red = super.get("client", "red", 255).getInt();
+        this.green = super.get("client", "green", 255).getInt();
+        this.blue = super.get("client", "blue", 255).getInt();
+        this.alpha = super.get("client", "alpha", 255).getInt();
+        this.chromaSpeed = super.get("client", "chromaSpeed", 5).getInt();
+        super.save();
+    }
+
+    public void save() {
+        super.get("client", "mode", "Default").set(this.mode.name);
+        super.get("client", "isPersistent", false).set(this.isPersistent);
+        super.get("client", "isChroma", false).set(this.isChroma);
+        super.get("client", "ignoreDepth", false).set(this.ignoreDepth);
+        super.get("client", "lineWidth", 2.0D).set((double) this.lineWidth);
+        super.get("client", "red", 255).set(this.red);
+        super.get("client", "green", 255).set(this.green);
+        super.get("client", "blue", 255).set(this.blue);
+        super.get("client", "alpha", 255).set(this.alpha);
+        super.get("client", "chromaSpeed", 5).set(this.chromaSpeed);
+        super.save();
+    }
+
+    public Overlay getMode() {
+        return this.mode;
+    }
+
+    public void setMode(Overlay mode) {
+        this.mode = mode;
+    }
+
+    public boolean isPersistent() {
+        return this.isPersistent;
+    }
+
+    public void setPersistent(boolean isPersistent) {
+        this.isPersistent = isPersistent;
+    }
+
+    public boolean isChroma() {
+        return this.isChroma;
+    }
+
+    public void setChroma(boolean isChroma) {
+        this.isChroma = isChroma;
+    }
+
+    public boolean isIgnoreDepth() {
+        return this.ignoreDepth;
+    }
+
+    public void setIgnoreDepth(boolean ignoreDepth) {
+        this.ignoreDepth = ignoreDepth;
+    }
+
+    public float getLineWidth() {
+        return this.lineWidth;
+    }
+
+    public void setLineWidth(float lineWidth) {
+        this.lineWidth = lineWidth;
+    }
+
+    public int getRed() {
+        return this.red;
+    }
+
+    public void setRed(int red) {
+        this.red = red;
+    }
+
+    public int getGreen() {
+        return this.green;
+    }
+
+    public void setGreen(int green) {
+        this.green = green;
+    }
+
+    public int getBlue() {
+        return this.blue;
+    }
+
+    public void setBlue(int blue) {
+        this.blue = blue;
+    }
+
+    public int getAlpha() {
+        return this.alpha;
+    }
+
+    public void setAlpha(int alpha) {
+        this.alpha = alpha;
+    }
+
+    public int getChromaSpeed() {
+        return this.chromaSpeed;
+    }
+
+    public void setChromaSpeed(int chromaSpeed) {
+        this.chromaSpeed = chromaSpeed;
+    }
+}

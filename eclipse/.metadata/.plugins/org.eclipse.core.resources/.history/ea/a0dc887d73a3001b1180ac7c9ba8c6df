@@ -1,0 +1,5 @@
+package clientname.basicgui.elements;
+
+public class FPS {
+
+}

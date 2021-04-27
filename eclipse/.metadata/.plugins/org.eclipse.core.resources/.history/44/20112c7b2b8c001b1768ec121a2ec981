@@ -1,0 +1,157 @@
+package com.github.lunatrius.schematica.handler.client;
+
+import com.github.lunatrius.schematica.client.gui.control.GuiSchematicControl;
+import com.github.lunatrius.schematica.client.gui.load.GuiSchematicLoad;
+import com.github.lunatrius.schematica.client.gui.save.GuiSchematicSave;
+import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
+import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import com.github.lunatrius.schematica.proxy.ClientProxy;
+import com.github.lunatrius.schematica.reference.Reference;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent;
+
+public class InputHandler {
+
+    public static final InputHandler INSTANCE = new InputHandler();
+    private static final KeyBinding KEY_BINDING_LOAD = new KeyBinding("schematica.key.load", 181, "schematica.key.category");
+    private static final KeyBinding KEY_BINDING_SAVE = new KeyBinding("schematica.key.save", 55, "schematica.key.category");
+    private static final KeyBinding KEY_BINDING_CONTROL = new KeyBinding("schematica.key.control", 74, "schematica.key.category");
+    private static final KeyBinding KEY_BINDING_LAYER_INC = new KeyBinding("schematica.key.layerInc", 0, "schematica.key.category");
+    private static final KeyBinding KEY_BINDING_LAYER_DEC = new KeyBinding("schematica.key.layerDec", 0, "schematica.key.category");
+    private static final KeyBinding KEY_BINDING_LAYER_TOGGLE = new KeyBinding("schematica.key.layerToggle", 0, "schematica.key.category");
+    private static final KeyBinding KEY_BINDING_RENDER_TOGGLE = new KeyBinding("schematica.key.renderToggle", 0, "schematica.key.category");
+    private static final KeyBinding KEY_BINDING_PRINTER_TOGGLE = new KeyBinding("schematica.key.printerToggle", 0, "schematica.key.category");
+    private static final KeyBinding KEY_BINDING_MOVE_HERE = new KeyBinding("schematica.key.moveHere", 0, "schematica.key.category");
+    public static final KeyBinding[] KEY_BINDINGS = new KeyBinding[] { InputHandler.KEY_BINDING_LOAD, InputHandler.KEY_BINDING_SAVE, InputHandler.KEY_BINDING_CONTROL, InputHandler.KEY_BINDING_LAYER_INC, InputHandler.KEY_BINDING_LAYER_DEC, InputHandler.KEY_BINDING_LAYER_TOGGLE, InputHandler.KEY_BINDING_RENDER_TOGGLE, InputHandler.KEY_BINDING_PRINTER_TOGGLE, InputHandler.KEY_BINDING_MOVE_HERE};
+    private final Minecraft minecraft = Minecraft.getMinecraft();
+
+    @SubscribeEvent
+    public void onKeyInput(InputEvent event) {
+        if (this.minecraft.currentScreen == null) {
+            if (InputHandler.KEY_BINDING_LOAD.isPressed()) {
+                this.minecraft.displayGuiScreen(new GuiSchematicLoad(this.minecraft.currentScreen));
+            }
+
+            if (InputHandler.KEY_BINDING_SAVE.isPressed()) {
+                this.minecraft.displayGuiScreen(new GuiSchematicSave(this.minecraft.currentScreen));
+            }
+
+            if (InputHandler.KEY_BINDING_CONTROL.isPressed()) {
+                this.minecraft.displayGuiScreen(new GuiSchematicControl(this.minecraft.currentScreen));
+            }
+
+            SchematicWorld schematic;
+
+            if (InputHandler.KEY_BINDING_LAYER_INC.isPressed()) {
+                schematic = ClientProxy.schematic;
+                if (schematic != null && schematic.isRenderingLayer) {
+                    schematic.renderingLayer = MathHelper.clamp_int(schematic.renderingLayer + 1, 0, schematic.getHeight() - 1);
+                    RenderSchematic.INSTANCE.refresh();
+                }
+            }
+
+            if (InputHandler.KEY_BINDING_LAYER_DEC.isPressed()) {
+                schematic = ClientProxy.schematic;
+                if (schematic != null && schematic.isRenderingLayer) {
+                    schematic.renderingLayer = MathHelper.clamp_int(schematic.renderingLayer - 1, 0, schematic.getHeight() - 1);
+                    RenderSchematic.INSTANCE.refresh();
+                }
+            }
+
+            if (InputHandler.KEY_BINDING_LAYER_TOGGLE.isPressed()) {
+                schematic = ClientProxy.schematic;
+                if (schematic != null) {
+                    schematic.isRenderingLayer = !schematic.isRenderingLayer;
+                    RenderSchematic.INSTANCE.refresh();
+                }
+            }
+
+            if (InputHandler.KEY_BINDING_RENDER_TOGGLE.isPressed()) {
+                schematic = ClientProxy.schematic;
+                if (schematic != null) {
+                    schematic.isRendering = !schematic.isRendering;
+                    RenderSchematic.INSTANCE.refresh();
+                }
+            }
+
+            if (InputHandler.KEY_BINDING_PRINTER_TOGGLE.isPressed() && ClientProxy.schematic != null) {
+                boolean schematic1 = SchematicPrinter.INSTANCE.togglePrinting();
+
+                this.minecraft.thePlayer.addChatComponentMessage(new ChatComponentTranslation("schematica.message.togglePrinter", new Object[] { I18n.format(schematic1 ? "schematica.gui.on" : "schematica.gui.off", new Object[0])}));
+            }
+
+            if (InputHandler.KEY_BINDING_MOVE_HERE.isPressed()) {
+                schematic = ClientProxy.schematic;
+                if (schematic != null) {
+                    ClientProxy.moveSchematicToPlayer(schematic);
+                    RenderSchematic.INSTANCE.refresh();
+                }
+            }
+
+            this.handlePickBlock();
+        }
+
+    }
+
+    private void handlePickBlock() {
+        KeyBinding keyPickBlock = this.minecraft.gameSettings.keyBindPickBlock;
+
+        if (keyPickBlock.isPressed()) {
+            try {
+                SchematicWorld e = ClientProxy.schematic;
+                boolean revert = true;
+
+                if (e != null && e.isRendering) {
+                    revert = this.pickBlock(e, ClientProxy.movingObjectPosition);
+                }
+
+                if (revert) {
+                    KeyBinding.onTick(keyPickBlock.getKeyCode());
+                }
+            } catch (Exception exception) {
+                Reference.logger.error("Could not pick block!", exception);
+            }
+        }
+
+    }
+
+    private boolean pickBlock(SchematicWorld schematic, MovingObjectPosition objectMouseOver) {
+        boolean revert = false;
+
+        if (objectMouseOver != null) {
+            EntityPlayerSP player = this.minecraft.thePlayer;
+
+            if (objectMouseOver.typeOfHit == MovingObjectType.MISS) {
+                revert = true;
+            }
+
+            MovingObjectPosition mcObjectMouseOver = this.minecraft.objectMouseOver;
+
+            if (mcObjectMouseOver != null && mcObjectMouseOver.typeOfHit == MovingObjectType.BLOCK && mcObjectMouseOver.getBlockPos().subtract(schematic.position).equals(objectMouseOver.getBlockPos())) {
+                return true;
+            }
+
+            if (!ForgeHooks.onPickBlock(objectMouseOver, player, schematic)) {
+                return revert;
+            }
+
+            if (player.capabilities.isCreativeMode) {
+                int slot = player.inventoryContainer.inventorySlots.size() - 9 + player.inventory.currentItem;
+
+                this.minecraft.playerController.sendSlotPacket(player.inventory.getStackInSlot(player.inventory.currentItem), slot);
+            }
+        }
+
+        return revert;
+    }
+}

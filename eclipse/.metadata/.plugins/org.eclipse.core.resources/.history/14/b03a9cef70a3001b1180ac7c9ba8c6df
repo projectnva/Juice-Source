@@ -1,0 +1,14 @@
+package clientname.basicgui;
+
+import java.awt.List;
+import java.util.ArrayList;
+
+public class HUD {
+
+	public List<HUDElement> elements = new ArrayList<HUDElement>();
+	
+	private void draw() {
+		
+	}
+	
+}

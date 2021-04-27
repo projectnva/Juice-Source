@@ -1,0 +1,5 @@
+package juiceclient.server.packets.client;
+
+public abstract class CPacket extends ECPacket {
+
+}

@@ -1,0 +1,161 @@
+package com.github.lunatrius.schematica.block.state.pattern;
+
+import com.github.lunatrius.core.exceptions.LocalizedException;
+import com.google.common.base.Predicate;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.state.pattern.BlockStateHelper;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import net.minecraftforge.fml.common.registry.GameData;
+
+public class BlockStateReplacer {
+
+    private static final FMLControlledNamespacedRegistry BLOCK_REGISTRY = GameData.getBlockRegistry();
+    private final IBlockState defaultReplacement;
+
+    private BlockStateReplacer(IBlockState defaultReplacement) {
+        this.defaultReplacement = defaultReplacement;
+    }
+
+    public IBlockState getReplacement(IBlockState original, Map properties) {
+        IBlockState replacement = this.defaultReplacement;
+
+        replacement = this.applyProperties(replacement, original.getProperties());
+        replacement = this.applyProperties(replacement, properties);
+        return replacement;
+    }
+
+    private IBlockState applyProperties(IBlockState blockState, Map properties) {
+        Iterator iterator = properties.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Entry entry = (Entry) iterator.next();
+
+            try {
+                blockState = blockState.withProperty((IProperty) entry.getKey(), (Comparable) entry.getValue());
+            } catch (IllegalArgumentException illegalargumentexception) {
+                ;
+            }
+        }
+
+        return blockState;
+    }
+
+    public static BlockStateReplacer forBlockState(IBlockState replacement) {
+        return new BlockStateReplacer(replacement);
+    }
+
+    public static BlockStateHelper getMatcher(BlockStateReplacer.BlockStateInfo blockStateInfo) {
+        BlockStateHelper matcher = BlockStateHelper.forBlock(blockStateInfo.block);
+        Iterator iterator = blockStateInfo.stateData.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            final Entry entry = (Entry) iterator.next();
+
+            matcher.where((IProperty) entry.getKey(), new Predicate() {
+                public boolean apply(Comparable input) {
+                    return input != null && input.equals(entry.getValue());
+                }
+            });
+        }
+
+        return matcher;
+    }
+
+    public static BlockStateReplacer.BlockStateInfo fromString(String input) throws LocalizedException {
+        int start = input.indexOf(91);
+        int end = input.indexOf(93);
+        String blockName;
+        String stateData;
+
+        if (start > -1 && end > -1) {
+            blockName = input.substring(0, start);
+            stateData = input.substring(start + 1, end);
+        } else {
+            blockName = input;
+            stateData = "";
+        }
+
+        ResourceLocation location = new ResourceLocation(blockName);
+
+        if (!BlockStateReplacer.BLOCK_REGISTRY.containsKey(location)) {
+            throw new LocalizedException("schematica.message.invalidBlock", new Object[] { blockName});
+        } else {
+            Block block = (Block) BlockStateReplacer.BLOCK_REGISTRY.getObject(location);
+            Map propertyData = parsePropertyData(block.getDefaultState(), stateData, true);
+
+            return new BlockStateReplacer.BlockStateInfo(block, propertyData);
+        }
+    }
+
+    public static Map parsePropertyData(IBlockState blockState, String stateData, boolean strict) throws LocalizedException {
+        HashMap map = new HashMap();
+
+        if (stateData != null && stateData.length() != 0) {
+            String[] propertyPairs = stateData.split(",");
+            String[] astring = propertyPairs;
+            int i = propertyPairs.length;
+
+            for (int j = 0; j < i; ++j) {
+                String propertyPair = astring[j];
+                String[] split = propertyPair.split("=");
+
+                if (split.length != 2) {
+                    throw new LocalizedException("schematica.message.invalidProperty", new Object[] { propertyPair});
+                }
+
+                putMatchingProperty(map, blockState, split[0], split[1], strict);
+            }
+
+            return map;
+        } else {
+            return map;
+        }
+    }
+
+    private static boolean putMatchingProperty(Map map, IBlockState blockState, String name, String value, boolean strict) throws LocalizedException {
+        Iterator iterator = blockState.getPropertyNames().iterator();
+
+        while (iterator.hasNext()) {
+            IProperty property = (IProperty) iterator.next();
+
+            if (property.getName().equalsIgnoreCase(name)) {
+                Collection allowedValues = property.getAllowedValues();
+                Iterator iterator1 = allowedValues.iterator();
+
+                while (iterator1.hasNext()) {
+                    Comparable allowedValue = (Comparable) iterator1.next();
+
+                    if (String.valueOf(allowedValue).equalsIgnoreCase(value)) {
+                        map.put(property, allowedValue);
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (strict) {
+            throw new LocalizedException("schematica.message.invalidPropertyForBlock", new Object[] { name + "=" + value, BlockStateReplacer.BLOCK_REGISTRY.getNameForObject(blockState.getBlock())});
+        } else {
+            return false;
+        }
+    }
+
+    public static class BlockStateInfo {
+
+        public final Block block;
+        public final Map stateData;
+
+        public BlockStateInfo(Block block, Map stateData) {
+            this.block = block;
+            this.stateData = stateData;
+        }
+    }
+}

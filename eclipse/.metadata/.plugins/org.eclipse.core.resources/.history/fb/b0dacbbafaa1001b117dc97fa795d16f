@@ -1,0 +1,151 @@
+package dev.voyageclient.gui.clickgui.newgui.setting;
+
+import java.awt.Color;
+import java.util.ArrayList;
+
+import dev.voyageclient.mods.Category;
+import dev.voyageclient.mods.ModDraggable;
+import dev.voyageclient.mods.ModInstances;
+import dev.voyageclient.mods.Side;
+import dev.voyageclient.settings.BooleanSetting;
+import dev.voyageclient.settings.ModeSetting;
+import dev.voyageclient.settings.Setting;
+import dev.voyageclient.util.font.VoyageFontFromAsset;
+import dev.voyageclient.util.render.ColorMode;
+import dev.voyageclient.util.render.ColorUtil;
+import dev.voyageclient.util.render.DrawUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ResourceLocation;
+
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.ResourceLocation;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import org.liquidengine.legui.*;
+import org.liquidengine.legui.component.Button;
+
+import dev.voyageclient.Voyage;
+import dev.voyageclient.gui.clickgui.newgui.component.ModComponent;
+import dev.voyageclient.mods.Category;
+import dev.voyageclient.mods.ModDraggable;
+import dev.voyageclient.mods.ModInstances;
+import dev.voyageclient.settings.BooleanSetting;
+import dev.voyageclient.settings.ModeSetting;
+import dev.voyageclient.settings.Setting;
+import dev.voyageclient.util.font.VoyageFont;
+import dev.voyageclient.util.font.VoyageFontFromAsset;
+import dev.voyageclient.gui.clickgui.newgui.setting.comp.BooleanButton;
+import dev.voyageclient.gui.clickgui.newgui.setting.comp.ModeButton;
+
+public class SettingGUI extends GuiScreen {
+	
+	ModDraggable mod;
+	
+	private Minecraft mc = Minecraft.getMinecraft();
+	FontRenderer font = mc.fontRendererObj;
+	ModComponent modButton = new ModComponent();
+	ArrayList<ModComponent> modbuttons = new ArrayList<ModComponent>();
+	ScaledResolution sr = new ScaledResolution(mc);
+	
+	ArrayList<SettingFrame> frames;
+	ArrayList<BooleanSetting> bools;
+	
+	@Override
+	public boolean doesGuiPauseGame() {
+		return false;
+	}
+	
+	public SettingGUI(ModDraggable mod) {
+		this.mod = mod;
+		
+		frames = new ArrayList<>();
+		int offset = 0;
+		 for(Category category : Category.values()) {
+			 frames.add(new SettingFrame(mod, 285, 100));
+			 offset += 150;
+		 }
+	}
+	
+	@Override
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		super.drawScreen(mouseX,  mouseY, partialTicks);
+		
+		super.drawDefaultBackground();
+		
+		for(SettingFrame frame : frames) {
+			frame.render(mouseX, mouseY);
+		}
+		
+		DrawUtil.drawRoundedRect(50, 50, sr.getScaledWidth() - 50, sr.getScaledHeight() - 50, 10, ColorMode.getBgColor()); // 0, 0, 0, 150
+		//DrawUtil.drawRoundedRect(650, 459, 910, 490, 10, ColorMode.getBgColor());
+		DrawUtil.drawEntityOnScreen(sr.getScaledWidth() - 10, sr.getScaledHeight() - 10, 1, 1f, mc.thePlayer);
+		
+		DrawUtil.drawRoundedRect(50, 20, 205, 50, 10, ColorMode.getBgColor()); // 0, 0, 0, 150
+		DrawUtil.setColor(-1);
+		font.drawString("Settings", 60, 25, new Color(255, 255, 255, 255).getRGB());
+		GlStateManager.pushMatrix();
+		GlStateManager.scale(0.8, 0.8, 0.8);
+		font.drawString("Customize your modules to your liking.", 75, 45, -1);
+		GlStateManager.popMatrix();
+		Gui.drawRect(60, 35, 130, 34, -1);
+    	
+    	mc.fontRendererObj.drawString("Voyage Client Copyright © 2021", 0 + 3, this.height - 15, -1);
+    	
+    	if(!mod.settings.isEmpty()) {	
+			for(Setting setting : mod.settings) {
+				int countb = 1;
+				if(setting instanceof BooleanSetting) {
+					new BooleanButton(mouseX, mouseY, 75, 75 * countb + 10, (BooleanSetting) setting, mod, 1);
+					countb += 1;
+				}
+			}
+			for(Setting setting : mod.settings) {
+				int countm = 1;
+				if(setting instanceof ModeSetting) {
+					new ModeButton(mouseX, mouseY,  175 + 10, 75 * countm + 10, (ModeSetting) setting, mod, 2);
+					countm += 1;
+				}
+			}
+		}
+    	
+    	if(mod.settings.isEmpty()) {	
+    		font.drawString("This mod has no settings!", 420, 250, -1);
+    	}
+	}
+	
+	@Override
+	public void mouseClicked(int x, int y, int button) {
+		for(ModDraggable mod : Voyage.INSTANCE.modMananager.modules) {
+			if(!mod.settings.isEmpty()) {	
+				for(Setting setting : mod.settings) {
+					if(setting instanceof BooleanSetting) {
+						if(BooleanButton.isHovered(x, y)) {
+							((BooleanSetting) setting).toggle();
+						}
+					}
+				}
+			}
+		}
+		for(ModDraggable mod : Voyage.INSTANCE.modMananager.modules) {
+			if(!mod.settings.isEmpty()) {	
+				for(Setting setting : mod.settings) {
+					if(setting instanceof ModeSetting) {
+						if(ModeButton.isHovered(x, y)) {
+							((ModeSetting) setting).cycle();
+						}
+					}
+				}
+			}
+		}
+	}
+}

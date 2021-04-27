@@ -1,0 +1,33 @@
+package clientname.basicgui.hudconfiger;
+
+import java.io.IOException;
+
+import clientname.Client;
+import clientname.basicgui.HUDElement;
+import net.minecraft.client.gui.GuiScreen;
+
+public class HUDConfiger extends GuiScreen{
+
+	public HUDElement elementSelected;
+	public boolean dragging;
+	
+	@Override
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		
+	}
+	
+	@Override
+	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+		elementSelected = getElementSelected(mouseX, mouseY);
+	}
+	
+	public HUDElement getElementSelected(int mouseX, int mouseY) {
+		for(HUDElement he : Client.INSTANCE.hud.elements) {
+			if(mouseX >= he.x && mouseX <= he.x + he.width && mouseY >= he.y && mouseY <= he.height) {
+				return he;
+			}
+		}
+		return null;
+	}
+	
+}

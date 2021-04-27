@@ -1,0 +1,28 @@
+package com.github.lunatrius.schematica.client.util;
+
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import com.github.lunatrius.schematica.reference.Reference;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.MovingObjectPosition;
+
+public class BlockStateToItemStack {
+
+    public static ItemStack getItemStack(IBlockState blockState, MovingObjectPosition movingObjectPosition, SchematicWorld world, BlockPos pos) {
+        Block block = blockState.getBlock();
+
+        try {
+            ItemStack e = block.getPickBlock(movingObjectPosition, world, pos);
+
+            if (e != null) {
+                return e;
+            }
+        } catch (Exception exception) {
+            Reference.logger.debug("Could not get the pick block for: {}", new Object[] { blockState, exception});
+        }
+
+        return null;
+    }
+}

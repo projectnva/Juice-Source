@@ -1,0 +1,69 @@
+package com.github.lunatrius.schematica.handler.client;
+
+import com.github.lunatrius.schematica.Schematica;
+import com.github.lunatrius.schematica.client.printer.SchematicLiquidPrinter;
+import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.proxy.ClientProxy;
+import com.github.lunatrius.schematica.reference.Reference;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientConnectedToServerEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
+
+public class TickHandler {
+
+    public static final TickHandler INSTANCE = new TickHandler();
+    private final Minecraft minecraft = Minecraft.getMinecraft();
+    private int ticks = -1;
+
+    @SubscribeEvent
+    public void onClientConnect(ClientConnectedToServerEvent event) {}
+
+    @SubscribeEvent
+    public void onClientDisconnect(ClientDisconnectionFromServerEvent event) {
+        Reference.logger.info("Scheduling client settings reset.");
+        ClientProxy.isPendingReset = false;
+    }
+
+    @SubscribeEvent
+    public void onClientTick(ClientTickEvent event) {
+        if (!this.minecraft.isGamePaused() && event.phase == Phase.END) {
+            this.minecraft.mcProfiler.startSection("schematica");
+            WorldClient world = this.minecraft.theWorld;
+            EntityPlayerSP player = this.minecraft.thePlayer;
+            SchematicWorld schematic = ClientProxy.schematic;
+
+            if (world != null && player != null && schematic != null && schematic.isRendering) {
+                this.minecraft.mcProfiler.startSection("printer");
+                SchematicPrinter printer = SchematicPrinter.INSTANCE;
+                SchematicLiquidPrinter liquidPrinter = SchematicLiquidPrinter.INSTANCE;
+
+                if (printer.isEnabled() && printer.isPrinting() && this.ticks-- < 0) {
+                    this.ticks = ConfigurationHandler.placeDelay;
+                    printer.print(world, player);
+                }
+
+                if (liquidPrinter.isEnabled() && liquidPrinter.isPrinting() && this.ticks-- < 0) {
+                    this.ticks = ConfigurationHandler.placeDelay;
+                    liquidPrinter.print(world, player);
+                }
+
+                this.minecraft.mcProfiler.endSection();
+            }
+
+            if (ClientProxy.isPendingReset) {
+                Schematica.proxy.resetSettings();
+                ClientProxy.isPendingReset = false;
+                Reference.logger.info("Client settings have been reset.");
+            }
+
+            this.minecraft.mcProfiler.endSection();
+        }
+    }
+}

@@ -1,0 +1,7 @@
+package clientname.basicgui.elements;
+
+public class ModBlockOverlay {
+
+	public static boolean blockoverlayEnabled = true;
+
+}

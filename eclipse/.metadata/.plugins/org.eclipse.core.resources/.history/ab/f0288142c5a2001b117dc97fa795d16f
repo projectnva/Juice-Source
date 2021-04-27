@@ -1,0 +1,32 @@
+package clientname.cosmetics;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+import clientname.cosmetics.impl.NitroCape;
+import clientname.gui.clickgui.monsoon.Category;
+
+
+public class CosmeticManager {
+	
+	public static ArrayList<CosmeticBase> cosmetics = new ArrayList<CosmeticBase>();
+	
+	public static NitroCape nitroCape;
+	
+	public void addCosmetics() {
+		
+		nitroCape = new NitroCape(null);
+		cosmetics.add(nitroCape);
+		
+	}
+	
+	public static ArrayList<CosmeticBase> getCosmetics() {
+		return cosmetics;
+	}
+	
+	public static ArrayList<CosmeticBase> getCosByCategory(Category c){
+		ArrayList<CosmeticBase> list = (ArrayList<CosmeticBase>) getCosmetics().stream().filter(m -> m.getCategory().equals(c)).collect(Collectors.toList());
+		return list;
+	}
+
+}

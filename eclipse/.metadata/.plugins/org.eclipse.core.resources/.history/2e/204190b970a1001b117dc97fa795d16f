@@ -1,0 +1,6 @@
+package clientname.gui.modmenu;
+
+public enum CoolCategory {
+
+	PLAYER, RENDER, MISC
+}

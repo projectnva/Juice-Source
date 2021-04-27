@@ -1,0 +1,91 @@
+---- Minecraft Crash Report ----
+// Don't be sad, have a hug! <3
+
+Time: 22/04/21 12:42 PM
+Description: Unexpected error
+
+java.lang.NullPointerException: Unexpected error
+	at clientname.basicgui.elements.FPS.draw(FPS.java:37)
+	at clientname.basicgui.HUD.draw(HUD.java:20)
+	at net.minecraft.client.gui.GuiIngame.renderGameOverlay(GuiIngame.java:207)
+	at net.minecraft.client.renderer.EntityRenderer.func_181560_a(EntityRenderer.java:1350)
+	at net.minecraft.client.Minecraft.runGameLoop(Minecraft.java:1148)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:429)
+	at net.minecraft.client.main.Main.main(Main.java:113)
+	at Start.main(Start.java:11)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Stacktrace:
+	at clientname.basicgui.elements.FPS.draw(FPS.java:37)
+	at clientname.basicgui.HUD.draw(HUD.java:20)
+	at net.minecraft.client.gui.GuiIngame.renderGameOverlay(GuiIngame.java:207)
+
+-- Affected level --
+Details:
+	Level name: MpServer
+	All players: 1 total; [EntityPlayerSP['Pedophilles'/34, l='MpServer', x=-765.33, y=64.00, z=1058.32]]
+	Chunk stats: MultiplayerChunkCache: 30, 30
+	Level seed: 0
+	Level generator: ID 00 - default, ver 1. Features enabled: false
+	Level generator options: 
+	Level spawn location: 8.00,64.00,140.00 - World: (8,64,140), Chunk: (at 8,4,12 in 0,8; contains blocks 0,0,128 to 15,255,143), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,0,0 to 511,255,511)
+	Level time: 404550 game time, 372113 day time
+	Level dimension: 0
+	Level storage version: 0x00000 - Unknown?
+	Level weather: Rain time: 0 (now: false), thunder time: 0 (now: false)
+	Level game mode: Game mode: creative (ID 1). Hardcore: false. Cheats: false
+	Forced entities: 23 total; [EntityCow['Cow'/96, l='MpServer', x=-762.22, y=69.00, z=1045.16], EntityZombie['Zombie'/97, l='MpServer', x=-759.50, y=34.00, z=1094.50], EntityZombie['Zombie'/98, l='MpServer', x=-758.47, y=33.00, z=1089.88], EntityCow['Cow'/35, l='MpServer', x=-762.78, y=60.84, z=1067.63], EntityCow['Cow'/132, l='MpServer', x=-723.47, y=67.00, z=1032.97], EntityCow['Cow'/133, l='MpServer', x=-732.78, y=65.00, z=1043.69], EntityCow['Cow'/134, l='MpServer', x=-722.75, y=64.00, z=1047.75], EntityCreeper['Creeper'/76, l='MpServer', x=-774.50, y=58.00, z=1033.50], EntityZombie['Zombie'/108, l='MpServer', x=-746.50, y=28.00, z=1026.50], EntityZombie['Zombie'/109, l='MpServer', x=-751.50, y=28.00, z=1028.50], EntityZombie['Zombie'/110, l='MpServer', x=-751.50, y=28.00, z=1024.50], EntityCreeper['Creeper'/111, l='MpServer', x=-751.50, y=28.00, z=1027.50], EntityCreeper['Creeper'/112, l='MpServer', x=-749.50, y=28.00, z=1026.50], EntityBat['Bat'/113, l='MpServer', x=-752.25, y=29.03, z=1027.28], EntityCow['Cow'/145, l='MpServer', x=-709.31, y=63.00, z=1037.47], EntityCow['Cow'/114, l='MpServer', x=-740.03, y=66.00, z=1043.47], EntityChicken['Chicken'/146, l='MpServer', x=-706.19, y=62.75, z=1051.69], EntityHorse['Horse'/147, l='MpServer', x=-705.84, y=63.00, z=1054.56], EntityCow['Cow'/148, l='MpServer', x=-716.03, y=63.00, z=1047.94], EntityHorse['Horse'/149, l='MpServer', x=-704.06, y=64.00, z=1056.91], EntityPlayerSP['Pedophilles'/34, l='MpServer', x=-765.33, y=64.00, z=1058.32], EntitySkeleton['Skeleton'/94, l='MpServer', x=-758.50, y=38.00, z=1039.50], EntitySkeleton['Skeleton'/95, l='MpServer', x=-761.53, y=38.00, z=1042.13]]
+	Retry entities: 0 total; []
+	Server brand: vanilla
+	Server type: Integrated singleplayer server
+Stacktrace:
+	at net.minecraft.client.multiplayer.WorldClient.addWorldInfoToCrashReport(WorldClient.java:401)
+	at net.minecraft.client.Minecraft.addGraphicsAndWorldToCrashReport(Minecraft.java:2779)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:458)
+	at net.minecraft.client.main.Main.main(Main.java:113)
+	at Start.main(Start.java:11)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.8.8
+	Operating System: Windows 10 (amd64) version 10.0
+	CPU: 12x AMD Ryzen 5 3600X 6-Core Processor 
+	Java Version: 1.8.0_275, Eclipse OpenJ9
+	Java VM Version: Eclipse OpenJ9 VM (JRE 1.8.0 Windows 10 amd64-64-Bit Compressed References 20201112_897 (JIT enabled, AOT enabled)
+OpenJ9   - 0394ef754
+OMR      - 582366ae5
+JCL      - b52d2ff7ee based on jdk8u275-b01), Eclipse OpenJ9
+	Memory: 778912760 bytes (742 MB) / 1073741824 bytes (1024 MB) up to 1073741824 bytes (1024 MB)
+	JVM Flags: 6 total; -Xoptionsfile=C:\Program Files\AdoptOpenJDK\jdk-8.0.275.1-openj9\jre\bin\compressedrefs\options.default -Xlockword:mode=default,noLockword=java/lang/String,noLockword=java/util/MapEntry,noLockword=java/util/HashMap$Entry,noLockword=org/apache/harmony/luni/util/ModifiedMap$Entry,noLockword=java/util/Hashtable$Entry,noLockword=java/lang/invoke/MethodType,noLockword=java/lang/invoke/MethodHandle,noLockword=java/lang/invoke/CollectHandle,noLockword=java/lang/invoke/ConstructorHandle,noLockword=java/lang/invoke/ConvertHandle,noLockword=java/lang/invoke/ArgumentConversionHandle,noLockword=java/lang/invoke/AsTypeHandle,noLockword=java/lang/invoke/ExplicitCastHandle,noLockword=java/lang/invoke/FilterReturnHandle,noLockword=java/lang/invoke/DirectHandle,noLockword=java/lang/invoke/ReceiverBoundHandle,noLockword=java/lang/invoke/DynamicInvokerHandle,noLockword=java/lang/invoke/FieldHandle,noLockword=java/lang/invoke/FieldGetterHandle,noLockword=java/lang/invoke/FieldSetterHandle,noLockword=java/lang/invoke/StaticFieldGetterHandle,noLockword=java/lang/invoke/StaticFieldSetterHandle,noLockword=java/lang/invoke/IndirectHandle,noLockword=java/lang/invoke/InterfaceHandle,noLockword=java/lang/invoke/VirtualHandle,noLockword=java/lang/invoke/PrimitiveHandle,noLockword=java/lang/invoke/InvokeExactHandle,noLockword=java/lang/invoke/InvokeGenericHandle,noLockword=java/lang/invoke/VarargsCollectorHandle,noLockword=java/lang/invoke/ThunkTuple -Xjcl:jclse29 -Xincgc -Xmx1024M -Xms1024M
+	IntCache: cache: 0, tcache: 0, allocated: 12, tallocated: 94
+	Launched Version: mcp
+	LWJGL: 2.9.4
+	OpenGL: GeForce RTX 2070 SUPER/PCIe/SSE2 GL version 4.6.0 NVIDIA 457.09, NVIDIA Corporation
+	GL Caps: Using GL 1.3 multitexturing.
+Using GL 1.3 texture combiners.
+Using framebuffer objects because OpenGL 3.0 is supported and separate blending is supported.
+Shaders are available because OpenGL 2.1 is supported.
+VBOs are available because OpenGL 1.5 is supported.
+
+	Using VBOs: No
+	Is Modded: Very likely; Jar signature invalidated
+	Type: Client (map_client.txt)
+	Resource Packs: Jylio Default §l§e[V&P] 1.8.9.zip
+	Current Language: English (US)
+	Profiler Position: N/A (disabled)
+	CPU: 12x AMD Ryzen 5 3600X 6-Core Processor 
+	OptiFine Version: OptiFine_1.8.8_HD_U_H8
+	Render Distance Chunks: 8
+	Mipmaps: 4
+	Anisotropic Filtering: 1
+	Antialiasing: 0
+	Multitexture: false
+	Shaders: null
+	OpenGlVersion: 4.6.0 NVIDIA 457.09
+	OpenGlRenderer: GeForce RTX 2070 SUPER/PCIe/SSE2
+	OpenGlVendor: NVIDIA Corporation
+	CpuCount: 12

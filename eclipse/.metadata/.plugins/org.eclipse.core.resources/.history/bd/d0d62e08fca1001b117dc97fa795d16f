@@ -1,0 +1,22 @@
+package clientname.gui.clickgui.monsoon.newgui.theme.themes;
+
+import java.awt.Color;
+
+import clientname.gui.clickgui.monsoon.newgui.theme.Theme;
+import clientname.util.render.ColorUtil;
+import net.minecraft.util.ResourceLocation;
+
+public class RainbowTheme extends Theme {
+
+	public RainbowTheme() {
+		super("Raindbow", 0.1, new ResourceLocation("Voyage/background/voyagebg.png"), ColorUtil.getRGB(7, 0.9f, 1, 100), -1);
+	}
+	
+	@Override
+	public int getMainColor() {
+		float hue = ((System.currentTimeMillis() + 100) % (int)(4 * 1000)) / (float)(4 * 1000);
+		int color = Color.HSBtoRGB(hue, 0.9f, 1);
+		return color;
+	}
+
+}

@@ -1,0 +1,44 @@
+package me.aycy.blockoverlay.commands;
+
+import me.aycy.blockoverlay.BlockOverlay;
+import me.aycy.blockoverlay.gui.GuiBlockOverlay;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+
+public class CommandBlockOverlay extends CommandBase {
+
+    public String getCommandName() {
+        return "blockoverlay";
+    }
+
+    public String getCommandUsage(ICommandSender sender) {
+        return EnumChatFormatting.RED + "Usage: /" + this.getCommandName();
+    }
+
+    public void processCommand(ICommandSender sender, String[] args) {
+        if (args.length == 0) {
+            MinecraftForge.EVENT_BUS.register(this);
+        } else {
+            BlockOverlay.mc.thePlayer.addChatMessage(new ChatComponentText(this.getCommandUsage(sender)));
+        }
+
+    }
+
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return true;
+    }
+
+    @SubscribeEvent
+    public void onTick(ClientTickEvent event) {
+        if (event.phase == Phase.START) {
+            BlockOverlay.mc.displayGuiScreen(new GuiBlockOverlay());
+        }
+
+    }
+}

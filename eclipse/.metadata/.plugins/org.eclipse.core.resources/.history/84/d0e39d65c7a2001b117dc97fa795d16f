@@ -1,0 +1,9 @@
+package clientname.mods.module;
+
+public class Module {
+
+	public Module(String name, int key, Category cat) {
+		
+	}
+	
+}

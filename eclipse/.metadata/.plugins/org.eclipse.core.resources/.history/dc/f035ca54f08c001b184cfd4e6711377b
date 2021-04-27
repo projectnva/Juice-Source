@@ -1,0 +1,5 @@
+package clientname.mods.impl.crosshair;
+
+public class ModCrosshair {
+
+}

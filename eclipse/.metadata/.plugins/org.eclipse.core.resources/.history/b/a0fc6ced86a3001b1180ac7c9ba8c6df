@@ -1,0 +1,56 @@
+package clientname.basicgui.hudconfiger;
+
+import java.io.IOException;
+
+import clientname.Client;
+import clientname.basicgui.HUDElement;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiScreen;
+
+public class HUDConfiger extends GuiScreen{
+
+	public HUDElement elementSelected;
+	public boolean dragging;
+	
+	@Override
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		if(dragging && elementSelected != null) {
+			elementSelected.x = elementSelected.x2 - mouseX;
+			elementSelected.y = elementSelected.y2 - mouseY;
+		}
+		
+		for(HUDElement he : Client.INSTANCE.hud.getElements()) {
+			Gui.drawRect(he.x, he.y, he.x + he.width, he.y + he.height);
+		}
+	}
+	
+	@Override
+	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+		if(mouseButton == 0 && getElementSelected(mouseX, mouseY) != null) {
+			elementSelected.x2 = elementSelected.x - mouseX;
+			elementSelected.y2 = elementSelected.y - mouseY;
+			elementSelected = getElementSelected(mouseX, mouseY);
+			dragging = true;
+		}
+	}
+	
+	@Override
+	protected void mouseReleased(int mouseX, int mouseY, int state) {
+		if(state == 0) {
+			elementSelected.x2 = 0;
+			elementSelected.x2 = 0;
+			elementSelected.dragging = false;
+			dragging = false;
+		}
+	}
+	
+	public HUDElement getElementSelected(int mouseX, int mouseY) {
+		for(HUDElement he : Client.INSTANCE.hud.elements) {
+			if(mouseX >= he.x && mouseX <= he.x + he.width && mouseY >= he.y && mouseY <= he.height) {
+				return he;
+			}
+		}
+		return null;
+	}
+	
+}

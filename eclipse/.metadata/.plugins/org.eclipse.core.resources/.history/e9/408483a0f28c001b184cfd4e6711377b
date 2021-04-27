@@ -1,0 +1,17 @@
+package sparkless101.crosshairmod.main;
+
+import net.minecraft.client.Minecraft;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
+import sparkless101.crosshairmod.gui.GuiEditCrosshair;
+
+public class KeyInputHandler {
+
+    @SubscribeEvent
+    public void onKeyInput(KeyInputEvent event) {
+        if (CustomCrosshairMod.guiEditKeyBind.isPressed()) {
+            Minecraft.getMinecraft().displayGuiScreen(new GuiEditCrosshair());
+        }
+
+    }
+}

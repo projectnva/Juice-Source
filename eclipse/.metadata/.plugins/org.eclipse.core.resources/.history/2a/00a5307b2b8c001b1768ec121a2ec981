@@ -1,0 +1,74 @@
+package com.github.lunatrius.schematica.command;
+
+import com.github.lunatrius.core.util.MBlockPos;
+import com.github.lunatrius.schematica.Schematica;
+import com.github.lunatrius.schematica.reference.Reference;
+import java.io.File;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.NumberInvalidException;
+import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChatComponentTranslation;
+
+public class CommandSchematicaSave extends CommandSchematicaBase {
+
+    public String getCommandName() {
+        return "schematicaSave";
+    }
+
+    public String getCommandUsage(ICommandSender sender) {
+        return "schematica.command.save.usage";
+    }
+
+    public void processCommand(ICommandSender sender, String[] arguments) throws CommandException {
+        if (arguments.length < 7) {
+            throw new WrongUsageException(this.getCommandUsage(sender), new Object[0]);
+        } else if (!(sender instanceof EntityPlayer)) {
+            throw new CommandException("schematica.command.save.playersOnly", new Object[0]);
+        } else {
+            EntityPlayer player = (EntityPlayer) sender;
+
+            if (Schematica.proxy.isPlayerQuotaExceeded(player)) {
+                throw new CommandException("schematica.command.save.quotaExceeded", new Object[0]);
+            } else {
+                MBlockPos from = new MBlockPos();
+                MBlockPos to = new MBlockPos();
+
+                String filename;
+                String name;
+
+                try {
+                    from.set(this.parseCoord(arguments[0]), this.parseCoord(arguments[1]), this.parseCoord(arguments[2]));
+                    to.set(this.parseCoord(arguments[3]), this.parseCoord(arguments[4]), this.parseCoord(arguments[5]));
+                    name = arguments[6];
+                    filename = String.format("%s.schematic", new Object[] { name});
+                } catch (NumberFormatException numberformatexception) {
+                    throw new WrongUsageException(this.getCommandUsage(sender), new Object[0]);
+                }
+
+                Reference.logger.debug("Saving schematic from {} to {} to {}", new Object[] { from, to, filename});
+                File schematicDirectory = Schematica.proxy.getPlayerSchematicDirectory(player, true);
+
+                if (schematicDirectory == null) {
+                    Reference.logger.warn("Unable to determine the schematic directory for player {}", new Object[] { player});
+                    throw new CommandException("schematica.command.save.playerSchematicDirUnavailable", new Object[0]);
+                } else if (!schematicDirectory.exists() && !schematicDirectory.mkdirs()) {
+                    Reference.logger.warn("Could not create player schematic directory {}", new Object[] { schematicDirectory.getAbsolutePath()});
+                    throw new CommandException("schematica.command.save.playerSchematicDirUnavailable", new Object[0]);
+                } else {
+                    try {
+                        Schematica.proxy.saveSchematic(player, schematicDirectory, filename, player.getEntityWorld(), from, to);
+                        sender.addChatMessage(new ChatComponentTranslation("schematica.command.save.saveSucceeded", new Object[] { name}));
+                    } catch (Exception exception) {
+                        throw new CommandException("schematica.command.save.saveFailed", new Object[] { name});
+                    }
+                }
+            }
+        }
+    }
+
+    private int parseCoord(String argument) throws NumberInvalidException {
+        return parseInt(argument, -30000000, 30000000);
+    }
+}

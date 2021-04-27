@@ -1,0 +1,28 @@
+package clientname.module.modules;
+
+import clientname.event.Event;
+import clientname.module.Module;
+
+public class Fullbright extends Module {
+	    public Fullbright() {
+	        super("FullBright", 35, Module.Category.RENDER);
+	    }
+
+	    @Override
+	    public void onEnable() {
+	        this.mc.gameSettings.gammaSetting = 100.0f;
+	    }
+
+	    @Override
+	    public void onDisable() {
+	        this.mc.gameSettings.gammaSetting = 0.0f;
+	    }
+
+	    public void onEvent(Event event) {
+	        if (event instanceof EventUpdate) {
+	            event.isPre();
+	        }
+	    }
+	}
+
+}

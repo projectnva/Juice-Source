@@ -1,0 +1,171 @@
+package com.github.lunatrius.schematica.nbt;
+
+import com.github.lunatrius.schematica.proxy.ClientProxy;
+import com.github.lunatrius.schematica.world.WorldDummy;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+
+public class NBTHelper {
+
+    public static List readTileEntitiesFromCompound(NBTTagCompound compound) {
+        return readTileEntitiesFromCompound(compound, new ArrayList());
+    }
+
+    public static List readTileEntitiesFromCompound(NBTTagCompound compound, List tileEntities) {
+        NBTTagList tagList = compound.getTagList("TileEntities", 10);
+
+        for (int i = 0; i < tagList.tagCount(); ++i) {
+            ClientProxy.sendMessage("" + tagList.getCompoundTagAt(i), new Object[0]);
+            NBTTagCompound tileEntityCompound = tagList.getCompoundTagAt(i);
+            TileEntity tileEntity = readTileEntityFromCompound(tileEntityCompound);
+
+            tileEntities.add(tileEntity);
+        }
+
+        return tileEntities;
+    }
+
+    public static NBTTagCompound writeTileEntitiesToCompound(List tileEntities) {
+        return writeTileEntitiesToCompound(tileEntities, new NBTTagCompound());
+    }
+
+    public static NBTTagCompound writeTileEntitiesToCompound(List tileEntities, NBTTagCompound compound) {
+        NBTTagList tagList = new NBTTagList();
+        Iterator iterator = tileEntities.iterator();
+
+        while (iterator.hasNext()) {
+            TileEntity tileEntity = (TileEntity) iterator.next();
+            NBTTagCompound tileEntityCompound = writeTileEntityToCompound(tileEntity);
+
+            tagList.appendTag(tileEntityCompound);
+        }
+
+        compound.setTag("TileEntities", tagList);
+        return compound;
+    }
+
+    public static List readEntitiesFromCompound(NBTTagCompound compound) {
+        return readEntitiesFromCompound(compound, (World) null, new ArrayList());
+    }
+
+    public static List readEntitiesFromCompound(NBTTagCompound compound, World world) {
+        return readEntitiesFromCompound(compound, world, new ArrayList());
+    }
+
+    public static List readEntitiesFromCompound(NBTTagCompound compound, List entities) {
+        return readEntitiesFromCompound(compound, (World) null, entities);
+    }
+
+    public static List readEntitiesFromCompound(NBTTagCompound compound, World world, List entities) {
+        NBTTagList tagList = compound.getTagList("Entities", 10);
+
+        for (int i = 0; i < tagList.tagCount(); ++i) {
+            NBTTagCompound entityCompound = tagList.getCompoundTagAt(i);
+            Entity entity = readEntityFromCompound(entityCompound, world);
+
+            if (entity != null) {
+                entities.add(entity);
+            }
+        }
+
+        return entities;
+    }
+
+    public static NBTTagCompound writeEntitiesToCompound(List entities) {
+        return writeEntitiesToCompound(entities, new NBTTagCompound());
+    }
+
+    public static NBTTagCompound writeEntitiesToCompound(List entities, NBTTagCompound compound) {
+        NBTTagList tagList = new NBTTagList();
+        Iterator iterator = entities.iterator();
+
+        while (iterator.hasNext()) {
+            Entity entity = (Entity) iterator.next();
+            NBTTagCompound entityCompound = new NBTTagCompound();
+
+            entity.writeToNBT(entityCompound);
+            tagList.appendTag(entityCompound);
+        }
+
+        compound.setTag("Entities", tagList);
+        return compound;
+    }
+
+    public static TileEntity reloadTileEntity(TileEntity tileEntity) throws NBTConversionException {
+        return reloadTileEntity(tileEntity, 0, 0, 0);
+    }
+
+    public static TileEntity reloadTileEntity(TileEntity tileEntity, int offsetX, int offsetY, int offsetZ) throws NBTConversionException {
+        if (tileEntity == null) {
+            return null;
+        } else {
+            try {
+                NBTTagCompound t = writeTileEntityToCompound(tileEntity);
+
+                tileEntity = readTileEntityFromCompound(t);
+                BlockPos pos = tileEntity.getPos();
+
+                tileEntity.setPos(pos.add(-offsetX, -offsetY, -offsetZ));
+                return tileEntity;
+            } catch (Throwable throwable) {
+                throw new NBTConversionException(tileEntity, throwable);
+            }
+        }
+    }
+
+    public static Entity reloadEntity(Entity entity) throws NBTConversionException {
+        return reloadEntity(entity, 0, 0, 0);
+    }
+
+    public static Entity reloadEntity(Entity entity, int offsetX, int offsetY, int offsetZ) throws NBTConversionException {
+        if (entity == null) {
+            return null;
+        } else {
+            try {
+                NBTTagCompound t = writeEntityToCompound(entity);
+
+                if (t != null) {
+                    entity = readEntityFromCompound(t, WorldDummy.instance());
+                    if (entity != null) {
+                        entity.posX -= (double) offsetX;
+                        entity.posY -= (double) offsetY;
+                        entity.posZ -= (double) offsetZ;
+                    }
+                }
+
+                return entity;
+            } catch (Throwable throwable) {
+                throw new NBTConversionException(entity, throwable);
+            }
+        }
+    }
+
+    public static NBTTagCompound writeTileEntityToCompound(TileEntity tileEntity) {
+        NBTTagCompound tileEntityCompound = new NBTTagCompound();
+
+        tileEntity.writeToNBT(tileEntityCompound);
+        return tileEntityCompound;
+    }
+
+    public static TileEntity readTileEntityFromCompound(NBTTagCompound tileEntityCompound) {
+        return TileEntity.createAndLoadEntity(tileEntityCompound);
+    }
+
+    public static NBTTagCompound writeEntityToCompound(Entity entity) {
+        NBTTagCompound entityCompound = new NBTTagCompound();
+
+        return entity.writeToNBTOptional(entityCompound) ? entityCompound : null;
+    }
+
+    public static Entity readEntityFromCompound(NBTTagCompound nbtTagCompound, World world) {
+        return EntityList.createEntityFromNBT(nbtTagCompound, world);
+    }
+}

@@ -1,0 +1,29 @@
+package com.orbitclient.imsoogood.ez.orbitclient;
+
+import com.orbitclient.imsoogood.ez.orbitclient.gui.hud.settings.SubGuiCustomizer;
+import org.json.JSONObject;
+
+public interface OrbitClientModule {
+
+    void onSocket(String s, JSONObject jsonobject);
+
+    void setEnabled(boolean flag);
+
+    boolean isEnabled();
+
+    void onEnable();
+
+    void onDisable();
+
+    String getName();
+
+    String getDescription();
+
+    String getSection();
+
+    SubGuiCustomizer getGui();
+
+    boolean viewable();
+
+    void update();
+}

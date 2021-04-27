@@ -1,0 +1,27 @@
+package clientname.mods;
+
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class ModuleManager {
+
+	public CopyOnWriteArrayList<ModDraggable> impl = new CopyOnWriteArrayList<>();
+	
+	public ModuleManager() {
+		
+	}
+	
+	public CopyOnWriteArrayList<ModDraggable> getModules() {
+		return impl;
+	}
+	
+	public CopyOnWriteArrayList<ModDraggable> getEnabledModules() {
+		CopyOnWriteArrayList<ModDraggable> enabledModules = new CopyOnWriteArrayList<>();
+		for(ModDraggable m : getModules()) {
+			if(m.isEnabled()) {
+				enabledModules.add(m);
+			}
+		}
+		return enabledModules;
+	}
+	
+}

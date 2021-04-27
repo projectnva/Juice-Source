@@ -1,0 +1,110 @@
+package clientname.mods.impl.crosshairmod.main;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+
+import org.lwjgl.input.Keyboard;
+
+import clientname.mods.impl.crosshairmod.crosshair.Crosshair;
+import clientname.mods.impl.crosshairmod.utils.SaveUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.ChatComponentTranslation;
+
+
+public class CustomCrosshairMod {
+
+    public static String NAME = "Custom Crosshair Mod";
+    public static String MODID = "customcrosshairmod";
+    public static String VERSION = "0.5.1-forge";
+    //public static final String forumUrl = "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/2637819/";
+    //public static final String curseForgeUrl = "http://www.curseforge.com/projects/242995/";
+    //public static final String latestVersionUrl = "http://pastebin.com/raw/B2sL8QCh";
+    private Crosshair crosshair;
+    private static CustomCrosshairMod crosshairMod = new CustomCrosshairMod();
+    private String guiKeyBind;
+    public static KeyBinding guiEditKeyBind;
+    public static boolean showMessage = true;
+
+    public void init() {
+        CustomCrosshairMod.crosshairMod = this;
+        //this.crosshair = new Crosshair();
+        this.setGuiKeyBind("GRAVE");
+        CustomCrosshairMod.guiEditKeyBind = new KeyBinding("Open GUI", Keyboard.getKeyIndex(this.getGuiKeyBind()), "Custom Crosshair Mod");
+        //ClientRegistry.registerKeyBinding(CustomCrosshairMod.guiEditKeyBind);
+        if (!SaveUtils.readSaveFile(this)) {
+            SaveUtils.writeSaveFileDefault();
+        }
+
+    }
+
+    public void addChatMessage(String message) {
+        String pre = "§9[Custom Crosshair Mod] §r";
+
+        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentTranslation(pre + message, new Object[0]));
+    }
+
+    public void openWebLink(String url) {
+        try {
+            URI ex = new URI(url);
+            Class oclass = Class.forName("java.awt.Desktop");
+            Object object = oclass.getMethod("getDesktop", new Class[0]).invoke((Object) null, new Object[0]);
+
+            oclass.getMethod("browse", new Class[] { URI.class}).invoke(object, new Object[] { ex});
+        } catch (Exception exception) {
+            System.out.println(exception.getMessage());
+        }
+
+    }
+
+    public String sendLatestVersionGetRequest() {
+        try {
+            URL e = new URL("http://pastebin.com/raw/B2sL8QCh");
+            HttpURLConnection connection = (HttpURLConnection) e.openConnection();
+
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+            int responseCode = connection.getResponseCode();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+            String inputLine;
+            String lineVersion;
+
+            do {
+                if ((inputLine = reader.readLine().toLowerCase()) == null) {
+                    return null;
+                }
+
+                lineVersion = inputLine.split(" ")[0];
+            } while (!lineVersion.equals("1.8.9-forge"));
+
+            reader.close();
+            return inputLine.split(" ")[1];
+        } catch (Exception exception) {
+            return null;
+        }
+    }
+
+    public static CustomCrosshairMod getCrosshairMod() {
+        return CustomCrosshairMod.crosshairMod;
+    }
+
+    public Crosshair getCrosshair() {
+        return this.crosshair;
+    }
+
+    public void resetCrosshair() {
+        this.crosshair = new Crosshair();
+    }
+
+    public String getGuiKeyBind() {
+        return this.guiKeyBind;
+    }
+
+    public void setGuiKeyBind(String guiKeyBind) {
+        this.guiKeyBind = guiKeyBind;
+    }
+}

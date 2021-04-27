@@ -1,0 +1,139 @@
+package com.github.lunatrius.core.util.vector;
+
+public class Vector4i extends Vector3i {
+
+    public int w;
+
+    public Vector4i() {
+        this(0, 0, 0, 0);
+    }
+
+    public Vector4i(Vector4i vec) {
+        this(vec.x, vec.y, vec.z, vec.w);
+    }
+
+    public Vector4i(int num) {
+        this(num, num, num, num);
+    }
+
+    public Vector4i(int x, int y, int z, int w) {
+        super(x, y, z);
+        this.w = w;
+    }
+
+    public final int getW() {
+        return this.w;
+    }
+
+    public final void setW(int w) {
+        this.w = w;
+    }
+
+    public Vector4i set(Vector4i vec) {
+        return this.set(vec.x, vec.y, vec.z, vec.w);
+    }
+
+    public Vector4i set(int x, int y, int z, int w) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.w = w;
+        return this;
+    }
+
+    public int lengthSquared() {
+        return this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
+    }
+
+    public final double lengthTo(Vector4i vec) {
+        return Math.sqrt((double) this.lengthSquaredTo(vec));
+    }
+
+    public int lengthSquaredTo(Vector4i vec) {
+        return this.pow2(this.x - vec.x) + this.pow2(this.y - vec.y) + this.pow2(this.z - vec.z) + this.pow2(this.w - vec.w);
+    }
+
+    public Vector4i negate() {
+        this.x = -this.x;
+        this.y = -this.y;
+        this.z = -this.z;
+        this.w = -this.w;
+        return this;
+    }
+
+    public double dot(Vector4i vec) {
+        return (double) (this.x * vec.x + this.y * vec.y + this.z * vec.z + this.w * vec.w);
+    }
+
+    public Vector4i scale(double scale) {
+        this.x = (int) ((double) this.x * scale);
+        this.y = (int) ((double) this.y * scale);
+        this.z = (int) ((double) this.z * scale);
+        this.w = (int) ((double) this.w * scale);
+        return this;
+    }
+
+    public Vector4i add(Vector4i vec) {
+        this.x += vec.x;
+        this.y += vec.y;
+        this.z += vec.z;
+        this.w += vec.w;
+        return this;
+    }
+
+    public Vector4i add(int x, int y, int z, int w) {
+        this.x += x;
+        this.y += y;
+        this.z += z;
+        this.w += w;
+        return this;
+    }
+
+    public Vector4i sub(Vector4i vec) {
+        this.x -= vec.x;
+        this.y -= vec.y;
+        this.z -= vec.z;
+        this.w -= vec.w;
+        return this;
+    }
+
+    public Vector4i sub(int x, int y, int z, int w) {
+        this.x -= x;
+        this.y -= y;
+        this.z -= z;
+        this.w -= w;
+        return this;
+    }
+
+    public Vector4f toVector4f() {
+        return new Vector4f((float) this.x, (float) this.y, (float) this.z, (float) this.w);
+    }
+
+    public Vector4f toVector4f(Vector4f vec) {
+        return vec.set((float) this.x, (float) this.y, (float) this.z, (float) this.w);
+    }
+
+    public Vector4d toVector4d() {
+        return new Vector4d((double) this.x, (double) this.y, (double) this.z, (double) this.w);
+    }
+
+    public Vector4d toVector4d(Vector4d vec) {
+        return vec.set((double) this.x, (double) this.y, (double) this.z, (double) this.w);
+    }
+
+    public Vector4i clone() {
+        return new Vector4i(this);
+    }
+
+    public boolean equals(Object obj) {
+        return obj instanceof Vector4i && this.equals((Vector4i) obj);
+    }
+
+    public boolean equals(Vector4i vec) {
+        return this.x == vec.x && this.y == vec.y && this.z == vec.z && this.w == vec.w;
+    }
+
+    public String toString() {
+        return String.format("[%s, %s, %s, %s]", new Object[] { Integer.valueOf(this.x), Integer.valueOf(this.y), Integer.valueOf(this.z), Integer.valueOf(this.w)});
+    }
+}

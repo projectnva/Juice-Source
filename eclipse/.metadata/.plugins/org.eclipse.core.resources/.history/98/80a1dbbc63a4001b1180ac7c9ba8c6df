@@ -1,0 +1,30 @@
+package clientname.basicgui.settings;
+
+import clientname.mods.ModDraggable;
+
+public class Setting<Type> {
+
+	public String name;
+	public ModDraggable element;
+	public Type value;
+	
+	public boolean isBooleanSetting() {
+		return this instanceof BooleanSetting;
+	}
+	
+	public boolean isModeSetting() {
+		return this instanceof ModeSetting;
+	}
+	
+	public boolean isNumberSetting() {
+		return this instanceof NumberSetting;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public ModDraggable getElement() {
+		return element;
+	}
+}

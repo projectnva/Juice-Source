@@ -1,0 +1,24 @@
+/*
+ * Decompiled with CFR 0.150.
+ */
+package clientname.events.listeners;
+
+import clientname.events.Event;
+
+public class EventChat
+extends Event<EventChat> {
+    public String message;
+
+    public EventChat(String string) {
+        this.message = string;
+    }
+
+    public void setMessage(String string) {
+        this.message = string;
+    }
+
+    public String getMessage() {
+        return this.message;
+    }
+}
+

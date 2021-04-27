@@ -1,0 +1,113 @@
+package me.aycy.blockoverlay.renderer;
+
+import java.awt.Color;
+import me.aycy.blockoverlay.BlockOverlay;
+import me.aycy.blockoverlay.utils.ColorUtil;
+import me.aycy.blockoverlay.utils.Overlay;
+import me.aycy.blockoverlay.utils.RenderUtil;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.world.WorldSettings.GameType;
+import net.minecraftforge.client.event.DrawBlockHighlightEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.lwjgl.opengl.GL11;
+
+public class RendererBlockOverlay {
+
+    private final double buffer = 0.0020000000949949026D;
+
+    @SubscribeEvent
+    public void onDrawBlockHighlight(DrawBlockHighlightEvent event) {
+        if (event.player != null && BlockOverlay.mc.theWorld != null && BlockOverlay.config.getMode() != Overlay.DEFAULT && (BlockOverlay.mc.playerController.getCurrentGameType() == GameType.SURVIVAL || BlockOverlay.mc.playerController.getCurrentGameType() == GameType.CREATIVE)) {
+            event.setCanceled(true);
+            if (BlockOverlay.config.getMode() != Overlay.NONE) {
+                this.drawBlockOverlay(event.partialTicks);
+            }
+        }
+
+    }
+
+    @SubscribeEvent
+    public void onRenderWorldLast(RenderWorldLastEvent event) {
+        if (BlockOverlay.mc.thePlayer != null && BlockOverlay.mc.theWorld != null && BlockOverlay.config.isPersistent() && BlockOverlay.config.getMode() != Overlay.NONE && BlockOverlay.config.getMode() != Overlay.DEFAULT && (BlockOverlay.mc.playerController.getCurrentGameType() == GameType.ADVENTURE || BlockOverlay.mc.playerController.getCurrentGameType() == GameType.SPECTATOR)) {
+            this.drawBlockOverlay(event.partialTicks);
+        }
+
+    }
+
+    private void drawBlockOverlay(float partialTicks) {
+        if (!BlockOverlay.mc.gameSettings.hideGUI) {
+            MovingObjectPosition mouseOver = BlockOverlay.mc.objectMouseOver;
+
+            if (mouseOver != null && mouseOver.typeOfHit == MovingObjectType.BLOCK) {
+                BlockPos blockPos = mouseOver.getBlockPos();
+                Block block = BlockOverlay.mc.theWorld.getBlockState(blockPos).getBlock();
+
+                if (block != Blocks.air && block.getMaterial() != Material.water) {
+                    block.setBlockBoundsBasedOnState(BlockOverlay.mc.theWorld, blockPos);
+                    EntityPlayerSP player = BlockOverlay.mc.thePlayer;
+                    double x = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double) partialTicks;
+                    double y = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double) partialTicks;
+                    double z = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double) partialTicks;
+                    boolean outlined = BlockOverlay.config.getLineWidth() > 0.0F;
+                    AxisAlignedBB boundingBox = block.getSelectedBoundingBox(BlockOverlay.mc.theWorld, blockPos).expand(this.buffer, this.buffer, this.buffer).offset(-x, -y, -z);
+                    Color color = BlockOverlay.config.isChroma() ? ColorUtil.getChroma() : ColorUtil.getColor();
+
+                    GlStateManager.pushMatrix();
+                    GlStateManager.disableAlpha();
+                    GlStateManager.enableBlend();
+                    GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+                    GlStateManager.disableTexture2D();
+                    GlStateManager.depthMask(false);
+                    GL11.glEnable(2848);
+                    GL11.glHint(3154, 4354);
+                    if (BlockOverlay.config.isIgnoreDepth()) {
+                        GlStateManager.disableDepth();
+                    }
+
+                    if (outlined) {
+                        GL11.glLineWidth(BlockOverlay.config.getLineWidth());
+                    }
+
+                    switch (BlockOverlay.config.getMode()) {
+                    case SIDE_OUTLINE:
+                        RenderUtil.drawSide(boundingBox, mouseOver.sideHit, color, false, outlined);
+                        break;
+
+                    case SIDE_FULL:
+                        RenderUtil.drawSide(boundingBox, mouseOver.sideHit, color, true, outlined);
+                        break;
+
+                    case OUTLINE:
+                        if (outlined) {
+                            RenderUtil.setGLColor(color);
+                            RenderGlobal.drawSelectionBoundingBox(boundingBox);
+                        }
+                        break;
+
+                    case FULL:
+                        RenderUtil.drawFilledBoundingBox(boundingBox, color, outlined);
+                    }
+
+                    GL11.glLineWidth(1.0F);
+                    GL11.glDisable(2848);
+                    GlStateManager.enableDepth();
+                    GlStateManager.depthMask(true);
+                    GlStateManager.enableTexture2D();
+                    GlStateManager.disableBlend();
+                    GlStateManager.enableAlpha();
+                    GlStateManager.popMatrix();
+                }
+            }
+        }
+    }
+}

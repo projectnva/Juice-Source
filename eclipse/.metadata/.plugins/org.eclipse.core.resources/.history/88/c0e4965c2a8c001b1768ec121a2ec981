@@ -1,0 +1,546 @@
+package clientname.util.patchcrumbsv2;
+
+import com.orbitclient.imsoogood.ez.orbitclient.OrbitClientModule;
+import com.orbitclient.imsoogood.ez.orbitclient.anitlag.LessArrayLists;
+import com.orbitclient.imsoogood.ez.orbitclient.gui.hud.settings.SubGuiCustomizer;
+import com.orbitclient.imsoogood.ez.orbitclient.util.ColorMap;
+import com.orbitclient.imsoogood.ez.orbitclient.util.GlShim;
+import clientname.util.patchcrumbsv2.Direction;
+import clientname.util.patchcrumbsv2.PatchCrumb;
+import clientname.util.patchcrumbsv2.WallCoord;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Iterator;
+import net.minecraft.block.BlockSand;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import org.json.JSONObject;
+import org.lwjgl.opengl.GL11;
+
+public class PatchCrumbsV2 implements OrbitClientModule {
+
+    public static final PatchCrumbsV2 INSTANCE = new PatchCrumbsV2();
+    public static String mode = "NORTH/SOUTH";
+    public static String patchcrumbsColor = "Green";
+    public static String shotBoxColor = "Orange";
+    public static boolean drawtracer = false;
+    public static boolean renderTag = false;
+    public static int width = 5;
+    public static int time = 12;
+    public static ArrayList wallCoords = new ArrayList();
+    public static PatchCrumb currentCrumb = null;
+    private static boolean enabled = false;
+    private final Minecraft minecraft = Minecraft.getMinecraft();
+    public static ResourceLocation location = new ResourceLocation("OrbitClient:textures/PlutoMBL.png");
+    public static boolean showSkin = false;
+
+    public static void outlinedShotBox(PatchCrumb crumb) {
+        GlShim.glPushMatrix();
+        GlShim.glBlendFunc(770, 771);
+        GlShim.glEnable(3042);
+        GlShim.glLineWidth((float) PatchCrumbsV2.width);
+        GlShim.glDisable(3553);
+        GlShim.glDisable(2929);
+        GlShim.glDepthMask(false);
+        GlStateManager.color((float) ((Color) ColorMap.colors.get(PatchCrumbsV2.shotBoxColor)).getRed(), (float) ((Color) ColorMap.colors.get(PatchCrumbsV2.shotBoxColor)).getGreen(), (float) ((Color) ColorMap.colors.get(PatchCrumbsV2.shotBoxColor)).getBlue(), 1.0F);
+        Minecraft.getMinecraft().getRenderManager();
+        RenderGlobal.drawSelectionBoundingBox(new AxisAlignedBB(crumb.boundingBOX.minX - 0.05D - (double) crumb.posX + ((double) crumb.posX - Minecraft.getMinecraft().getRenderManager().viewerPosX), crumb.boundingBOX.minY - (double) crumb.posY + ((double) crumb.posY - Minecraft.getMinecraft().getRenderManager().viewerPosY), crumb.boundingBOX.minZ - 0.05D - (double) crumb.posZ + ((double) crumb.posZ - Minecraft.getMinecraft().getRenderManager().viewerPosZ), crumb.boundingBOX.maxX + 0.05D - (double) crumb.posX + ((double) crumb.posX - Minecraft.getMinecraft().getRenderManager().viewerPosX), crumb.boundingBOX.maxY + 0.1D - (double) crumb.posY + ((double) crumb.posY - Minecraft.getMinecraft().getRenderManager().viewerPosY), crumb.boundingBOX.maxZ + 0.05D - (double) crumb.posZ + ((double) crumb.posZ - Minecraft.getMinecraft().getRenderManager().viewerPosZ)));
+        GlShim.glEnable(3553);
+        GlShim.glEnable(2929);
+        GlShim.glDepthMask(true);
+        GlShim.glDisable(3042);
+        GlStateManager.color(1.0F, 1.0F, 1.0F);
+        GlShim.glPopMatrix();
+    }
+
+    public static void patchFinder(PatchCrumb crumb) {
+        GlStateManager.pushMatrix();
+        GlShim.glBlendFunc(770, 771);
+        GlShim.glEnable(3042);
+        GlShim.glLineWidth((float) PatchCrumbsV2.width);
+        GlShim.glDisable(3553);
+        GlShim.glDisable(2929);
+        GlShim.glDepthMask(false);
+        GlStateManager.color((float) ((Color) ColorMap.colors.get(PatchCrumbsV2.patchcrumbsColor)).getRed(), (float) ((Color) ColorMap.colors.get(PatchCrumbsV2.patchcrumbsColor)).getGreen(), (float) ((Color) ColorMap.colors.get(PatchCrumbsV2.patchcrumbsColor)).getBlue(), 1.0F);
+        RenderManager rm = Minecraft.getMinecraft().getRenderManager();
+        double vX = rm.viewerPosX;
+        double vY = rm.viewerPosY;
+        double vZ = rm.viewerPosZ;
+        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+        double pX = player.posX;
+        double pY = player.posY;
+        double pZ = player.posZ;
+        byte extender = 100;
+        AxisAlignedBB bX;
+
+        if (PatchCrumbsV2.mode.equalsIgnoreCase("NORTH/SOUTH")) {
+            bX = new AxisAlignedBB(crumb.boundingBOX.minX - 0.05D - (double) crumb.posX + ((double) crumb.posX - vX), crumb.boundingBOX.minY - (double) crumb.posY + ((double) crumb.posY - vY), vZ - (double) extender - 0.05D - (double) crumb.posZ + ((double) crumb.posZ - vZ), crumb.boundingBOX.maxX + 0.05D - (double) crumb.posX + ((double) crumb.posX - vX), crumb.boundingBOX.maxY + 0.1D - (double) crumb.posY + ((double) crumb.posY - vY), vZ + (double) extender + 0.05D - (double) crumb.posZ + ((double) crumb.posZ - vZ));
+            RenderGlobal.drawSelectionBoundingBox(bX);
+        } else if (PatchCrumbsV2.mode.equalsIgnoreCase("EAST/WEST")) {
+            bX = new AxisAlignedBB(vX - (double) extender - 0.05D - (double) crumb.posX + ((double) crumb.posX - vX), crumb.boundingBOX.minY - (double) crumb.posY + ((double) crumb.posY - vY), crumb.boundingBOX.minZ - 0.05D - (double) crumb.posZ + ((double) crumb.posZ - vZ), vX + (double) extender + 0.05D - (double) crumb.posX + ((double) crumb.posX - vX), crumb.boundingBOX.maxY + 0.1D - (double) crumb.posY + ((double) crumb.posY - vY), crumb.boundingBOX.maxZ + 0.05D - (double) crumb.posZ + ((double) crumb.posZ - vZ));
+            RenderGlobal.drawSelectionBoundingBox(bX);
+        } else {
+            bX = new AxisAlignedBB(vX - (double) extender - 0.05D - (double) crumb.posX + ((double) crumb.posX - vX), crumb.boundingBOX.minY - (double) crumb.posY + ((double) crumb.posY - vY), crumb.boundingBOX.minZ - 0.05D - (double) crumb.posZ + ((double) crumb.posZ - vZ), vX + (double) extender + 0.05D - (double) crumb.posX + ((double) crumb.posX - vX), crumb.boundingBOX.maxY + 0.1D - (double) crumb.posY + ((double) crumb.posY - vY), crumb.boundingBOX.maxZ + 0.05D - (double) crumb.posZ + ((double) crumb.posZ - vZ));
+            RenderGlobal.drawSelectionBoundingBox(bX);
+            AxisAlignedBB bZ = new AxisAlignedBB(crumb.boundingBOX.minX - 0.05D - (double) crumb.posX + ((double) crumb.posX - vX), crumb.boundingBOX.minY - (double) crumb.posY + ((double) crumb.posY - vY), vZ - (double) extender - 0.05D - (double) crumb.posZ + ((double) crumb.posZ - vZ), crumb.boundingBOX.maxX + 0.05D - (double) crumb.posX + ((double) crumb.posX - vX), crumb.boundingBOX.maxY + 0.1D - (double) crumb.posY + ((double) crumb.posY - vY), vZ + (double) extender + 0.05D - (double) crumb.posZ + ((double) crumb.posZ - vZ));
+
+            RenderGlobal.drawSelectionBoundingBox(bZ);
+        }
+
+        if (PatchCrumbsV2.showSkin) {
+            drawTexturedFill(crumb);
+        }
+
+        GlShim.glEnable(3553);
+        GlShim.glEnable(2929);
+        GlShim.glDepthMask(true);
+        GlShim.glDisable(3042);
+        GlStateManager.color(1.0F, 1.0F, 1.0F);
+        GlStateManager.popMatrix();
+    }
+
+    public static void drawTexturedFill(PatchCrumb crumb) {
+        RenderManager rm = Minecraft.getMinecraft().getRenderManager();
+        double vX = rm.viewerPosX;
+        double vY = rm.viewerPosY;
+        double vZ = rm.viewerPosZ;
+
+        GlShim.glPushMatrix();
+        GlStateManager.disableCull();
+        GlStateManager.enableTexture2D();
+        GlStateManager.enableBlend();
+        GlShim.glEnable(2929);
+        GlStateManager.blendFunc(770, 771);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(PatchCrumbsV2.location);
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+        int i;
+        AxisAlignedBB axisAlignedBB;
+
+        if (PatchCrumbsV2.mode.equalsIgnoreCase("NORTH/SOUTH")) {
+            for (i = 0; i < 40; ++i) {
+                axisAlignedBB = new AxisAlignedBB(crumb.boundingBOX.minX - 0.05D - (double) crumb.posX + ((double) crumb.posX - Minecraft.getMinecraft().getRenderManager().viewerPosX), crumb.boundingBOX.minY - (double) crumb.posY + ((double) crumb.posY - Minecraft.getMinecraft().getRenderManager().viewerPosY), crumb.boundingBOX.minZ - 20.0D + (double) i - 0.05D - (double) crumb.posZ + ((double) crumb.posZ - Minecraft.getMinecraft().getRenderManager().viewerPosZ), crumb.boundingBOX.maxX + 0.05D - (double) crumb.posX + ((double) crumb.posX - Minecraft.getMinecraft().getRenderManager().viewerPosX), crumb.boundingBOX.maxY + 0.1D - (double) crumb.posY + ((double) crumb.posY - Minecraft.getMinecraft().getRenderManager().viewerPosY), crumb.boundingBOX.minZ - 20.0D + (double) i + 1.0D + 0.05D - (double) crumb.posZ + ((double) crumb.posZ - Minecraft.getMinecraft().getRenderManager().viewerPosZ));
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(1.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(1.0D, 0.0D).endVertex();
+                tessellator.draw();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(1.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(1.0D, 1.0D).endVertex();
+                tessellator.draw();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(1.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(1.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(0.0D, 0.0D).endVertex();
+                tessellator.draw();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(1.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(1.0D, 0.0D).endVertex();
+                tessellator.draw();
+            }
+        } else if (PatchCrumbsV2.mode.equalsIgnoreCase("EAST/WEST")) {
+            for (i = 0; i < 40; ++i) {
+                axisAlignedBB = new AxisAlignedBB(crumb.boundingBOX.minX - 20.0D + (double) i - 0.05D - (double) crumb.posX + ((double) crumb.posX - Minecraft.getMinecraft().getRenderManager().viewerPosX), crumb.boundingBOX.minY - (double) crumb.posY + ((double) crumb.posY - Minecraft.getMinecraft().getRenderManager().viewerPosY), crumb.boundingBOX.minZ - 0.05D - (double) crumb.posZ + ((double) crumb.posZ - Minecraft.getMinecraft().getRenderManager().viewerPosZ), crumb.boundingBOX.minX - 20.0D + (double) i + 1.0D + 0.05D - (double) crumb.posX + ((double) crumb.posX - Minecraft.getMinecraft().getRenderManager().viewerPosX), crumb.boundingBOX.maxY + 0.1D - (double) crumb.posY + ((double) crumb.posY - Minecraft.getMinecraft().getRenderManager().viewerPosY), crumb.boundingBOX.maxZ + 0.05D - (double) crumb.posZ + ((double) crumb.posZ - Minecraft.getMinecraft().getRenderManager().viewerPosZ));
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(1.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(1.0D, 0.0D).endVertex();
+                tessellator.draw();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(1.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(1.0D, 1.0D).endVertex();
+                tessellator.draw();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(1.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(1.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(0.0D, 1.0D).endVertex();
+                tessellator.draw();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(1.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(1.0D, 1.0D).endVertex();
+                tessellator.draw();
+            }
+        } else {
+            for (i = 0; i < 40; ++i) {
+                axisAlignedBB = new AxisAlignedBB(crumb.boundingBOX.minX - 0.05D - (double) crumb.posX + ((double) crumb.posX - Minecraft.getMinecraft().getRenderManager().viewerPosX), crumb.boundingBOX.minY - (double) crumb.posY + ((double) crumb.posY - Minecraft.getMinecraft().getRenderManager().viewerPosY), crumb.boundingBOX.minZ - 20.0D + (double) i - 0.05D - (double) crumb.posZ + ((double) crumb.posZ - Minecraft.getMinecraft().getRenderManager().viewerPosZ), crumb.boundingBOX.maxX + 0.05D - (double) crumb.posX + ((double) crumb.posX - Minecraft.getMinecraft().getRenderManager().viewerPosX), crumb.boundingBOX.maxY + 0.1D - (double) crumb.posY + ((double) crumb.posY - Minecraft.getMinecraft().getRenderManager().viewerPosY), crumb.boundingBOX.minZ - 20.0D + (double) i + 1.0D + 0.05D - (double) crumb.posZ + ((double) crumb.posZ - Minecraft.getMinecraft().getRenderManager().viewerPosZ));
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(1.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(1.0D, 0.0D).endVertex();
+                tessellator.draw();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(1.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(1.0D, 1.0D).endVertex();
+                tessellator.draw();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(1.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(1.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(0.0D, 0.0D).endVertex();
+                tessellator.draw();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(1.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(1.0D, 0.0D).endVertex();
+                tessellator.draw();
+            }
+
+            for (i = 0; i < 40; ++i) {
+                axisAlignedBB = new AxisAlignedBB(crumb.boundingBOX.minX - 20.0D + (double) i - 0.05D - (double) crumb.posX + ((double) crumb.posX - Minecraft.getMinecraft().getRenderManager().viewerPosX), crumb.boundingBOX.minY - (double) crumb.posY + ((double) crumb.posY - Minecraft.getMinecraft().getRenderManager().viewerPosY), crumb.boundingBOX.minZ - 0.05D - (double) crumb.posZ + ((double) crumb.posZ - Minecraft.getMinecraft().getRenderManager().viewerPosZ), crumb.boundingBOX.minX - 20.0D + (double) i + 1.0D + 0.05D - (double) crumb.posX + ((double) crumb.posX - Minecraft.getMinecraft().getRenderManager().viewerPosX), crumb.boundingBOX.maxY + 0.1D - (double) crumb.posY + ((double) crumb.posY - Minecraft.getMinecraft().getRenderManager().viewerPosY), crumb.boundingBOX.maxZ + 0.05D - (double) crumb.posZ + ((double) crumb.posZ - Minecraft.getMinecraft().getRenderManager().viewerPosZ));
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(1.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(1.0D, 0.0D).endVertex();
+                tessellator.draw();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(1.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(1.0D, 1.0D).endVertex();
+                tessellator.draw();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(1.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(1.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.minZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.minZ).tex(0.0D, 1.0D).endVertex();
+                tessellator.draw();
+                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(0.0D, 1.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.minX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(0.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.maxY, axisAlignedBB.maxZ).tex(1.0D, 0.0D).endVertex();
+                worldrenderer.pos(axisAlignedBB.maxX, axisAlignedBB.minY, axisAlignedBB.maxZ).tex(1.0D, 1.0D).endVertex();
+                tessellator.draw();
+            }
+        }
+
+        GlStateManager.disableBlend();
+        GlStateManager.disableTexture2D();
+        GlShim.glDisable(2929);
+        GlStateManager.enableCull();
+        GlShim.glPopMatrix();
+    }
+
+    public void onSocket(String name, JSONObject json) {}
+
+    @SubscribeEvent
+    public void clienttick(ClientTickEvent event) {
+        try {
+            if (!PatchCrumbsV2.enabled) {
+                return;
+            }
+
+            if (this.minecraft.theWorld == null) {
+                return;
+            }
+
+            if (this.minecraft.thePlayer == null) {
+                return;
+            }
+
+            if (this.minecraft.theWorld == null || this.minecraft.thePlayer == null || this.minecraft.theWorld.loadedEntityList == null) {
+                return;
+            }
+
+            Iterator E = LessArrayLists.currentTnT.iterator();
+
+            while (E.hasNext()) {
+                Entity wc = (Entity) E.next();
+
+                if (wc instanceof EntityTNTPrimed) {
+                    boolean flag = false;
+
+                    for (int i = 0; i < PatchCrumbsV2.wallCoords.size(); ++i) {
+                        WallCoord wc1 = (WallCoord) PatchCrumbsV2.wallCoords.get(i);
+
+                        if (wc1.testTNT((EntityTNTPrimed) wc)) {
+                            flag = true;
+                        }
+                    }
+
+                    if (!flag) {
+                        PatchCrumbsV2.wallCoords.add(new WallCoord((EntityTNTPrimed) wc));
+                    }
+                }
+            }
+
+            for (int i = 0; i < PatchCrumbsV2.wallCoords.size(); ++i) {
+                WallCoord wallcoord = (WallCoord) PatchCrumbsV2.wallCoords.get(i);
+
+                if (this.minecraft.theWorld.getBlockState(new BlockPos(wallcoord.x, wallcoord.y - 1, wallcoord.z)).getBlock() instanceof BlockSand) {
+                    PatchCrumbsV2.currentCrumb = new PatchCrumb(wallcoord.x, (int) wallcoord.firstYLevel, wallcoord.z, Math.abs(wallcoord.firstVelocityX) < Math.abs(wallcoord.firstVelocityZ) ? Direction.EASTWEST : Direction.NORTHSOUTH, wallcoord.boundingBOX);
+                    ShareTNT.patchcrumbsv2Link = PatchCrumbsV2.currentCrumb;
+                }
+
+                if (System.currentTimeMillis() > wallcoord.expiresAt) {
+                    PatchCrumbsV2.wallCoords.remove(i);
+                    --i;
+                }
+            }
+        } catch (Exception exception) {
+            System.out.println("patchcrumbsv2 problem");
+        }
+
+    }
+
+    @SubscribeEvent
+    public void renderworldlast(RenderWorldLastEvent event) {
+        try {
+            if (!PatchCrumbsV2.enabled) {
+                return;
+            }
+
+            if (this.minecraft.theWorld == null) {
+                return;
+            }
+
+            if (this.minecraft.thePlayer == null) {
+                return;
+            }
+
+            if (this.minecraft.theWorld == null || this.minecraft.thePlayer == null || this.minecraft.theWorld.loadedEntityList == null) {
+                return;
+            }
+
+            if (PatchCrumbsV2.currentCrumb != null) {
+                if (PatchCrumbsV2.drawtracer) {
+                    this.drawTracer(PatchCrumbsV2.currentCrumb);
+                }
+
+                patchFinder(PatchCrumbsV2.currentCrumb);
+                outlinedShotBox(PatchCrumbsV2.currentCrumb);
+                this.renderTag(PatchCrumbsV2.currentCrumb);
+                if (System.currentTimeMillis() > PatchCrumbsV2.currentCrumb.expiresAt) {
+                    PatchCrumbsV2.currentCrumb = null;
+                    ShareTNT.patchcrumbsv2Link = null;
+                }
+            }
+        } catch (Exception exception) {
+            System.out.println("patchcrumbsv2 problem");
+        }
+
+    }
+
+    public boolean isEnabled() {
+        return PatchCrumbsV2.enabled;
+    }
+
+    public void setEnabled(boolean e) {
+        PatchCrumbsV2.enabled = e;
+        if (e) {
+            this.onEnable();
+        } else {
+            this.onDisable();
+        }
+
+    }
+
+    public void onEnable() {}
+
+    public void onDisable() {}
+
+    public void fullShotBox(PatchCrumb crumb, float partialTicks) {
+        double x_fix = this.minecraft.thePlayer.lastTickPosX + (this.minecraft.thePlayer.posX - this.minecraft.thePlayer.lastTickPosX) * (double) partialTicks;
+        double y_fix = this.minecraft.thePlayer.lastTickPosY + (this.minecraft.thePlayer.posY - this.minecraft.thePlayer.lastTickPosY) * (double) partialTicks;
+        double z_fix = this.minecraft.thePlayer.lastTickPosZ + (this.minecraft.thePlayer.posZ - this.minecraft.thePlayer.lastTickPosZ) * (double) partialTicks;
+
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(-x_fix, -y_fix, -z_fix);
+        GlStateManager.disableLighting();
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(770, 771);
+        GlStateManager.disableTexture2D();
+        GlStateManager.color((float) ((Color) ColorMap.colors.get(PatchCrumbsV2.shotBoxColor)).getRed(), (float) ((Color) ColorMap.colors.get(PatchCrumbsV2.shotBoxColor)).getGreen(), (float) ((Color) ColorMap.colors.get(PatchCrumbsV2.shotBoxColor)).getBlue(), 1.0F);
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+        AxisAlignedBB aabb = crumb.boundingBOX;
+
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex();
+        tessellator.draw();
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex();
+        tessellator.draw();
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex();
+        tessellator.draw();
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex();
+        tessellator.draw();
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex();
+        tessellator.draw();
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION);
+        worldrenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex();
+        worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex();
+        tessellator.draw();
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+        GlStateManager.enableLighting();
+        GlStateManager.color(1.0F, 1.0F, 1.0F);
+        GlStateManager.popMatrix();
+    }
+
+    public String getName() {
+        return "PatchCrumbs ABC";
+    }
+
+    public SubGuiCustomizer getGui() {
+        SubGuiCustomizer customizer = new SubGuiCustomizer(PatchCrumbsV2.INSTANCE);
+
+        customizer.addSlider("Timeout", "time", 1, 60, "seconds");
+        customizer.addSlider("Width", "width", 1, 10, "px");
+        customizer.addStringSelection("Patch Crumbs Color", "patchcrumbsColor", ColorMap.getColorArray());
+        customizer.addStringSelection("Shot Box Color", "shotBoxColor", ColorMap.getColorArray());
+        ArrayList direction = new ArrayList();
+
+        direction.add("NORTH/SOUTH");
+        direction.add("EAST/WEST");
+        direction.add("BOTH");
+        customizer.addStringSelection("Direction", "mode", direction);
+        customizer.addButton("Render Tag", "renderTag");
+        customizer.addButton("Draw Tracer", "drawtracer");
+        return customizer;
+    }
+
+    public boolean viewable() {
+        return true;
+    }
+
+    public void update() {}
+
+    public void drawTracer(PatchCrumb tnt) {
+        try {
+            GlShim.glPushMatrix();
+            GlShim.glBlendFunc(770, 771);
+            GlShim.glEnable(3042);
+            GlShim.glEnable(2848);
+            GlShim.glLineWidth(2.0F);
+            GlShim.glDisable(3553);
+            GlShim.glDisable(2929);
+            GlShim.glDepthMask(false);
+            GlShim.glBegin(1);
+            GlStateManager.color((float) ((Color) ColorMap.colors.get(PatchCrumbsV2.shotBoxColor)).getRed(), (float) ((Color) ColorMap.colors.get(PatchCrumbsV2.shotBoxColor)).getGreen(), (float) ((Color) ColorMap.colors.get(PatchCrumbsV2.shotBoxColor)).getBlue(), 1.0F);
+            EntityPlayerSP thePlayer = this.minecraft.thePlayer;
+            double x = (double) tnt.posX - this.minecraft.getRenderManager().viewerPosX;
+            double y = (double) tnt.posY - this.minecraft.getRenderManager().viewerPosY;
+            double z = (double) tnt.posZ - this.minecraft.getRenderManager().viewerPosZ;
+            Vec3 eyeVector = (new Vec3(0.0D, 0.0D, 1.0D)).rotatePitch((float) (-Math.toRadians((double) thePlayer.rotationPitch))).rotateYaw((float) (-Math.toRadians((double) thePlayer.rotationYaw)));
+
+            GlShim.glVertex3d(eyeVector.xCoord, (double) thePlayer.eyeHeight + eyeVector.yCoord, eyeVector.zCoord);
+            GlShim.glVertex3d(x, y, z);
+            GlShim.glEnd();
+            GlShim.glEnable(3553);
+            GlShim.glDisable(2848);
+            GlShim.glEnable(2929);
+            GlShim.glDepthMask(true);
+            GlShim.glDisable(3042);
+            GlStateManager.color(1.0F, 1.0F, 1.0F);
+            GlShim.glPopMatrix();
+        } catch (Exception exception) {
+            ;
+        }
+
+    }
+
+    public void renderTag(PatchCrumb tnt) {
+        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+        double x = (double) tnt.posX - player.posX;
+        double y = (double) tnt.posY - player.posY + 0.5D;
+        double z = (double) tnt.posZ - player.posZ;
+        String str;
+
+        if (PatchCrumbsV2.mode.equalsIgnoreCase("NORTH/SOUTH")) {
+            str = "x:" + tnt.posX + " y:" + tnt.posY;
+            z = 3.0D;
+        } else {
+            str = "z:" + tnt.posZ + " y:" + tnt.posY;
+            x = 3.0D;
+        }
+
+        FontRenderer fontrenderer = Minecraft.getMinecraft().fontRendererObj;
+        RenderManager renderManager = Minecraft.getMinecraft().getRenderManager();
+        float f = 2.3F;
+        float f1 = 0.016666668F * f;
+
+        GlStateManager.pushMatrix();
+        GlStateManager.translate((float) x + 0.0F, (float) y + 1.0F, (float) z);
+        GL11.glNormal3f(0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(-renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+        GlStateManager.scale(-f1, -f1, f1);
+        GlStateManager.disableLighting();
+        GlStateManager.depthMask(false);
+        GlStateManager.disableDepth();
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableTexture2D();
+        fontrenderer.drawString(str, -fontrenderer.getStringWidth(str) / 2, 0, ((Color) ColorMap.colors.get(PatchCrumbsV2.shotBoxColor)).getRGB());
+        GlStateManager.enableDepth();
+        GlStateManager.depthMask(true);
+        GlStateManager.enableLighting();
+        GlStateManager.disableBlend();
+        GlStateManager.color(1.0F, 1.0F, 1.0F);
+        GlStateManager.popMatrix();
+    }
+
+    public String getDescription() {
+        return "Draws a box to patch";
+    }
+
+    public String getSection() {
+        return "Crumbs";
+    }
+}

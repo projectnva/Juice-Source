@@ -1,0 +1,23 @@
+package sparkless101.crosshairmod.gui.items;
+
+import java.util.List;
+import net.minecraft.client.gui.GuiScreen;
+import sparkless101.crosshairmod.gui.ModGuiScreen;
+import sparkless101.crosshairmod.utils.GuiGraphics;
+
+public class HelpButton extends GuiItem {
+
+    public HelpButton(GuiScreen screen, List text) {
+        super(screen, -1, "", 0, 0, 10, 10);
+        this.helpText = text;
+    }
+
+    public void drawItem(int mouseX, int mouseY) {
+        GuiGraphics.drawThemeBorderedRectangle(this.getPosX(), this.getPosY(), this.getPosX() + this.getWidth(), this.getPosY() + this.getHeight());
+        GuiGraphics.drawString("?", this.getPosX() + 3, this.getPosY() + 2, 16777215);
+        if (mouseX >= this.getPosX() && mouseX <= this.getPosX() + this.getWidth() && mouseY >= this.getPosY() && mouseY <= this.getPosY() + this.getHeight() && this.getCurrentScreen() instanceof ModGuiScreen) {
+            ((ModGuiScreen) this.getCurrentScreen()).toolTip = this.getHelpText();
+        }
+
+    }
+}

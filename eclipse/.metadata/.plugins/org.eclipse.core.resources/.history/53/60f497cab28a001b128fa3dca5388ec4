@@ -1,0 +1,20 @@
+package clientname.module.modules;
+
+import org.lwjgl.input.Keyboard;
+
+import clientname.mods.impl.ModArmorStatus;
+import clientname.module.Category;
+import clientname.module.Module;
+
+public class ArmorStatus extends Module {
+
+	public ArmorStatus(String name, int key, Category cat) {
+		super("ArmourStatus", Keyboard.KEY_G, Category.RENDER);
+	}
+	
+	@Override
+	public void onEnable() {
+		ModArmorStatus.isToggled() = false;
+	}
+
+}

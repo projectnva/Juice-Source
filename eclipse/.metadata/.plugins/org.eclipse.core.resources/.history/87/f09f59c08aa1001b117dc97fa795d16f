@@ -1,0 +1,132 @@
+package clientname.mods.impl.crosshairmod.gui;
+
+import java.io.IOException;
+
+import org.lwjgl.input.Keyboard;
+
+import clientname.mods.impl.crosshairmod.gui.items.Button;
+import clientname.mods.impl.crosshairmod.gui.items.GuiItem;
+import clientname.mods.impl.crosshairmod.gui.items.HelpButton;
+import clientname.mods.impl.crosshairmod.main.CustomCrosshairMod;
+import clientname.mods.impl.crosshairmod.utils.GuiGraphics;
+import clientname.mods.impl.crosshairmod.utils.GuiTheme;
+
+
+public class GuiSettings extends ModGuiScreen {
+
+    private Button button_return;
+    private Button button_editKeyBind;
+    private Button button_viewForum;
+    private Button button_viewCurseProject;
+    private boolean editingKey;
+    private String requestedLatestVersion;
+
+    public void initGui() {
+        this.editingKey = false;
+        this.itemList.clear();
+        this.itemList.add(this.button_editKeyBind = new Button(this, 1, "Open GUI key: " + CustomCrosshairMod.getCrosshairMod().getGuiKeyBind(), 0, 0, 110, 25) {
+            public void mouseClicked(int mouseX, int mouseY) {
+                GuiSettings.this.editingKey = true;
+                GuiSettings.this.button_editKeyBind.setDisplayText("Press a button...");
+            }
+        });
+        this.button_editKeyBind.getHelpText().add("Change the key to open the customize crosshair menu.");
+        this.itemList.add(this.button_viewForum = new Button(this, 2, "View MinecraftForum Thread", 0, 0, 150, 15) {
+            public void mouseClicked(int mouseX, int mouseY) {
+                CustomCrosshairMod.getCrosshairMod().openWebLink("http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/2637819/");
+            }
+        });
+        this.button_viewForum.getHelpText().add("Navigate to the MinecraftForum thread.");
+        this.button_viewForum.getHelpText().add("(Opens in a web browser).");
+        this.itemList.add(this.button_viewCurseProject = new Button(this, 3, "View CurseForge Project", 0, 0, 135, 15) {
+            public void mouseClicked(int mouseX, int mouseY) {
+                CustomCrosshairMod.getCrosshairMod().openWebLink("http://www.curseforge.com/projects/242995/");
+            }
+        });
+        this.button_viewCurseProject.getHelpText().add("Navigate to the CurseForge project.");
+        this.button_viewCurseProject.getHelpText().add("(Opens in a web browser).");
+        int y = 32;
+
+        int size;
+
+        for (size = 0; size < this.itemList.size(); ++size) {
+            if (size > 0) {
+                y += ((GuiItem) this.itemList.get(size - 1)).getHeight() + 6;
+            }
+
+            ((GuiItem) this.itemList.get(size)).setPosition(21, y);
+        }
+
+        y = 32;
+        size = this.itemList.size();
+
+        for (int screenSize = 0; screenSize < size; ++screenSize) {
+            this.itemList.add(new HelpButton(this, ((GuiItem) this.itemList.get(screenSize)).getHelpText()));
+            if (screenSize > 0) {
+                y += ((GuiItem) this.itemList.get(screenSize - 1)).getHeight() + 6;
+            }
+
+            ((GuiItem) this.itemList.get(size + screenSize)).setPosition(5, y);
+        }
+
+        int[] aint = GuiGraphics.getScreenSize();
+
+        this.itemList.add(this.button_return = new Button(this, 0, "<- Return", aint[0] - 56, 0, 55, 25) {
+            public void mouseClicked(int mouseX, int mouseY) {
+                GuiSettings.this.mc.displayGuiScreen(new GuiEditCrosshair());
+            }
+        });
+        this.requestedLatestVersion = CustomCrosshairMod.getCrosshairMod().sendLatestVersionGetRequest();
+    }
+
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        int[] screenSize = GuiGraphics.getScreenSize();
+
+        this.drawDefaultBackground();
+        String titleText = CustomCrosshairMod.NAME + " v" + CustomCrosshairMod.VERSION;
+
+        GuiGraphics.drawBorderedRectangle(0, 0, screenSize[0] - 1, 25, GuiTheme.PRIMARY, GuiTheme.SECONDARY);
+        GuiGraphics.drawStringWithShadow(titleText, 5, 10, 16777215);
+        String message;
+
+        if (this.requestedLatestVersion != null && !this.requestedLatestVersion.equals(CustomCrosshairMod.VERSION)) {
+            message = "Detected new latest version: v" + this.requestedLatestVersion + ".";
+            GuiGraphics.drawStringWithShadow(message, screenSize[0] - GuiGraphics.getStringWidth(message) - 5, screenSize[1] - 41, 16757760);
+        }
+
+        message = CustomCrosshairMod.NAME + " v" + CustomCrosshairMod.VERSION;
+        GuiGraphics.drawStringWithShadow(message, screenSize[0] - GuiGraphics.getStringWidth(message) - 5, screenSize[1] - 28, 16777215);
+        message = "Made by Sparkless101";
+        GuiGraphics.drawStringWithShadow(message, screenSize[0] - GuiGraphics.getStringWidth(message) - 5, screenSize[1] - 15, 16777215);
+        this.toolTip = null;
+
+        for (int i = 0; i < this.itemList.size(); ++i) {
+            GuiItem item = (GuiItem) this.itemList.get(i);
+
+            item.drawItem(mouseX, mouseY);
+        }
+
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        for (int i = 0; i < this.itemList.size(); ++i) {
+            GuiItem item = (GuiItem) this.itemList.get(i);
+
+            if (mouseX >= item.getPosX() && mouseX <= item.getPosX() + item.getWidth() && mouseY >= item.getPosY() && mouseY <= item.getPosY() + item.getHeight()) {
+                item.mouseClicked(mouseX, mouseY);
+            }
+        }
+
+    }
+
+    protected void keyTyped(char character, int keyCode) throws IOException {
+        if (keyCode != 1 && this.editingKey) {
+            CustomCrosshairMod.getCrosshairMod().setGuiKeyBind(Keyboard.getKeyName(keyCode));
+            this.editingKey = false;
+            this.button_editKeyBind.setDisplayText("Open GUI key: " + CustomCrosshairMod.getCrosshairMod().getGuiKeyBind());
+        }
+
+        super.keyTyped(character, keyCode);
+    }
+}

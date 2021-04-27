@@ -1,0 +1,155 @@
+package me.aycy.blockoverlay.visual;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import me.aycy.blockoverlay.BlockOverlay;
+import me.aycy.blockoverlay.util.GuiSlideControl;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+
+public class ColorGui extends GuiScreen {
+
+    private BlockOverlay mod;
+    private BlockOverlayRender render;
+    private GuiSlideControl red;
+    private GuiSlideControl green;
+    private GuiSlideControl blue;
+    private GuiSlideControl alpha;
+    private GuiSlideControl chromaSpeed;
+    private GuiButton lastPressed;
+    private GuiButton goBack;
+    private GuiButton chromaToggle;
+
+    public ColorGui(BlockOverlay mod, BlockOverlayRender render) {
+        this.mod = mod;
+        this.render = render;
+    }
+
+    public void initGui() {
+        int x = super.width / 2;
+        int y = super.height / 2;
+        ArrayList currentVals = this.render.getRGBAValues();
+
+        this.red = new GuiSlideControl(60, this.getCenter() - 100, this.getRowPos(3), 200, 20, "Red: ", 0.0F, 1.0F, ((Float) currentVals.get(0)).floatValue(), false);
+        this.green = new GuiSlideControl(40, this.getCenter() - 100, this.getRowPos(4), 200, 20, "Green: ", 0.0F, 1.0F, ((Float) currentVals.get(1)).floatValue(), false);
+        this.blue = new GuiSlideControl(20, this.getCenter() - 100, this.getRowPos(5), 200, 20, "Blue: ", 0.0F, 1.0F, ((Float) currentVals.get(2)).floatValue(), false);
+        this.alpha = new GuiSlideControl(0, this.getCenter() - 100, this.getRowPos(6), 200, 20, "Alpha: ", 0.0F, 1.0F, ((Float) currentVals.get(3)).floatValue(), false);
+        this.chromaSpeed = new GuiSlideControl(7, this.getCenter() - 100, this.getRowPos(3), 200, 20, "Chroma Speed: ", 1.0F, 10.0F, (float) this.render.getChromaSpeed(), true);
+        super.buttonList.add(this.goBack = new GuiButton(10, this.getCenter() - 100, this.getRowPos(7), "Go Back"));
+        super.buttonList.add(this.chromaToggle = new GuiButton(5, this.getCenter() - 100, this.getRowPos(2), "Chroma: " + (this.mod.getChroma() ? "Enabled" : "Disabled")));
+        this.buttonList.add(this.red);
+        this.buttonList.add(this.green);
+        this.buttonList.add(this.blue);
+        this.buttonList.add(this.alpha);
+        this.buttonList.add(this.chromaSpeed);
+    }
+
+    public int getRowPos(int rowNumber) {
+        return this.height / 4 + (24 * rowNumber - 24) - 16;
+    }
+
+    public int getCenter() {
+        return this.width / 2;
+    }
+
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        int x = super.width / 2;
+        int y = super.height / 2;
+
+        this.drawDefaultBackground();
+        this.drawCenteredString(this.fontRendererObj, "Block Overlay Color", x, y - 80, 16777215);
+        this.chromaSpeed.visible = this.mod.getChroma();
+        this.red.visible = !this.mod.getChroma();
+        this.green.visible = !this.mod.getChroma();
+        this.blue.visible = !this.mod.getChroma();
+        this.alpha.visible = !this.mod.getChroma();
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    protected void mouseReleased(int mouseX, int mouseY, int which) {
+        if (this.lastPressed != null && which == 0) {
+            this.lastPressed.mouseReleased(mouseX, mouseY);
+
+            try {
+                this.actionPerformed_MouseUp(this.lastPressed);
+            } catch (IOException ioexception) {
+                ioexception.printStackTrace();
+            }
+
+            this.lastPressed = null;
+        }
+
+    }
+
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        if (mouseButton == 0) {
+            for (int l = 0; l < this.buttonList.size(); ++l) {
+                GuiButton guibutton = (GuiButton) this.buttonList.get(l);
+
+                if (guibutton.mousePressed(this.mc, mouseX, mouseY)) {
+                    this.lastPressed = guibutton;
+                    this.actionPerformed(guibutton);
+                }
+            }
+        } else {
+            super.mouseClicked(mouseX, mouseY, mouseButton);
+        }
+
+    }
+
+    protected void actionPerformed_MouseUp(GuiButton button) throws IOException {
+        if (button instanceof GuiSlideControl) {
+            this.actionPerformed(button);
+        }
+
+    }
+
+    protected void actionPerformed(GuiButton button) throws IOException {
+        switch (button.id) {
+        case 0:
+            this.render.setColor(this.red.GetValueAsFloat(), this.green.GetValueAsFloat(), this.blue.GetValueAsFloat(), this.alpha.GetValueAsFloat());
+            break;
+
+        case 5:
+            this.mod.switchChroma();
+            button.displayString = "Chroma: " + (this.mod.getChroma() ? "Enabled" : "Disabled");
+            if (this.mod.getChroma()) {
+                this.red.visible = false;
+                this.green.visible = false;
+                this.blue.visible = false;
+                this.alpha.visible = false;
+            } else {
+                this.red.visible = true;
+                this.green.visible = true;
+                this.blue.visible = true;
+                this.alpha.visible = true;
+            }
+            break;
+
+        case 7:
+            this.render.setChromaSpeed(this.chromaSpeed.GetValueAsInt());
+            break;
+
+        case 10:
+            this.mod.setOpenGui(true);
+            break;
+
+        case 20:
+            this.render.setColor(this.red.GetValueAsFloat(), this.green.GetValueAsFloat(), this.blue.GetValueAsFloat(), this.alpha.GetValueAsFloat());
+            break;
+
+        case 40:
+            this.render.setColor(this.red.GetValueAsFloat(), this.green.GetValueAsFloat(), this.blue.GetValueAsFloat(), this.alpha.GetValueAsFloat());
+            break;
+
+        case 60:
+            this.render.setColor(this.red.GetValueAsFloat(), this.green.GetValueAsFloat(), this.blue.GetValueAsFloat(), this.alpha.GetValueAsFloat());
+        }
+
+    }
+
+    public void onGuiClosed() {
+        this.render.setColor(this.red.GetValueAsFloat(), this.green.GetValueAsFloat(), this.blue.GetValueAsFloat(), this.alpha.GetValueAsFloat());
+        this.mod.saveConfig();
+    }
+}

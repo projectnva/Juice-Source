@@ -1,0 +1,54 @@
+package clientname.basicgui.comp.impl;
+
+import java.awt.Color;
+
+import clientname.basicgui.SettingsWindow;
+import clientname.basicgui.comp.Component;
+import clientname.basicgui.settings.BooleanSetting;
+import clientname.basicgui.utils.Colors;
+import clientname.basicgui.utils.RenderUtils;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.GlStateManager;
+
+public class CheckBox extends Component {
+
+	public int x, y;
+	public BooleanSetting set;
+	public SettingsWindow window;
+	
+    public CheckBox(int x, int y, BooleanSetting set, SettingsWindow window) {
+        this.x = x;
+        this.y = y;
+        this.set = set;
+        this.window = window;
+    }
+
+    @Override
+    public void draw(int mouseX, int mouseY) {
+    	FontRenderer ufr = Minecraft.getMinecraft().fontRendererObj;
+        GlStateManager.enableAlpha();
+        GlStateManager.disableBlend();
+        GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f );
+        ufr.drawString(set.name, x + 15, y + 2, Colors.getTextColor());
+
+        if(!set.getValue()) {
+            RenderUtils.drawCircle(x + 4, y + 8, 6, 100, Colors.getDarkerGuiBackgroundColor());
+        }else {
+        	RenderUtils.drawCircle(x + 4, y + 8, 6, 100, Colors.getDarkerGuiBackgroundColor());
+        	RenderUtils.drawFilledCircle(x + 4, y + 8, 4, Color.cyan);
+        }
+    }
+
+    @Override
+    public void mouseClicked(int mouseX, int mouseY, int button) {
+        if(isWithinComponent(mouseX, mouseY) && button == 0) {
+            set.setValue(!set.getValue());
+        }
+    }
+
+    public boolean isWithinComponent(int mouseX, int mouseY){
+        return mouseX > x && mouseX < x + 15 && mouseY > y && mouseY < y + 12;
+    }
+}

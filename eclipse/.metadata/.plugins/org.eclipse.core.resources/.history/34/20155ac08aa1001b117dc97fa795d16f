@@ -1,0 +1,57 @@
+package clientname.mods.impl.crosshairmod.gui;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import clientname.mods.impl.crosshairmod.main.CustomCrosshairMod;
+import clientname.mods.impl.crosshairmod.utils.GuiGraphics;
+import clientname.mods.impl.crosshairmod.utils.GuiTheme;
+import clientname.mods.impl.crosshairmod.utils.SaveUtils;
+import net.minecraft.client.gui.GuiScreen;
+
+
+public class ModGuiScreen extends GuiScreen {
+
+    public List itemList = new ArrayList();
+    public List toolTip = new ArrayList();
+
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        if (this.toolTip != null) {
+            GuiGraphics.drawBorderedRectangle(mouseX + 5, mouseY + 5, mouseX + this.getMaxWidth() + 9, mouseY + this.toolTip.size() * 11 + 8, GuiTheme.PRIMARY, GuiTheme.SECONDARY);
+
+            for (int i = 0; i < this.toolTip.size(); ++i) {
+                GuiGraphics.drawString((String) this.toolTip.get(i), mouseX + 8, mouseY + i * 11 + 9, 16777215);
+            }
+        }
+
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+    }
+
+    protected void mouseReleased(int mouseX, int mouseY, int mouseButton) {
+        super.mouseReleased(mouseX, mouseY, mouseButton);
+    }
+
+    public void onGuiClosed() {
+        SaveUtils.saveCurrentCrosshair(CustomCrosshairMod.getCrosshairMod());
+        super.onGuiClosed();
+    }
+
+    private int getMaxWidth() {
+        int max = 0;
+
+        for (int i = 0; i < this.toolTip.size(); ++i) {
+            int currentWidth = GuiGraphics.getStringWidth((String) this.toolTip.get(i));
+
+            if (currentWidth > max) {
+                max = currentWidth;
+            }
+        }
+
+        return max;
+    }
+}

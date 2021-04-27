@@ -1,0 +1,39 @@
+package com.github.lunatrius.schematica.api;
+
+import java.util.List;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+
+public interface ISchematic {
+
+    IBlockState getBlockState(BlockPos blockpos);
+
+    boolean setBlockState(BlockPos blockpos, IBlockState iblockstate);
+
+    TileEntity getTileEntity(BlockPos blockpos);
+
+    List getTileEntities();
+
+    void setTileEntity(BlockPos blockpos, TileEntity tileentity);
+
+    void removeTileEntity(BlockPos blockpos);
+
+    List getEntities();
+
+    void addEntity(Entity entity);
+
+    void removeEntity(Entity entity);
+
+    ItemStack getIcon();
+
+    void setIcon(ItemStack itemstack);
+
+    int getWidth();
+
+    int getLength();
+
+    int getHeight();
+}

@@ -1,0 +1,47 @@
+package clientname.mods.impl.crosshairmod.gui.items;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import clientname.mods.impl.crosshairmod.utils.GuiGraphics;
+import clientname.mods.impl.crosshairmod.utils.RGBA;
+import net.minecraft.client.gui.GuiScreen;
+
+
+public class ListDropBox extends GuiItem {
+
+    private boolean isOpen = false;
+    private List itemList = new ArrayList();
+    private String selectedItem;
+    private int selectedItemIndex;
+
+    public ListDropBox(GuiScreen screen) {
+        super(screen);
+        this.setWidth(100);
+        this.setHeight(10);
+        this.itemList.add("Item One");
+        this.itemList.add("Item Two");
+        this.itemList.add("Item Three");
+        this.itemList.add("Item Four");
+        this.itemList.add("Item Five");
+    }
+
+    public void drawItem(int mouseX, int mouseY) {
+        GuiGraphics.drawBorderedRectangle(this.getPosX(), this.getPosY(), this.getPosX() + this.getWidth(), this.getPosY() + this.getHeight(), new RGBA(23, 107, 192, 128), new RGBA(240, 240, 240, 255));
+        if (this.selectedItem != null && this.selectedItem != "") {
+            GuiGraphics.drawString(this.selectedItem, this.getPosX() + 2, this.getPosY(), 16777215);
+        } else {
+            GuiGraphics.drawString("No item selected.", this.getPosX() + 2, this.getPosY() + 2, 16777215);
+        }
+
+        GuiGraphics.drawBorderedRectangle(this.getPosX() + this.getWidth() - 10, this.getPosY(), this.getPosX() + this.getWidth(), this.getPosY() + this.getHeight(), new RGBA(23, 107, 192, 128), new RGBA(240, 240, 240, 255));
+        int listHeight = 1 + this.itemList.size() * 10;
+
+        GuiGraphics.drawBorderedRectangle(this.getPosX(), this.getPosY() + this.getHeight(), this.getPosX() + this.getWidth(), this.getPosY() + this.getHeight() + listHeight, new RGBA(23, 107, 192, 128), new RGBA(240, 240, 240, 255));
+
+        for (int i = 0; i < this.itemList.size(); ++i) {
+            GuiGraphics.drawString((String) this.itemList.get(i), this.getPosX() + 2, this.getPosY() + this.getHeight() + i * 10 + 2, 16777215);
+        }
+
+    }
+}

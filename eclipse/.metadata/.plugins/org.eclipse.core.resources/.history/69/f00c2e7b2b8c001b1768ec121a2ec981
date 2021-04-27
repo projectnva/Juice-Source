@@ -1,0 +1,81 @@
+package com.github.lunatrius.schematica.handler;
+
+import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.network.PacketHandler;
+import com.github.lunatrius.schematica.network.message.MessageDownloadBegin;
+import com.github.lunatrius.schematica.network.message.MessageDownloadChunk;
+import com.github.lunatrius.schematica.network.message.MessageDownloadEnd;
+import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
+import com.github.lunatrius.schematica.reference.Reference;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
+
+public class DownloadHandler {
+
+    public static final DownloadHandler INSTANCE = new DownloadHandler();
+    public ISchematic schematic = null;
+    public final Map transferMap = new LinkedHashMap();
+
+    @SubscribeEvent
+    public void onServerTick(ServerTickEvent event) {
+        if (event.phase != Phase.START) {
+            this.processQueue();
+        }
+    }
+
+    private void processQueue() {
+        if (this.transferMap.size() != 0) {
+            EntityPlayerMP player = (EntityPlayerMP) this.transferMap.keySet().iterator().next();
+            SchematicTransfer transfer = (SchematicTransfer) this.transferMap.remove(player);
+
+            if (transfer != null) {
+                if (!transfer.state.isWaiting()) {
+                    if (++transfer.timeout >= 300) {
+                        if (++transfer.retries >= 5) {
+                            Reference.logger.warn("{}\'s download was dropped!", new Object[] { player.getName()});
+                            return;
+                        }
+
+                        Reference.logger.warn("{}\'s download timed out, retrying (#{})", new Object[] { player.getName(), Integer.valueOf(transfer.retries)});
+                        this.sendChunk(player, transfer);
+                        transfer.timeout = 0;
+                    }
+                } else if (transfer.state == SchematicTransfer.State.BEGIN_WAIT) {
+                    this.sendBegin(player, transfer);
+                } else if (transfer.state == SchematicTransfer.State.CHUNK_WAIT) {
+                    this.sendChunk(player, transfer);
+                } else if (transfer.state == SchematicTransfer.State.END_WAIT) {
+                    this.sendEnd(player, transfer);
+                    return;
+                }
+
+                this.transferMap.put(player, transfer);
+            }
+        }
+    }
+
+    private void sendBegin(EntityPlayerMP player, SchematicTransfer transfer) {
+        transfer.setState(SchematicTransfer.State.BEGIN);
+        MessageDownloadBegin message = new MessageDownloadBegin(transfer.schematic);
+
+        PacketHandler.INSTANCE.sendTo(message, player);
+    }
+
+    private void sendChunk(EntityPlayerMP player, SchematicTransfer transfer) {
+        transfer.setState(SchematicTransfer.State.CHUNK);
+        Reference.logger.trace("Sending chunk {},{},{}", new Object[] { Integer.valueOf(transfer.baseX), Integer.valueOf(transfer.baseY), Integer.valueOf(transfer.baseZ)});
+        MessageDownloadChunk message = new MessageDownloadChunk(transfer.schematic, transfer.baseX, transfer.baseY, transfer.baseZ);
+
+        PacketHandler.INSTANCE.sendTo(message, player);
+    }
+
+    private void sendEnd(EntityPlayerMP player, SchematicTransfer transfer) {
+        MessageDownloadEnd message = new MessageDownloadEnd(transfer.name);
+
+        PacketHandler.INSTANCE.sendTo(message, player);
+    }
+}

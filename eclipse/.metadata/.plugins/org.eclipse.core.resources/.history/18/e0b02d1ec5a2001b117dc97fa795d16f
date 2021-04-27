@@ -1,0 +1,20 @@
+package clientname.gui.clickgui.monsoon.newgui.theme;
+
+import clientname.gui.clickgui.monsoon.newgui.theme.themes.*;
+
+public class CurrentTheme {
+	
+	public static RainbowTheme current = new RainbowTheme();
+	
+	public CurrentTheme() {
+	}
+
+	public static RainbowTheme getCurrent() {
+		return current;
+	}
+
+	public void setCurrent(RainbowTheme current) {
+		this.current = current;
+	}
+
+}

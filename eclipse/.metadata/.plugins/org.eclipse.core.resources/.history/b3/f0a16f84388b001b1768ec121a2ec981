@@ -1,0 +1,29 @@
+package clientname.module.modules;
+
+import org.lwjgl.input.Keyboard;
+
+import clientname.http.gsonobjs.ObjectUserCosmetics;
+import clientname.mods.impl.ModArmorStatus;
+import clientname.module.Category;
+import clientname.module.Module;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
+
+public class ArmorStatus extends Module {
+	
+	public ArmorStatus() {
+		super("ArmourStatus", Keyboard.KEY_G, Category.RENDER);
+	}
+	
+	@Override
+    public void onEnable() {
+    	System.err.println("Fullbright enabled");
+    	
+    }
+
+    @Override
+    public void onDisable() {
+    	
+    }
+	
+}

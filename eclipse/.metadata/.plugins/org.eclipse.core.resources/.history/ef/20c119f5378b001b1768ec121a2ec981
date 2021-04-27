@@ -1,0 +1,31 @@
+package clientname.module;
+
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import de.Hero.example.GUI;
+
+public class ModuleManager {
+
+	public CopyOnWriteArrayList<Module> modules = new CopyOnWriteArrayList<>();
+	
+	public ModuleManager() {
+		
+		modules.add(new GUI());
+		
+	}
+	
+	public CopyOnWriteArrayList<Module> getModules() {
+		return modules;
+	}
+	
+	public CopyOnWriteArrayList<Module> getEnabledModules() {
+		CopyOnWriteArrayList<Module> enabledModules = new CopyOnWriteArrayList<>();
+		for(Module m : getModules()) {
+			if(m.isEnabled()) {
+				enabledModules.add(m);
+			}
+		}
+		return enabledModules;
+	}
+	
+}

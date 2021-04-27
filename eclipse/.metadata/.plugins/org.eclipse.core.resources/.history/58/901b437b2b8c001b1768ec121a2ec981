@@ -1,0 +1,146 @@
+package com.github.lunatrius.schematica.client.gui.control;
+
+import com.github.lunatrius.core.client.gui.GuiScreenBase;
+import com.github.lunatrius.schematica.Schematica;
+import com.github.lunatrius.schematica.client.util.BlockList;
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.proxy.ClientProxy;
+import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.util.ItemStackSortType;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Formatter;
+import java.util.Iterator;
+import java.util.List;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.client.config.GuiUnicodeGlyphButton;
+import org.apache.commons.io.IOUtils;
+
+public class GuiSchematicMaterials extends GuiScreenBase {
+
+    private GuiSchematicMaterialsSlot guiSchematicMaterialsSlot;
+    private ItemStackSortType sortType;
+    private GuiUnicodeGlyphButton btnSort;
+    private GuiButton btnDump;
+    private GuiButton btnDone;
+    private final String strMaterialName;
+    private final String strMaterialAmount;
+    protected final List blockList;
+
+    public GuiSchematicMaterials(GuiScreen guiScreen) {
+        super(guiScreen);
+        this.sortType = ItemStackSortType.fromString(ConfigurationHandler.sortType);
+        this.btnSort = null;
+        this.btnDump = null;
+        this.btnDone = null;
+        this.strMaterialName = I18n.format("schematica.gui.materialname", new Object[0]);
+        this.strMaterialAmount = I18n.format("schematica.gui.materialamount", new Object[0]);
+        Minecraft minecraft = Minecraft.getMinecraft();
+        SchematicWorld schematic = ClientProxy.schematic;
+
+        this.blockList = (new BlockList()).getList(minecraft.thePlayer, schematic, minecraft.theWorld);
+        this.sortType.sort(this.blockList);
+    }
+
+    public void initGui() {
+        byte id = 0;
+        int i = id + 1;
+
+        this.btnSort = new GuiUnicodeGlyphButton(i, this.width / 2 - 154, this.height - 30, 100, 20, " " + I18n.format("schematica.gui.material" + this.sortType.label, new Object[0]), this.sortType.glyph, 2.0F);
+        this.buttonList.add(this.btnSort);
+        ++i;
+        this.btnDump = new GuiButton(i, this.width / 2 - 50, this.height - 30, 100, 20, I18n.format("schematica.gui.materialdump", new Object[0]));
+        this.buttonList.add(this.btnDump);
+        ++i;
+        this.btnDone = new GuiButton(i, this.width / 2 + 54, this.height - 30, 100, 20, I18n.format("schematica.gui.done", new Object[0]));
+        this.buttonList.add(this.btnDone);
+        this.guiSchematicMaterialsSlot = new GuiSchematicMaterialsSlot(this);
+    }
+
+    public void handleMouseInput() throws IOException {
+        super.handleMouseInput();
+        this.guiSchematicMaterialsSlot.handleMouseInput();
+    }
+
+    protected void actionPerformed(GuiButton guiButton) {
+        if (guiButton.enabled) {
+            if (guiButton.id == this.btnSort.id) {
+                this.sortType = this.sortType.next();
+                this.sortType.sort(this.blockList);
+                this.btnSort.displayString = " " + I18n.format("schematica.gui.material" + this.sortType.label, new Object[0]);
+                this.btnSort.glyph = this.sortType.glyph;
+                ConfigurationHandler.propSortType.set(String.valueOf(this.sortType));
+                ConfigurationHandler.loadConfiguration();
+            } else if (guiButton.id == this.btnDump.id) {
+                this.dumpMaterialList(this.blockList);
+            } else if (guiButton.id == this.btnDone.id) {
+                this.mc.displayGuiScreen(this.parentScreen);
+            } else {
+                this.guiSchematicMaterialsSlot.actionPerformed(guiButton);
+            }
+        }
+
+    }
+
+    public void renderToolTip(ItemStack stack, int x, int y) {
+        super.renderToolTip(stack, x, y);
+    }
+
+    public void drawScreen(int x, int y, float partialTicks) {
+        this.guiSchematicMaterialsSlot.drawScreen(x, y, partialTicks);
+        this.drawString(this.fontRendererObj, this.strMaterialName, this.width / 2 - 108, 4, 16777215);
+        this.drawString(this.fontRendererObj, this.strMaterialAmount, this.width / 2 + 108 - this.fontRendererObj.getStringWidth(this.strMaterialAmount), 4, 16777215);
+        super.drawScreen(x, y, partialTicks);
+    }
+
+    private void dumpMaterialList(List blockList) {
+        if (blockList.size() > 0) {
+            int maxLengthName = 0;
+            int maxSize = 0;
+
+            BlockList.WrappedItemStack formatName;
+
+            for (Iterator maxLengthSize = blockList.iterator(); maxLengthSize.hasNext(); maxSize = Math.max(maxSize, formatName.total)) {
+                formatName = (BlockList.WrappedItemStack) maxLengthSize.next();
+                maxLengthName = Math.max(maxLengthName, formatName.getItemStackDisplayName().length());
+            }
+
+            int maxLengthSize1 = String.valueOf(maxSize).length();
+            String formatName1 = "%-" + maxLengthName + "s";
+            String formatSize = "%" + maxLengthSize1 + "d";
+            StringBuilder stringBuilder = new StringBuilder((maxLengthName + 1 + maxLengthSize1) * blockList.size());
+            Formatter formatter = new Formatter(stringBuilder);
+            Iterator dumps = blockList.iterator();
+
+            while (dumps.hasNext()) {
+                BlockList.WrappedItemStack e = (BlockList.WrappedItemStack) dumps.next();
+
+                formatter.format(formatName1, new Object[] { e.getItemStackDisplayName()});
+                stringBuilder.append(" ");
+                formatter.format(formatSize, new Object[] { Integer.valueOf(e.total)});
+                stringBuilder.append(System.lineSeparator());
+            }
+
+            File dumps1 = Schematica.proxy.getDirectory("dumps");
+
+            try {
+                FileOutputStream e1 = new FileOutputStream(new File(dumps1, "OrbitClient-materials.txt"));
+
+                try {
+                    IOUtils.write(stringBuilder.toString(), e1);
+                } finally {
+                    e1.close();
+                }
+            } catch (Exception exception) {
+                Reference.logger.error("Could not dump the material list!", exception);
+            }
+
+        }
+    }
+}

@@ -1,0 +1,6 @@
+package clientname.util.patchcrumbsv2;
+
+public enum Direction {
+
+    NORTHSOUTH, EASTWEST;
+}

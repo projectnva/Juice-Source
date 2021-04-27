@@ -1,0 +1,25 @@
+package clientname.module.modules;
+
+import org.lwjgl.input.Keyboard;
+
+import clientname.http.gsonobjs.ObjectUserCosmetics;
+import clientname.mods.impl.ModArmorStatus;
+import clientname.module.Category;
+import clientname.module.Module;
+import net.minecraft.client.entity.AbstractClientPlayer;
+
+public class ArmorStatus extends Module {
+	boolean uc = false;
+	public ArmorStatus(String name, int key, Category cat) {
+		super("ArmourStatus", Keyboard.KEY_G, Category.RENDER);
+	}
+	
+	public boolean isEnabled() {
+
+		if(uc == true) {
+			return false;
+		}
+		return true;
+	}
+
+}

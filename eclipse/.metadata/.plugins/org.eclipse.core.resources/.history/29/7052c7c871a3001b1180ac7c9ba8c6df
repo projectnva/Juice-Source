@@ -1,0 +1,24 @@
+package clientname.basicgui;
+
+import java.util.*;
+
+public class HUD {
+
+	public List<HUDElement> elements = new ArrayList<HUDElement>();
+	
+	private void draw() {
+		for(HUDElement element : elements) {
+			if(element.isEnabled()) {
+				element.draw();
+			}
+		}
+	}
+	
+	public List<HUDElement> getElements() {
+		return elements;
+	}
+	
+	public void addElement(HUDElement element) {
+		element.add(element);
+	
+}

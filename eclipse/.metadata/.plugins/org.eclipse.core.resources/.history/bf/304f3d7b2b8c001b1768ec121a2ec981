@@ -1,0 +1,9 @@
+package com.github.lunatrius.schematica.client.printer.registry;
+
+import java.util.List;
+import net.minecraft.block.state.IBlockState;
+
+public interface IValidBlockFacing {
+
+    List getValidBlockFacings(List list, IBlockState iblockstate);
+}

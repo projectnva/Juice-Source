@@ -1,0 +1,225 @@
+package com.github.lunatrius.core.client.renderer;
+
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.BlockPos;
+
+public class GeometryTessellator extends Tessellator {
+
+    private static GeometryTessellator instance = null;
+    private static double deltaS = 0.0D;
+    private double delta;
+
+    public GeometryTessellator() {
+        this(2097152);
+    }
+
+    public GeometryTessellator(int size) {
+        super(size);
+        this.delta = 0.0D;
+    }
+
+    public static GeometryTessellator getInstance() {
+        if (GeometryTessellator.instance == null) {
+            GeometryTessellator.instance = new GeometryTessellator();
+        }
+
+        return GeometryTessellator.instance;
+    }
+
+    public void setTranslation(double x, double y, double z) {
+        this.getWorldRenderer().setTranslation(x, y, z);
+    }
+
+    public void beginQuads() {
+        this.begin(7);
+    }
+
+    public void beginLines() {
+        this.begin(1);
+    }
+
+    public void begin(int mode) {
+        this.getWorldRenderer().begin(mode, DefaultVertexFormats.POSITION_COLOR);
+    }
+
+    public void draw() {
+        super.draw();
+    }
+
+    public void setDelta(double delta) {
+        this.delta = delta;
+    }
+
+    public static void setStaticDelta(double delta) {
+        GeometryTessellator.deltaS = delta;
+    }
+
+    public void drawCuboid(BlockPos pos, int sides, int argb) {
+        this.drawCuboid(pos, pos, sides, argb);
+    }
+
+    public void drawCuboid(BlockPos begin, BlockPos end, int sides, int argb) {
+        drawCuboid(this.getWorldRenderer(), begin, end, sides, argb, this.delta);
+    }
+
+    public static void drawCuboid(WorldRenderer worldRenderer, BlockPos pos, int sides, int argb) {
+        drawCuboid(worldRenderer, pos, pos, sides, argb);
+    }
+
+    public static void drawCuboid(WorldRenderer worldRenderer, BlockPos begin, BlockPos end, int sides, int argb) {
+        drawCuboid(worldRenderer, begin, end, sides, argb, GeometryTessellator.deltaS);
+    }
+
+    private static void drawCuboid(WorldRenderer worldRenderer, BlockPos begin, BlockPos end, int sides, int argb, double delta) {
+        if (worldRenderer.getDrawMode() != -1 && sides != 0) {
+            double x0 = (double) begin.getX() - delta;
+            double y0 = (double) begin.getY() - delta;
+            double z0 = (double) begin.getZ() - delta;
+            double x1 = (double) (end.getX() + 1) + delta;
+            double y1 = (double) (end.getY() + 1) + delta;
+            double z1 = (double) (end.getZ() + 1) + delta;
+
+            switch (worldRenderer.getDrawMode()) {
+            case 1:
+                drawLines(worldRenderer, x0, y0, z0, x1, y1, z1, sides, argb);
+                break;
+
+            case 7:
+                drawQuads(worldRenderer, x0, y0, z0, x1, y1, z1, sides, argb);
+                break;
+
+            default:
+                throw new IllegalStateException("Unsupported mode!");
+            }
+
+        }
+    }
+
+    public static void drawQuads(WorldRenderer worldRenderer, double x0, double y0, double z0, double x1, double y1, double z1, int sides, int argb) {
+        int a = argb >>> 24 & 255;
+        int r = argb >>> 16 & 255;
+        int g = argb >>> 8 & 255;
+        int b = argb & 255;
+
+        drawQuads(worldRenderer, x0, y0, z0, x1, y1, z1, sides, a, r, g, b);
+    }
+
+    public static void drawQuads(WorldRenderer worldRenderer, double x0, double y0, double z0, double x1, double y1, double z1, int sides, int a, int r, int g, int b) {
+        if ((sides & 1) != 0) {
+            worldRenderer.pos(x1, y0, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y0, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y0, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y0, z0).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 2) != 0) {
+            worldRenderer.pos(x1, y1, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y1, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y1, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y1, z1).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 4) != 0) {
+            worldRenderer.pos(x1, y0, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y0, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y1, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y1, z0).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 8) != 0) {
+            worldRenderer.pos(x0, y0, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y0, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y1, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y1, z1).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 16) != 0) {
+            worldRenderer.pos(x0, y0, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y0, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y1, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y1, z0).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 32) != 0) {
+            worldRenderer.pos(x1, y0, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y0, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y1, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y1, z1).color(r, g, b, a).endVertex();
+        }
+
+    }
+
+    public static void drawLines(WorldRenderer worldRenderer, double x0, double y0, double z0, double x1, double y1, double z1, int sides, int argb) {
+        int a = argb >>> 24 & 255;
+        int r = argb >>> 16 & 255;
+        int g = argb >>> 8 & 255;
+        int b = argb & 255;
+
+        drawLines(worldRenderer, x0, y0, z0, x1, y1, z1, sides, a, r, g, b);
+    }
+
+    public static void drawLines(WorldRenderer worldRenderer, double x0, double y0, double z0, double x1, double y1, double z1, int sides, int a, int r, int g, int b) {
+        if ((sides & 17) != 0) {
+            worldRenderer.pos(x0, y0, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y0, z1).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 18) != 0) {
+            worldRenderer.pos(x0, y1, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y1, z1).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 33) != 0) {
+            worldRenderer.pos(x1, y0, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y0, z1).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 34) != 0) {
+            worldRenderer.pos(x1, y1, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y1, z1).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 5) != 0) {
+            worldRenderer.pos(x0, y0, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y0, z0).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 6) != 0) {
+            worldRenderer.pos(x0, y1, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y1, z0).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 9) != 0) {
+            worldRenderer.pos(x0, y0, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y0, z1).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 10) != 0) {
+            worldRenderer.pos(x0, y1, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y1, z1).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 20) != 0) {
+            worldRenderer.pos(x0, y0, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y1, z0).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 36) != 0) {
+            worldRenderer.pos(x1, y0, z0).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y1, z0).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 24) != 0) {
+            worldRenderer.pos(x0, y0, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x0, y1, z1).color(r, g, b, a).endVertex();
+        }
+
+        if ((sides & 40) != 0) {
+            worldRenderer.pos(x1, y0, z1).color(r, g, b, a).endVertex();
+            worldRenderer.pos(x1, y1, z1).color(r, g, b, a).endVertex();
+        }
+
+    }
+}

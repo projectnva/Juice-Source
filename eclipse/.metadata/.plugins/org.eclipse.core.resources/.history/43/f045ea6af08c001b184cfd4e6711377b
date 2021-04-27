@@ -1,0 +1,78 @@
+package clientname.mods.impl.crosshair;
+
+import org.lwjgl.opengl.GL11;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+
+public class ModCrosshair {
+
+	private boolean enabled;
+    private RGBA colour;
+    private Crosshair.CrosshairType crosshairType;
+    private boolean visibleHiddenGui;
+    private boolean visibleDefault;
+    private boolean visibleDebug;
+    private boolean visibleSpectator;
+    private boolean visibleThirdPerson;
+    private boolean outline;
+    private RGBA colourOutline;
+    private boolean dot;
+    private RGBA colourDot;
+    private int width;
+    private int height;
+    private int gap;
+    private int thickness;
+    private int rotation;
+    private boolean highlightPassive;
+    private RGBA colourHighlightPassive;
+    private boolean highlightHostile;
+    private RGBA colourHighlightHostile;
+    private boolean highlightPlayer;
+    private RGBA colourHighlightPlayer;
+    private boolean dynamicBow;
+    private boolean rainbowCrosshair;
+    private int rainbowSpeed;
+    private int rainbowColourTick;
+    private Minecraft mc = Minecraft.getMinecraft();
+
+    public Crosshair() {
+        this.setCrosshairType(Crosshair.CrosshairType.CROSS);
+        this.setEnabled(true);
+        this.setColour(new RGBA(255, 255, 255, 255));
+        this.setVisibleDefault(true);
+        this.setVisibleHiddenGui(true);
+        this.setVisibleDebug(true);
+        this.setVisibleSpectator(true);
+        this.setVisibleThirdPerson(false);
+        this.setOutline(true);
+        this.setOutlineColour(new RGBA(0, 0, 0, 255));
+        this.setDot(false);
+        this.setDotColour(new RGBA(255, 255, 255, 255));
+        this.setWidth(5);
+        this.setHeight(5);
+        this.setGap(3);
+        this.setThickness(1);
+        this.setHighlightHostile(true);
+        this.setHighlightHostileColour(new RGBA(255, 0, 0, 255));
+        this.setHighlightPassive(true);
+        this.setHighlightPassiveColour(new RGBA(0, 255, 0, 255));
+        this.setHighlightPlayer(true);
+        this.setHighlightPlayerColour(new RGBA(0, 0, 255, 255));
+        this.setDynamicBow(true);
+        this.setRainbowCrosshair(false);
+        this.setRainbowSpeed(500);
+        this.rainbowColourTick = 0;
+    }
+	
+}

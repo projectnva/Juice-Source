@@ -1,0 +1,41 @@
+package com.github.lunatrius.schematica.api.event;
+
+import com.github.lunatrius.schematica.api.ISchematic;
+import java.util.Map;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.eventhandler.Event;
+
+public class PreSchematicSaveEvent extends Event {
+
+    private final Map mappings;
+    public final ISchematic schematic;
+    public final NBTTagCompound extendedMetadata;
+
+    /** @deprecated */
+    @Deprecated
+    public PreSchematicSaveEvent(Map mappings) {
+        this((ISchematic) null, mappings);
+    }
+
+    public PreSchematicSaveEvent(ISchematic schematic, Map mappings) {
+        this.schematic = schematic;
+        this.mappings = mappings;
+        this.extendedMetadata = new NBTTagCompound();
+    }
+
+    public boolean replaceMapping(String oldName, String newName) throws DuplicateMappingException {
+        if (this.mappings.containsKey(newName)) {
+            throw new DuplicateMappingException(String.format("Could not replace block type %s, the block type %s already exists in the schematic.", new Object[] { oldName, newName}));
+        } else {
+            Short id = (Short) this.mappings.get(oldName);
+
+            if (id != null) {
+                this.mappings.remove(oldName);
+                this.mappings.put(newName, id);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+}

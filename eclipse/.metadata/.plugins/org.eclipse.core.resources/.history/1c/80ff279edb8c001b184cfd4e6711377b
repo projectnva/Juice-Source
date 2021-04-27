@@ -1,0 +1,5 @@
+package clientname.http.gsonobjs;
+
+public class ObjectIsJuiceClient {
+
+}

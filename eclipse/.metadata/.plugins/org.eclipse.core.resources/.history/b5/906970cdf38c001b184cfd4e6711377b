@@ -1,0 +1,14 @@
+package clientname.mods.impl.crosshairmod.main;
+
+import clientname.mods.impl.crosshairmod.gui.GuiEditCrosshair;
+import net.minecraft.client.Minecraft;
+
+public class KeyInputHandler {
+
+    public void onKeyInput(KeyInputEvent event) {
+        if (CustomCrosshairMod.guiEditKeyBind.isPressed()) {
+            Minecraft.getMinecraft().displayGuiScreen(new GuiEditCrosshair());
+        }
+
+    }
+}

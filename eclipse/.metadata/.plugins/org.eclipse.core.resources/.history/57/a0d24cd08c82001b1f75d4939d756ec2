@@ -1,0 +1,5 @@
+package clientname.module;
+
+public enum Category {
+
+}

@@ -1,0 +1,16 @@
+package com.github.lunatrius.schematica.command;
+
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayerMP;
+
+public abstract class CommandSchematicaBase extends CommandBase {
+
+    public int getRequiredPermissionLevel() {
+        return 0;
+    }
+
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return super.canCommandSenderUseCommand(sender) || sender instanceof EntityPlayerMP && this.getRequiredPermissionLevel() <= 0;
+    }
+}

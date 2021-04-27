@@ -1,0 +1,154 @@
+package clientname.mods;
+
+import java.io.File;
+
+import clientname.FileManager;
+import clientname.basicgui.HUDElementCategory;
+import clientname.gui.hud.IRenderer;
+import clientname.gui.hud.ScreenPosition;
+import net.minecraft.client.Minecraft;
+
+public class ModDraggable extends Mod implements IRenderer {
+
+	protected ScreenPosition pos;
+	
+	public ModDraggable() {
+		pos = loadPositionFromFile();
+	}
+	public String name, version;
+	public HUDElementCategory category;
+	
+	public boolean enabled, dragging;
+	
+	public int x, y, width , height, x2, y2;
+	
+	public ModDraggable(String name, String version, HUDElementCategory category) {
+		this.name = name;
+		this.version = version;
+		this.category = category;
+		onInit();
+	}
+	
+	public void toggle() {
+		enabled = !enabled;
+		if(enabled) {
+			onEnable();
+		}
+		else
+		{
+			onDisable();
+		}
+	}
+	
+	public void renderOnHUDConfiger() {
+		
+	}
+	
+	public void onEnable() {
+		
+	}
+	
+	public void onDisable() {
+			
+	}
+	
+	private void onInit() {
+		
+	}
+	
+	public void draw() {
+			
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public HUDElementCategory getCategory() {
+		return category;
+	}
+
+	public void setCategory(HUDElementCategory category) {
+		this.category = category;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+	
+	@Override
+	public ScreenPosition load() {
+		return pos;
+	}
+	
+	@Override
+	public void save(ScreenPosition pos) {
+		this.pos = pos;
+		savePositionToFile();
+	}
+	
+	private File getFolder() {
+		File folder = new File(FileManager.getModsDirectory(), this.getClass().getSimpleName());
+		folder.mkdirs();
+		return folder;
+	}
+
+	private void savePositionToFile() {
+		FileManager.writeJsonToFile(new File(getFolder(), "pos.json"), pos);
+	}
+	
+	private ScreenPosition loadPositionFromFile() {
+		ScreenPosition loaded = FileManager.readFromJson(new File(getFolder(), "pos.json"), ScreenPosition.class);
+		
+		if(loaded == null) {
+			loaded = ScreenPosition.fromRelativePosition(0.5, 0.5);
+			this.pos = loaded;
+			savePositionToFile();
+		}
+		
+		return loaded;
+	}
+	
+	public final int getLineOffset(ScreenPosition pos, int lineNum) {
+		return pos.getAbsoluteY() + getLineOffset(lineNum);
+	}
+	
+	private int getLineOffset(int lineNum) {
+		return (font.FONT_HEIGHT + 3) * lineNum;
+	}
+
+	@Override
+	public int getWidth() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getHeight() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void render(ScreenPosition pos) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+}

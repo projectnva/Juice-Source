@@ -1,0 +1,27 @@
+package com.github.lunatrius.schematica.client.renderer;
+
+import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.proxy.ClientProxy;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.client.renderer.RegionRenderCache;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+
+public class SchematicRenderCache extends RegionRenderCache {
+
+    private final Minecraft minecraft = Minecraft.getMinecraft();
+
+    public SchematicRenderCache(World world, BlockPos from, BlockPos to, int subtract) {
+        super(world, from, to, subtract);
+    }
+
+    public IBlockState getBlockState(BlockPos pos) {
+        BlockPos realPos = pos.add(ClientProxy.schematic.position);
+        WorldClient world = this.minecraft.theWorld;
+
+        return !world.isAirBlock(realPos) && !ConfigurationHandler.isExtraAirBlock(world.getBlockState(realPos).getBlock()) ? Blocks.air.getDefaultState() : super.getBlockState(pos);
+    }
+}

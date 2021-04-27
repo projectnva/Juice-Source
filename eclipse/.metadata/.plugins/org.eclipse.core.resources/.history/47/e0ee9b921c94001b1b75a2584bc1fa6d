@@ -1,0 +1,26 @@
+package me.aycy.blockoverlay;
+
+import java.io.File;
+import me.aycy.blockoverlay.commands.CommandBlockOverlay;
+import me.aycy.blockoverlay.config.Config;
+import me.aycy.blockoverlay.renderer.RendererBlockOverlay;
+import net.minecraft.client.Minecraft;
+import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+
+public class BlockOverlay {
+
+    public static final Minecraft mc = Minecraft.getMinecraft();
+    public static final BlockOverlay instance = new BlockOverlay();
+    public static final Config config = new Config(new File(Loader.instance().getConfigDir(), "blockOverlay.cfg"));
+
+    @EventHandler
+    public void onInit(FMLInitializationEvent event) {
+        MinecraftForge.EVENT_BUS.register(new RendererBlockOverlay());
+        ClientCommandHandler.instance.registerCommand(new CommandBlockOverlay());
+    }
+}

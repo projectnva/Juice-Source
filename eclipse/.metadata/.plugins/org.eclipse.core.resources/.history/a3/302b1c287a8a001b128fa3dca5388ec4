@@ -1,0 +1,7 @@
+package clientname.module;
+
+public class ModuleManager {
+
+	public CopyOnWriteArrayList<Module> modules = new CopyOnWriteArrayList<>();
+	
+}

@@ -1,0 +1,187 @@
+package com.github.lunatrius.schematica.world.storage;
+
+import com.github.lunatrius.schematica.api.ISchematic;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import net.minecraftforge.fml.common.registry.GameData;
+
+public class Schematic implements ISchematic {
+
+    private static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.grass);
+    private static final FMLControlledNamespacedRegistry BLOCK_REGISTRY = GameData.getBlockRegistry();
+    private ItemStack icon;
+    private final short[][][] blocks;
+    private final byte[][][] metadata;
+    private final List tileEntities = new ArrayList();
+    private final List entities = new ArrayList();
+    private final int width;
+    private final int height;
+    private final int length;
+
+    public Schematic(ItemStack icon, int width, int height, int length) {
+        this.icon = icon;
+        this.blocks = new short[width][height][length];
+        this.metadata = new byte[width][height][length];
+        this.width = width;
+        this.height = height;
+        this.length = length;
+    }
+
+    public IBlockState getBlockState(BlockPos pos) {
+        if (!this.isValid(pos)) {
+            return Blocks.air.getDefaultState();
+        } else {
+            int x = pos.getX();
+            int y = pos.getY();
+            int z = pos.getZ();
+            Block block = (Block) Schematic.BLOCK_REGISTRY.getObjectById(this.blocks[x][y][z]);
+
+            return block.getStateFromMeta(this.metadata[x][y][z]);
+        }
+    }
+
+    public boolean setBlockState(BlockPos pos, IBlockState blockState) {
+        if (!this.isValid(pos)) {
+            return false;
+        } else {
+            Block block = blockState.getBlock();
+            int id = Schematic.BLOCK_REGISTRY.getId(block);
+
+            if (id == -1) {
+                return false;
+            } else {
+                int meta = block.getMetaFromState(blockState);
+                int x = pos.getX();
+                int y = pos.getY();
+                int z = pos.getZ();
+
+                this.blocks[x][y][z] = (short) id;
+                this.metadata[x][y][z] = (byte) meta;
+                return true;
+            }
+        }
+    }
+
+    public TileEntity getTileEntity(BlockPos pos) {
+        Iterator iterator = this.tileEntities.iterator();
+
+        TileEntity tileEntity;
+
+        do {
+            if (!iterator.hasNext()) {
+                return null;
+            }
+
+            tileEntity = (TileEntity) iterator.next();
+        } while (!tileEntity.getPos().equals(pos));
+
+        return tileEntity;
+    }
+
+    public List getTileEntities() {
+        return this.tileEntities;
+    }
+
+    public void setTileEntity(BlockPos pos, TileEntity tileEntity) {
+        if (this.isValid(pos)) {
+            this.removeTileEntity(pos);
+            if (tileEntity != null) {
+                this.tileEntities.add(tileEntity);
+            }
+
+        }
+    }
+
+    public void removeTileEntity(BlockPos pos) {
+        Iterator iterator = this.tileEntities.iterator();
+
+        while (iterator.hasNext()) {
+            TileEntity tileEntity = (TileEntity) iterator.next();
+
+            if (tileEntity.getPos().equals(pos)) {
+                iterator.remove();
+            }
+        }
+
+    }
+
+    public List getEntities() {
+        return this.entities;
+    }
+
+    public void addEntity(Entity entity) {
+        if (entity != null && entity.getUniqueID() != null && !(entity instanceof EntityPlayer)) {
+            Iterator iterator = this.entities.iterator();
+
+            Entity e;
+
+            do {
+                if (!iterator.hasNext()) {
+                    this.entities.add(entity);
+                    return;
+                }
+
+                e = (Entity) iterator.next();
+            } while (!entity.getUniqueID().equals(e.getUniqueID()));
+
+        }
+    }
+
+    public void removeEntity(Entity entity) {
+        if (entity != null && entity.getUniqueID() != null) {
+            Iterator iterator = this.entities.iterator();
+
+            while (iterator.hasNext()) {
+                Entity e = (Entity) iterator.next();
+
+                if (entity.getUniqueID().equals(e.getUniqueID())) {
+                    iterator.remove();
+                }
+            }
+
+        }
+    }
+
+    public ItemStack getIcon() {
+        return this.icon;
+    }
+
+    public void setIcon(ItemStack icon) {
+        if (icon != null) {
+            this.icon = icon;
+        } else {
+            this.icon = Schematic.DEFAULT_ICON.copy();
+        }
+
+    }
+
+    public int getWidth() {
+        return this.width;
+    }
+
+    public int getLength() {
+        return this.length;
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
+
+    private boolean isValid(BlockPos pos) {
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+
+        return x >= 0 && y >= 0 && z >= 0 && x < this.width && y < this.height && z < this.length;
+    }
+}

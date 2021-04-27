@@ -1,0 +1,29 @@
+package juiceclient.server.packets;
+
+import java.io.IOException;
+
+import net.minecraft.server.v1_8_R3.Packet;
+import net.minecraft.server.v1_8_R3.PacketDataSerializer;
+import net.minecraft.server.v1_8_R3.PacketListener;
+
+public class ECPacket implements Packet{
+
+	@Override
+	public void a(PacketDataSerializer arg0) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void a(PacketListener arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void b(PacketDataSerializer arg0) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

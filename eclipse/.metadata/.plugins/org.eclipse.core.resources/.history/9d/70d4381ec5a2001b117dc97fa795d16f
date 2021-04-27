@@ -1,0 +1,111 @@
+package clientname.gui.clickgui.monsoon.newgui.component;
+
+
+import java.awt.Color;
+
+import clientname.gui.clickgui.monsoon.newgui.ClickGUI;
+import clientname.gui.clickgui.monsoon.newgui.setting.SettingGUI;
+import clientname.mods.ModDraggable;
+import clientname.util.render.ColorMode;
+import clientname.util.render.DrawUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.ScaledResolution;
+
+public class ModComponent {
+	
+	Minecraft mc = Minecraft.getMinecraft();
+	FontRenderer font = mc.fontRendererObj;
+	ModDraggable mod;
+	ClickGUI parent;
+	ScaledResolution sr = new ScaledResolution(mc, 0, 0);
+	
+	int x, y;
+	public static int buttonX;
+	public static int buttonY;
+	public static int buttonW;
+	public static int buttonH;
+	public static int buttonId;
+	
+	public ModComponent(ModDraggable mod, int mouseX, int mouseY, int x, int y, ClickGUI parent) {
+		this.mod = mod;
+		this.x = x;
+		this.y = y;
+		this.buttonX = x + 130;
+		this.buttonY = y;
+		this.buttonW = buttonX + 40;
+		this.buttonH = y + 45;
+		this.parent = parent;
+	}
+	
+	public ModComponent() {
+		
+	}
+	
+	public void draw(int mouseX, int mouseY) {
+		DrawUtil.drawBorderedRoundedRect(x, y, x + getWidth(), y + getHeight(), 10, 1, getWearingColor(mod), ColorMode.getModColor()); // 0, 0, 0, 255
+		//Gui.drawRect(buttonX, buttonY, buttonW, buttonH, getWearingColor(mod));
+		font.drawString(mod.name, x + 7, y + 7, -1);
+		font.drawString(getWearingString(mod), x + 7, y + 23, getWearingColor(mod));
+		
+		//drawToolTip(mouseX, mouseY, mod);
+	}
+	
+	private void drawToolTip(int mouseX, int mouseY, ModDraggable mod) {
+		int newX = 3;
+		int newY = sr.getScaledHeight() - 13;
+		if(mouseX >= x && mouseX <= x + 90 && mouseY >= y && mouseY <= y + 45) {
+			Gui.drawRect(newX, newY, newX + font.getStringWidth(mod.description), newY + font.FONT_HEIGHT + 2, new Color(0, 0, 0, 255).getRGB());
+			font.drawString(mod.description, newX + 1, newY + 1, -1);
+		}
+	}
+	
+	private int getWidth() {
+		if(mc.gameSettings.guiScale == 2) {
+			return 90;
+		}
+		if(mc.gameSettings.guiScale == 3) {
+			return 63;
+		}
+		return 0;
+	}
+	private int getHeight() {
+		if(mc.gameSettings.guiScale == 2) {
+			return 45;
+		}
+		if(mc.gameSettings.guiScale == 3) {
+			return 40;
+		}
+		return 0;
+	}
+	
+	private String getWearingString(ModDraggable m) {
+		if(m.isEnabled) {
+			return "Enabled";
+		} else {
+			return "Disabled";
+		}
+	}
+	
+	private int getWearingColor(ModDraggable m) {
+		if(m.isEnabled) {
+			return new Color(0, 255, 0, 255).getRGB();
+		} else {
+			 return new Color(255, 0, 0, 255).getRGB();
+		}
+	}
+	
+	public void onClick(int mouseX, int mouseY, int button) {
+	if(mouseX >= x && mouseX <= x + getWidth() && mouseY >= y && mouseY <= y + getHeight()) {
+		if(button == 0) {
+			mod.toggle();
+			System.out.println(mod.name + " toggled");
+		}
+		if(button == 1) {
+			mc.displayGuiScreen(new SettingGUI(mod));
+			System.out.println(mod.name + " settings");
+		}
+		}
+	}
+}

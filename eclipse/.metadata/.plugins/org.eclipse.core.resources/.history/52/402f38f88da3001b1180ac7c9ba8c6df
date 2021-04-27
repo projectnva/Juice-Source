@@ -1,0 +1,33 @@
+package clientname.basicgui;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import clientname.basicgui.elements.*;
+
+public class HUD {
+
+	public List<HUDElement> elements = new ArrayList<HUDElement>();
+	
+	public HUD() {
+		addElement(new FPS());
+		addElement(new Coords());
+	}
+	
+	public void draw() {
+		for(HUDElement element : elements) {
+			if(element.isEnabled()) {
+				element.draw();
+			}
+		}
+	}
+	
+	public List<HUDElement> getElements() {
+		return elements;
+	}
+	
+	public void addElement(HUDElement element) {
+		System.out.println("Registered new Element: " + element.getName());
+		elements.add(element);
+	}
+}

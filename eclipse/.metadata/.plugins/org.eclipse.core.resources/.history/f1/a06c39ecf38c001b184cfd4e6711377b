@@ -1,0 +1,103 @@
+package sparkless101.crosshairmod.gui.items;
+
+import net.minecraft.client.gui.GuiScreen;
+import sparkless101.crosshairmod.utils.GuiGraphics;
+
+public class Scrollbar extends GuiItem {
+
+    private int contentHeight;
+    private boolean mouseDown;
+    private int boxPosition;
+    private int boxHeight;
+    private int offset;
+    private int value;
+    private int minValue;
+    private int maxValue;
+
+    public Scrollbar(GuiScreen screen, int id, int x, int y, int width, int height, int cHeight) {
+        super(screen, id, "", x, y, width, height);
+        this.contentHeight = cHeight;
+        this.boxPosition = 0;
+        this.boxHeight = 30;
+        this.minValue = 0;
+        this.maxValue = Math.abs(this.contentHeight - this.getHeight());
+    }
+
+    public void drawItem(int mouseX, int mouseY) {
+        if (this.contentHeight > this.getHeight()) {
+            int y = this.getPosY() + this.boxPosition;
+
+            if (this.mouseDown) {
+                y = mouseY - this.offset;
+                if (y < this.getPosY()) {
+                    y = this.getPosY();
+                }
+
+                if (y > this.getPosY() + this.getHeight() - this.boxHeight) {
+                    y = this.getPosY() + this.getHeight() - this.boxHeight;
+                }
+
+                this.setCurrentPosition(y - this.getPosY());
+            }
+
+            GuiGraphics.drawThemeBorderedRectangle(this.getPosX(), this.getPosY(), this.getPosX() + this.getWidth(), this.getPosY() + this.getHeight());
+            GuiGraphics.drawThemeBorderedRectangle(this.getPosX(), this.getPosY() + this.boxPosition, this.getPosX() + this.getWidth(), this.getPosY() + this.boxPosition + this.boxHeight);
+        }
+    }
+
+    public void mouseClicked(int mouseX, int mouseY) {
+        if (this.contentHeight > this.getHeight()) {
+            if (this.isMouseOverBox(mouseX, mouseY)) {
+                this.mouseDown = true;
+                this.offset = mouseY - (this.getPosY() + this.boxPosition);
+            }
+
+        }
+    }
+
+    public void mouseReleased(int mouseX, int mouseY) {
+        this.mouseDown = false;
+    }
+
+    private boolean isMouseOverBox(int mouseX, int mouseY) {
+        return mouseX >= this.getPosX() && mouseX <= this.getPosX() + this.getWidth() && mouseY >= this.getPosY() + this.boxPosition && mouseY <= this.getPosY() + this.boxPosition + this.boxHeight;
+    }
+
+    private void setCurrentPosition(int x) {
+        if (this.contentHeight > this.getHeight()) {
+            this.boxPosition = x;
+            this.value = (int) ((float) this.minValue + (float) this.boxPosition / (float) (this.getHeight() - this.boxHeight) * (float) (this.maxValue - this.minValue));
+        }
+    }
+
+    public void setValue(int newValue) {
+        if (this.contentHeight > this.getHeight()) {
+            this.value = newValue;
+            if (this.value < this.minValue) {
+                this.value = this.minValue;
+            }
+
+            if (this.value > this.maxValue) {
+                this.value = this.maxValue;
+            }
+
+            this.boxPosition = (this.getHeight() - this.boxHeight) * (this.value - this.minValue) / (this.maxValue - this.minValue);
+        }
+    }
+
+    public int getValue() {
+        return this.value;
+    }
+
+    public int getMinValue() {
+        return this.minValue;
+    }
+
+    public int getMaxValue() {
+        return this.maxValue;
+    }
+
+    public boolean isMouseDown() {
+        return this.mouseDown;
+    }
+}

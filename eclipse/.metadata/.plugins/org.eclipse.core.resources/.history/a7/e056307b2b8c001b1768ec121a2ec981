@@ -1,0 +1,85 @@
+package com.github.lunatrius.schematica.command;
+
+import com.github.lunatrius.core.util.FileUtils;
+import com.github.lunatrius.schematica.Schematica;
+import com.github.lunatrius.schematica.reference.Reference;
+import com.google.common.base.Charsets;
+import com.google.common.hash.Hashing;
+import java.io.File;
+import java.util.Arrays;
+import joptsimple.internal.Strings;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.event.ClickEvent.Action;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
+
+public class CommandSchematicaRemove extends CommandSchematicaBase {
+
+    public String getCommandName() {
+        return "schematicaRemove";
+    }
+
+    public String getCommandUsage(ICommandSender sender) {
+        return "schematica.command.remove.usage";
+    }
+
+    public void processCommand(ICommandSender sender, String[] arguments) throws CommandException {
+        if (arguments.length < 1) {
+            throw new WrongUsageException(this.getCommandUsage(sender), new Object[0]);
+        } else if (!(sender instanceof EntityPlayer)) {
+            throw new CommandException("schematica.command.save.playersOnly", new Object[0]);
+        } else {
+            EntityPlayer player = (EntityPlayer) sender;
+            boolean delete = false;
+            String name = Strings.join(arguments, " ");
+            String filename;
+
+            if (arguments.length > 1) {
+                filename = arguments[arguments.length - 1];
+                if (filename.length() == 32) {
+                    String[] schematicDirectory = (String[]) Arrays.copyOfRange(arguments, 0, arguments.length - 1);
+
+                    name = Strings.join(schematicDirectory, " ");
+                    String file = Hashing.md5().hashString(name, Charsets.UTF_8).toString();
+
+                    if (filename.equals(file)) {
+                        delete = true;
+                    }
+                }
+            }
+
+            filename = String.format("%s.schematic", new Object[] { name});
+            File schematicDirectory1 = Schematica.proxy.getPlayerSchematicDirectory(player, true);
+            File file1 = new File(schematicDirectory1, filename);
+
+            if (!FileUtils.contains(schematicDirectory1, file1)) {
+                Reference.logger.error("{} has tried to download the file {}", new Object[] { player.getName(), filename});
+                throw new CommandException("schematica.command.remove.schematicNotFound", new Object[0]);
+            } else if (file1.exists()) {
+                if (delete) {
+                    if (!file1.delete()) {
+                        throw new CommandException("schematica.command.remove.schematicNotFound", new Object[0]);
+                    }
+
+                    sender.addChatMessage(new ChatComponentTranslation("schematica.command.remove.schematicRemoved", new Object[] { name}));
+                } else {
+                    String hash = Hashing.md5().hashString(name, Charsets.UTF_8).toString();
+                    String confirmCommand = String.format("/%s %s %s", new Object[] { "schematicaRemove", name, hash});
+                    IChatComponent chatComponent = (new ChatComponentTranslation("schematica.command.remove.areYouSure", new Object[] { name})).appendSibling(new ChatComponentText(" [")).appendSibling((new ChatComponentTranslation("gui.yes", new Object[0])).setChatStyle((new ChatStyle()).setColor(EnumChatFormatting.RED).setChatClickEvent(new ClickEvent(Action.RUN_COMMAND, confirmCommand)))).appendSibling(new ChatComponentText("]"));
+
+                    sender.addChatMessage(chatComponent);
+                }
+
+            } else {
+                throw new CommandException("schematica.command.remove.schematicNotFound", new Object[0]);
+            }
+        }
+    }
+}

@@ -1,0 +1,9 @@
+package clientname.basicgui;
+
+public class HUD {
+
+	private void draw() {
+		
+	}
+	
+}

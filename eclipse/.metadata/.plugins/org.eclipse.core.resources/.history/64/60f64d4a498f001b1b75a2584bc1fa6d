@@ -1,0 +1,9 @@
+package clientname.mods.impl;
+
+import clientname.mods.ModDraggable;
+
+public class ModProtest extends ModDraggable{
+
+	
+	
+}

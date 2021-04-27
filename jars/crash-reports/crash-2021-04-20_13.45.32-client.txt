@@ -1,0 +1,115 @@
+---- Minecraft Crash Report ----
+// You should try our sister game, Minceraft!
+
+Time: 20/04/21 1:45 PM
+Description: Updating screen events
+
+java.lang.ExceptionInInitializerError
+	at java.lang.J9VMInternals.ensureError(J9VMInternals.java:147)
+	at java.lang.J9VMInternals.recordInitializationFailure(J9VMInternals.java:136)
+	at net.minecraft.client.gui.GuiIngameMenu.actionPerformed(GuiIngameMenu.java:94)
+	at net.minecraft.client.gui.GuiScreen.mouseClicked(GuiScreen.java:507)
+	at net.minecraft.client.gui.GuiScreen.handleMouseInput(GuiScreen.java:603)
+	at net.minecraft.client.gui.GuiScreen.handleInput(GuiScreen.java:572)
+	at net.minecraft.client.Minecraft.runTick(Minecraft.java:1795)
+	at net.minecraft.client.Minecraft.runGameLoop(Minecraft.java:1122)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:429)
+	at net.minecraft.client.main.Main.main(Main.java:113)
+	at Start.main(Start.java:11)
+Caused by: java.lang.NullPointerException
+	at clientname.mods.ModInstances.lambda$0(ModInstances.java:94)
+	at clientname.mods.ModInstances$$Lambda$14/000000000000000000.test(Unknown Source)
+	at java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:174)
+	at java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1384)
+	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:497)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:487)
+	at java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:708)
+	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:241)
+	at java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:566)
+	at clientname.mods.ModInstances.getModsByCategory(ModInstances.java:94)
+	at clientname.gui.clickgui.monsoon.MonsoonClickGUI.<init>(MonsoonClickGUI.java:87)
+	at clientname.gui.clickgui.monsoon.MonsoonClickGUI.<clinit>(MonsoonClickGUI.java:41)
+	... 9 more
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Stacktrace:
+	at java.lang.J9VMInternals.ensureError(J9VMInternals.java:147)
+	at java.lang.J9VMInternals.recordInitializationFailure(J9VMInternals.java:136)
+	at net.minecraft.client.gui.GuiIngameMenu.actionPerformed(GuiIngameMenu.java:94)
+	at net.minecraft.client.gui.GuiScreen.mouseClicked(GuiScreen.java:507)
+	at net.minecraft.client.gui.GuiScreen.handleMouseInput(GuiScreen.java:603)
+	at net.minecraft.client.gui.GuiScreen.handleInput(GuiScreen.java:572)
+
+-- Affected screen --
+Details:
+	Screen name: net.minecraft.client.gui.GuiIngameMenu
+
+-- Affected level --
+Details:
+	Level name: MpServer
+	All players: 1 total; [EntityPlayerSP['Pedophilles'/34, l='MpServer', x=-701.29, y=67.00, z=935.56]]
+	Chunk stats: MultiplayerChunkCache: 289, 289
+	Level seed: 0
+	Level generator: ID 00 - default, ver 1. Features enabled: false
+	Level generator options: 
+	Level spawn location: 8.00,64.00,140.00 - World: (8,64,140), Chunk: (at 8,4,12 in 0,8; contains blocks 0,0,128 to 15,255,143), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,0,0 to 511,255,511)
+	Level time: 75964 game time, 43527 day time
+	Level dimension: 0
+	Level storage version: 0x00000 - Unknown?
+	Level weather: Rain time: 0 (now: false), thunder time: 0 (now: false)
+	Level game mode: Game mode: creative (ID 1). Hardcore: false. Cheats: false
+	Forced entities: 102 total; [EntityCreeper['Creeper'/256, l='MpServer', x=-635.47, y=26.00, z=950.06], EntityZombie['Zombie'/257, l='MpServer', x=-638.94, y=54.00, z=951.53], EntityCow['Cow'/258, l='MpServer', x=-636.47, y=65.00, z=965.53], EntityHorse['Horse'/259, l='MpServer', x=-630.94, y=69.00, z=985.91], EntityHorse['Horse'/260, l='MpServer', x=-638.34, y=64.00, z=999.06], EntityHorse['Horse'/261, l='MpServer', x=-639.63, y=64.00, z=997.97], EntityHorse['Horse'/271, l='MpServer', x=-631.00, y=65.00, z=1001.72], EntityPlayerSP['Pedophilles'/34, l='MpServer', x=-701.29, y=67.00, z=935.56], EntityZombie['Zombie'/113, l='MpServer', x=-779.16, y=72.00, z=945.31], EntityCreeper['Creeper'/115, l='MpServer', x=-781.50, y=72.00, z=937.50], EntitySpider['Spider'/116, l='MpServer', x=-769.13, y=71.00, z=958.59], EntitySpider['Spider'/117, l='MpServer', x=-777.50, y=72.00, z=946.50], EntitySpider['Spider'/118, l='MpServer', x=-776.22, y=70.00, z=969.13], EntityWitch['Witch'/119, l='MpServer', x=-777.72, y=70.00, z=969.28], EntityWitch['Witch'/120, l='MpServer', x=-775.03, y=70.00, z=971.28], EntityZombie['Zombie'/122, l='MpServer', x=-770.50, y=59.00, z=1003.50], EntityBat['Bat'/123, l='MpServer', x=-774.25, y=58.28, z=1009.53], EntityZombie['Zombie'/124, l='MpServer', x=-774.50, y=70.00, z=1003.50], EntitySpider['Spider'/125, l='MpServer', x=-771.50, y=59.00, z=1011.50], EntityItem['item.tile.dirt.default'/128, l='MpServer', x=-765.47, y=73.00, z=878.41], EntityItem['item.tile.dirt.default'/130, l='MpServer', x=-764.13, y=75.00, z=877.13], EntityItem['item.tile.flower2.poppy'/131, l='MpServer', x=-763.84, y=77.00, z=878.09], EntityChicken['Chicken'/134, l='MpServer', x=-760.75, y=72.00, z=889.19], EntityItem['item.tile.dirt.default'/135, l='MpServer', x=-764.47, y=73.00, z=880.78], EntityItem['item.tile.dirt.default'/136, l='MpServer', x=-764.44, y=73.00, z=887.38], EntityItem['item.tile.dirt.default'/137, l='MpServer', x=-763.66, y=73.00, z=886.88], EntityItem['item.tile.stonebrick'/139, l='MpServer', x=-765.13, y=72.00, z=886.25], EntityItem['item.item.egg'/141, l='MpServer', x=-759.22, y=69.00, z=893.16], EntityCreeper['Creeper'/142, l='MpServer', x=-765.50, y=70.00, z=907.50], EntityCow['Cow'/143, l='MpServer', x=-754.22, y=69.00, z=916.28], EntityCow['Cow'/144, l='MpServer', x=-753.13, y=69.00, z=928.00], EntityBat['Bat'/145, l='MpServer', x=-770.44, y=23.41, z=973.91], EntityCreeper['Creeper'/146, l='MpServer', x=-761.50, y=70.00, z=971.50], EntitySkeleton['Skeleton'/147, l='MpServer', x=-754.50, y=69.00, z=989.50], EntitySkeleton['Skeleton'/148, l='MpServer', x=-757.72, y=68.00, z=993.50], EntityChicken['Chicken'/154, l='MpServer', x=-739.38, y=70.00, z=866.44], EntityCow['Cow'/155, l='MpServer', x=-736.94, y=69.00, z=897.97], EntityBat['Bat'/156, l='MpServer', x=-744.88, y=30.84, z=993.44], EntityCreeper['Creeper'/157, l='MpServer', x=-738.50, y=70.00, z=998.50], EntityCreeper['Creeper'/158, l='MpServer', x=-742.50, y=70.00, z=998.50], EntitySpider['Spider'/159, l='MpServer', x=-738.31, y=63.09, z=1002.69], EntitySkeleton['Skeleton'/162, l='MpServer', x=-725.88, y=71.00, z=892.69], EntityZombie['Zombie'/163, l='MpServer', x=-723.50, y=66.00, z=966.50], EntityZombie['Zombie'/164, l='MpServer', x=-727.50, y=66.00, z=963.50], EntitySkeleton['Skeleton'/165, l='MpServer', x=-712.31, y=64.00, z=972.13], EntityBat['Bat'/166, l='MpServer', x=-734.09, y=38.00, z=980.28], EntityCow['Cow'/167, l='MpServer', x=-735.00, y=70.00, z=983.94], EntityPig['Pig'/168, l='MpServer', x=-735.69, y=70.00, z=982.75], EntitySkeleton['Skeleton'/169, l='MpServer', x=-733.69, y=60.00, z=998.34], EntityCow['Cow'/170, l='MpServer', x=-713.22, y=65.00, z=988.88], EntityCow['Cow'/176, l='MpServer', x=-704.34, y=63.00, z=895.25], EntityBat['Bat'/177, l='MpServer', x=-686.81, y=40.31, z=974.21], EntityBat['Bat'/178, l='MpServer', x=-700.74, y=46.32, z=970.82], EntityBat['Bat'/179, l='MpServer', x=-703.58, y=48.42, z=967.61], EntityCow['Cow'/180, l='MpServer', x=-708.13, y=64.00, z=977.91], EntityRabbit['Rabbit'/181, l='MpServer', x=-708.22, y=64.00, z=995.25], EntityPig['Pig'/182, l='MpServer', x=-711.41, y=66.00, z=1007.84], EntityCow['Cow'/183, l='MpServer', x=-712.00, y=64.00, z=1015.91], EntityCow['Cow'/185, l='MpServer', x=-691.28, y=65.10, z=901.56], EntitySheep['Sheep'/186, l='MpServer', x=-692.97, y=66.00, z=952.88], EntityXPOrb['Experience Orb'/698, l='MpServer', x=-805.72, y=58.00, z=1064.69], EntityPig['Pig'/187, l='MpServer', x=-692.06, y=64.00, z=974.00], EntityXPOrb['Experience Orb'/699, l='MpServer', x=-803.25, y=56.00, z=1068.16], EntityBat['Bat'/188, l='MpServer', x=-699.91, y=30.22, z=997.69], EntityRabbit['Rabbit'/189, l='MpServer', x=-693.38, y=64.00, z=1013.66], EntityItem['item.tile.dirt.default'/192, l='MpServer', x=-682.56, y=62.00, z=908.84], EntityItem['item.tile.dirt.default'/194, l='MpServer', x=-680.78, y=62.00, z=910.66], EntityItem['item.tile.dirt.default'/203, l='MpServer', x=-685.31, y=63.00, z=896.97], EntityItem['item.tile.dirt.default'/204, l='MpServer', x=-686.50, y=63.00, z=896.69], EntityItem['item.tile.dirt.default'/205, l='MpServer', x=-687.78, y=62.00, z=900.00], EntityItem['item.tile.dirt.default'/206, l='MpServer', x=-685.13, y=62.00, z=899.94], EntityItem['item.tile.dirt.default'/207, l='MpServer', x=-686.56, y=62.00, z=900.53], EntityItem['item.tile.dirt.default'/208, l='MpServer', x=-686.59, y=62.00, z=899.53], EntityItem['item.tile.dirt.default'/209, l='MpServer', x=-687.34, y=62.00, z=898.75], EntityItem['item.tile.dirt.default'/210, l='MpServer', x=-686.97, y=63.00, z=901.53], EntityItem['item.tile.dirt.default'/211, l='MpServer', x=-686.91, y=63.00, z=902.50], EntityItem['item.tile.dirt.default'/212, l='MpServer', x=-686.13, y=63.00, z=902.88], EntityItem['item.tile.dirt.default'/217, l='MpServer', x=-680.28, y=66.00, z=906.09], EntityItem['item.tile.dirt.default'/222, l='MpServer', x=-687.13, y=64.00, z=903.88], EntityItem['item.tile.dirt.default'/223, l='MpServer', x=-686.53, y=65.00, z=903.28], EntityItem['item.tile.dirt.default'/224, l='MpServer', x=-682.38, y=66.00, z=900.38], EntityCreeper['Creeper'/225, l='MpServer', x=-678.47, y=64.00, z=949.66], EntityZombie['Zombie'/226, l='MpServer', x=-678.50, y=66.00, z=940.50], EntityCreeper['Creeper'/227, l='MpServer', x=-686.97, y=65.00, z=948.56], EntityPig['Pig'/228, l='MpServer', x=-686.94, y=63.00, z=976.31], EntityRabbit['Rabbit'/229, l='MpServer', x=-687.00, y=63.00, z=1013.28], EntityCow['Cow'/230, l='MpServer', x=-683.91, y=64.00, z=1008.81], EntitySheep['Sheep'/236, l='MpServer', x=-665.53, y=64.00, z=885.66], EntitySpider['Spider'/237, l='MpServer', x=-671.50, y=68.00, z=896.50], EntityBat['Bat'/238, l='MpServer', x=-664.44, y=63.10, z=929.75], EntityItem['item.item.bone'/239, l='MpServer', x=-667.31, y=26.00, z=956.41], EntityItem['item.item.arrow'/240, l='MpServer', x=-660.84, y=25.00, z=963.25], EntityCow['Cow'/241, l='MpServer', x=-670.88, y=65.00, z=964.66], EntitySkeleton['Skeleton'/244, l='MpServer', x=-649.50, y=64.00, z=939.50], EntityCow['Cow'/245, l='MpServer', x=-654.22, y=63.00, z=953.28], EntityCow['Cow'/246, l='MpServer', x=-644.66, y=64.00, z=959.38], EntitySpider['Spider'/247, l='MpServer', x=-654.38, y=37.09, z=973.69], EntityHorse['Horse'/248, l='MpServer', x=-640.63, y=64.00, z=998.03], EntityCreeper['Creeper'/252, l='MpServer', x=-636.00, y=34.00, z=924.38], EntitySkeleton['Skeleton'/253, l='MpServer', x=-638.72, y=34.00, z=925.69], EntityCreeper['Creeper'/254, l='MpServer', x=-639.50, y=27.00, z=950.50], EntityCreeper['Creeper'/255, l='MpServer', x=-638.50, y=27.00, z=944.50]]
+	Retry entities: 0 total; []
+	Server brand: vanilla
+	Server type: Integrated singleplayer server
+Stacktrace:
+	at net.minecraft.client.multiplayer.WorldClient.addWorldInfoToCrashReport(WorldClient.java:401)
+	at net.minecraft.client.Minecraft.addGraphicsAndWorldToCrashReport(Minecraft.java:2779)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:450)
+	at net.minecraft.client.main.Main.main(Main.java:113)
+	at Start.main(Start.java:11)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.8.8
+	Operating System: Windows 10 (amd64) version 10.0
+	CPU: 12x AMD Ryzen 5 3600X 6-Core Processor 
+	Java Version: 1.8.0_275, Eclipse OpenJ9
+	Java VM Version: Eclipse OpenJ9 VM (JRE 1.8.0 Windows 10 amd64-64-Bit Compressed References 20201112_897 (JIT enabled, AOT enabled)
+OpenJ9   - 0394ef754
+OMR      - 582366ae5
+JCL      - b52d2ff7ee based on jdk8u275-b01), Eclipse OpenJ9
+	Memory: 858813328 bytes (819 MB) / 1073741824 bytes (1024 MB) up to 1073741824 bytes (1024 MB)
+	JVM Flags: 6 total; -Xoptionsfile=C:\Program Files\AdoptOpenJDK\jdk-8.0.275.1-openj9\jre\bin\compressedrefs\options.default -Xlockword:mode=default,noLockword=java/lang/String,noLockword=java/util/MapEntry,noLockword=java/util/HashMap$Entry,noLockword=org/apache/harmony/luni/util/ModifiedMap$Entry,noLockword=java/util/Hashtable$Entry,noLockword=java/lang/invoke/MethodType,noLockword=java/lang/invoke/MethodHandle,noLockword=java/lang/invoke/CollectHandle,noLockword=java/lang/invoke/ConstructorHandle,noLockword=java/lang/invoke/ConvertHandle,noLockword=java/lang/invoke/ArgumentConversionHandle,noLockword=java/lang/invoke/AsTypeHandle,noLockword=java/lang/invoke/ExplicitCastHandle,noLockword=java/lang/invoke/FilterReturnHandle,noLockword=java/lang/invoke/DirectHandle,noLockword=java/lang/invoke/ReceiverBoundHandle,noLockword=java/lang/invoke/DynamicInvokerHandle,noLockword=java/lang/invoke/FieldHandle,noLockword=java/lang/invoke/FieldGetterHandle,noLockword=java/lang/invoke/FieldSetterHandle,noLockword=java/lang/invoke/StaticFieldGetterHandle,noLockword=java/lang/invoke/StaticFieldSetterHandle,noLockword=java/lang/invoke/IndirectHandle,noLockword=java/lang/invoke/InterfaceHandle,noLockword=java/lang/invoke/VirtualHandle,noLockword=java/lang/invoke/PrimitiveHandle,noLockword=java/lang/invoke/InvokeExactHandle,noLockword=java/lang/invoke/InvokeGenericHandle,noLockword=java/lang/invoke/VarargsCollectorHandle,noLockword=java/lang/invoke/ThunkTuple -Xjcl:jclse29 -Xincgc -Xmx1024M -Xms1024M
+	IntCache: cache: 0, tcache: 0, allocated: 12, tallocated: 94
+	Launched Version: mcp
+	LWJGL: 2.9.4
+	OpenGL: GeForce RTX 2070 SUPER/PCIe/SSE2 GL version 4.6.0 NVIDIA 457.09, NVIDIA Corporation
+	GL Caps: Using GL 1.3 multitexturing.
+Using GL 1.3 texture combiners.
+Using framebuffer objects because OpenGL 3.0 is supported and separate blending is supported.
+Shaders are available because OpenGL 2.1 is supported.
+VBOs are available because OpenGL 1.5 is supported.
+
+	Using VBOs: No
+	Is Modded: Very likely; Jar signature invalidated
+	Type: Client (map_client.txt)
+	Resource Packs: Jylio Default §l§e[V&P] 1.8.9.zip
+	Current Language: English (US)
+	Profiler Position: N/A (disabled)
+	CPU: 12x AMD Ryzen 5 3600X 6-Core Processor 
+	OptiFine Version: OptiFine_1.8.8_HD_U_H8
+	Render Distance Chunks: 8
+	Mipmaps: 4
+	Anisotropic Filtering: 1
+	Antialiasing: 0
+	Multitexture: false
+	Shaders: null
+	OpenGlVersion: 4.6.0 NVIDIA 457.09
+	OpenGlRenderer: GeForce RTX 2070 SUPER/PCIe/SSE2
+	OpenGlVendor: NVIDIA Corporation
+	CpuCount: 12

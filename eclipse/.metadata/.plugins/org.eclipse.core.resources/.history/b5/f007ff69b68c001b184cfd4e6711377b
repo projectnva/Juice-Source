@@ -1,0 +1,5 @@
+package clientname.module.modules;
+
+public class Coordinates {
+
+}

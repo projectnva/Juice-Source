@@ -1,0 +1,69 @@
+package clientname.module;
+
+import clientname.event.Event;
+
+public class Module {
+
+	private String name;
+	private int key;
+	private Category category;
+	private boolean enabled;
+	
+	public Module(String name, int key, Category cat) {
+		this.name = name;
+		this.key = key;
+		this.category = cat;
+		enabled = false;
+		setup();
+	}
+
+	public String getName() {
+		return name;
+	}
+	
+	public void onUpdate() {}
+	public void onEnable() {}
+	public void onDisable() {}
+	public void setup() {}
+
+	public void toggle() {
+		enabled = !enabled;
+		if(enabled) {
+			onEnable();
+		}
+		else {
+			onDisable();
+		}
+	}
+	
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public void onEvent(Event event) {
+    }
+
+	public int getKey() {
+		return key;
+	}
+
+	public void setKey(int key) {
+		this.key = key;
+	}
+
+	public Category getCategory() {
+		return category;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
+	}
+}

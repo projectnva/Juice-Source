@@ -1,0 +1,9 @@
+package clientname.module;
+
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class ModuleManager {
+
+	public CopyOnWriteArrayList<Module> modules = new CopyOnWriteArrayList<>();
+	
+}

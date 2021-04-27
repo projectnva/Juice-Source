@@ -1,0 +1,15 @@
+package clientname.gui.modmenu;
+
+import com.lukflug.panelstudio.settings.ColorSetting;
+import com.lukflug.panelstudio.settings.NumberSetting;
+
+public class CoolSettings {
+
+	public static ColorSetting activeColor;
+	public static ColorSetting inactiveColor;
+	public static ColorSetting backgroundColor;
+	public static ColorSetting outlineColor;
+	public static ColorSetting fontColor;
+	public static NumberSetting opacity;
+
+}

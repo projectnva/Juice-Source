@@ -1,0 +1,37 @@
+package dev.voyageclient.login;
+
+import java.util.ArrayList;
+
+public class Users {
+	
+	/*
+	 * Hi crackers!
+	 * Nice to know that you obsess over us
+	 * sooo much, that you want to view accounts.
+	 * That really sucks, you must be a terrible person.
+	 * Get the fuck out of my code NOW. 
+	 */
+	
+	public ArrayList<User> users = new ArrayList<User>();
+	
+	public ArrayList<User> getUsers() {
+		return users;
+	}
+
+	public void addUsers() {
+		users.add(new User("quickdaffy", "isVeryCool69", true, false, "fd3b6c9ce225d87b268d0e99130769fe", "quick#1000"));
+		users.add(new User("Flyable", "73dinrMvJ$%c", false, false, "92ef1ad0a8a9087a19717cfcf837a1b7", "😎Flyable😎#0001"));
+		users.add(new User("16moons1k", "Lenzixc@1", false, false, "50591dc8544e0dac2b88383b9aaee9e0", "Moons#7143"));
+		users.add(new User("Izzy", "U4lLi", false, false, "none", "IzzyBiz#4390"));
+		users.add(new User("Mark45", "Asduz", false, false, "none", "𝗠𝗮𝗿𝗸#6052"));
+		users.add(new User("Quaversal", "V8ogx", true, false, "none", "Quaversal#0001"));
+		users.add(new User("RepTyll", "WPNww", true, false, "none", "RepTyll#0001"));
+		users.add(new User("Hamood", "siQ3H", true, false, "none", "hamood#67501"));
+		users.add(new User("Ems", "wF0ND", true, false, "none", "Emily-May#5729"));
+		users.add(new User("ozhay", "fyxFP", true, false, "none", "ozhay#9703"));
+		users.add(new User("Weeble", "timetookok99", false, false, "01e81a127b2847ba6077c4dec3dc5896", "Weeble#7772"));
+		users.add(new User("Croacks", "Zep25081525", true, false, "f9b4852b47109d981c7fb85ea80731cf", "Croacks#1234"));
+		users.add(new User("w", "w", false, false, "false", "false"));
+	}
+
+}

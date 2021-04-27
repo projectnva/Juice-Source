@@ -1,0 +1,22 @@
+package com.github.lunatrius.schematica.client.renderer.chunk.container;
+
+import com.github.lunatrius.schematica.client.renderer.chunk.overlay.RenderOverlay;
+import com.google.common.collect.Lists;
+import java.util.List;
+import net.minecraft.client.renderer.ChunkRenderContainer;
+
+public abstract class SchematicChunkRenderContainer extends ChunkRenderContainer {
+
+    protected List renderOverlays = Lists.newArrayListWithCapacity(17424);
+
+    public void initialize(double viewEntityX, double viewEntityY, double viewEntityZ) {
+        super.initialize(viewEntityX, viewEntityY, viewEntityZ);
+        this.renderOverlays.clear();
+    }
+
+    public void addRenderOverlay(RenderOverlay renderOverlay) {
+        this.renderOverlays.add(renderOverlay);
+    }
+
+    public abstract void renderOverlay();
+}

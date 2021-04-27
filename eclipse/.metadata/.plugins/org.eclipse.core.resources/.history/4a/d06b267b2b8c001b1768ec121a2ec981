@@ -1,0 +1,210 @@
+package com.github.lunatrius.schematica.proxy;
+
+import com.github.lunatrius.core.util.MBlockPos;
+import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.command.CommandSchematicaList;
+import com.github.lunatrius.schematica.command.CommandSchematicaRemove;
+import com.github.lunatrius.schematica.command.CommandSchematicaSave;
+import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.handler.DownloadHandler;
+import com.github.lunatrius.schematica.handler.QueueTickHandler;
+import com.github.lunatrius.schematica.nbt.NBTConversionException;
+import com.github.lunatrius.schematica.nbt.NBTHelper;
+import com.github.lunatrius.schematica.network.PacketHandler;
+import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.chunk.SchematicContainer;
+import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
+import com.github.lunatrius.schematica.world.storage.Schematic;
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLInterModComms;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+
+public abstract class CommonProxy {
+
+    public boolean isSaveEnabled = true;
+    public boolean isLoadEnabled = true;
+
+    public void preInit(FMLPreInitializationEvent event) {
+        Reference.logger = event.getModLog();
+        ConfigurationHandler.init(event.getSuggestedConfigurationFile());
+        FMLInterModComms.sendMessage("LunatriusCore", "checkUpdate", "11.15.0.1661");
+    }
+
+    public void init(FMLInitializationEvent event) {
+        PacketHandler.init();
+        MinecraftForge.EVENT_BUS.register(QueueTickHandler.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(DownloadHandler.INSTANCE);
+    }
+
+    public void postInit(FMLPostInitializationEvent event) {}
+
+    public void serverStarting(FMLServerStartingEvent event) {
+        event.registerServerCommand(new CommandSchematicaSave());
+        event.registerServerCommand(new CommandSchematicaList());
+        event.registerServerCommand(new CommandSchematicaRemove());
+    }
+
+    public void createFolders() {
+        if (!ConfigurationHandler.schematicDirectory.exists() && !ConfigurationHandler.schematicDirectory.mkdirs()) {
+            Reference.logger.warn("Could not create schematic directory [{}]!", new Object[] { ConfigurationHandler.schematicDirectory.getAbsolutePath()});
+        }
+
+    }
+
+    public abstract File getDataDirectory();
+
+    public File getDirectory(String directory) {
+        File dataDirectory = this.getDataDirectory();
+        File subDirectory = new File(dataDirectory, directory);
+
+        if (!subDirectory.exists() && !subDirectory.mkdirs()) {
+            Reference.logger.error("Could not create directory [{}]!", new Object[] { subDirectory.getAbsolutePath()});
+        }
+
+        try {
+            return subDirectory.getCanonicalFile();
+        } catch (IOException ioexception) {
+            ioexception.printStackTrace();
+            return subDirectory;
+        }
+    }
+
+    public void resetSettings() {
+        this.isSaveEnabled = true;
+        this.isLoadEnabled = true;
+    }
+
+    public void unloadSchematic() {}
+
+    public void copyChunkToSchematic(ISchematic schematic, World world, int chunkX, int chunkZ, int minX, int maxX, int minY, int maxY, int minZ, int maxZ) {
+        MBlockPos pos = new MBlockPos();
+        MBlockPos localPos = new MBlockPos();
+        int localMinX = minX < chunkX << 4 ? 0 : minX & 15;
+        int localMaxX = maxX > (chunkX << 4) + 15 ? 15 : maxX & 15;
+        int localMinZ = minZ < chunkZ << 4 ? 0 : minZ & 15;
+        int localMaxZ = maxZ > (chunkZ << 4) + 15 ? 15 : maxZ & 15;
+
+        int minX1;
+        int minZ1;
+        int maxX1;
+        int maxZ1;
+
+        for (minX1 = localMinX; minX1 <= localMaxX; ++minX1) {
+            for (minZ1 = localMinZ; minZ1 <= localMaxZ; ++minZ1) {
+                for (maxX1 = minY; maxX1 <= maxY; ++maxX1) {
+                    maxZ1 = minX1 | chunkX << 4;
+                    int bb = minZ1 | chunkZ << 4;
+                    int entities = maxZ1 - minX;
+                    int localY = maxX1 - minY;
+                    int entity = bb - minZ;
+
+                    pos.set(maxZ1, maxX1, bb);
+                    localPos.set(entities, localY, entity);
+
+                    try {
+                        IBlockState nce = world.getBlockState(pos);
+                        Block block = nce.getBlock();
+                        boolean success = schematic.setBlockState(localPos, nce);
+
+                        if (success && block.hasTileEntity(nce)) {
+                            TileEntity tileEntity = world.getTileEntity(pos);
+
+                            if (tileEntity != null) {
+                                try {
+                                    TileEntity nce1 = NBTHelper.reloadTileEntity(tileEntity, minX, minY, minZ);
+
+                                    schematic.setTileEntity(localPos, nce1);
+                                } catch (NBTConversionException nbtconversionexception) {
+                                    Reference.logger.error("Error while trying to save tile entity \'{}\'!", new Object[] { tileEntity, nbtconversionexception});
+                                    schematic.setBlockState(localPos, Blocks.bedrock.getDefaultState());
+                                }
+                            }
+                        }
+                    } catch (Exception exception) {
+                        Reference.logger.error("Something went wrong!", exception);
+                    }
+                }
+            }
+        }
+
+        minX1 = localMinX | chunkX << 4;
+        minZ1 = localMinZ | chunkZ << 4;
+        maxX1 = localMaxX | chunkX << 4;
+        maxZ1 = localMaxZ | chunkZ << 4;
+        AxisAlignedBB axisalignedbb = AxisAlignedBB.fromBounds((double) minX1, (double) minY, (double) minZ1, (double) (maxX1 + 1), (double) (maxY + 1), (double) (maxZ1 + 1));
+        List list = world.getEntitiesWithinAABB(Entity.class, axisalignedbb);
+        Iterator iterator = list.iterator();
+
+        while (iterator.hasNext()) {
+            Entity entity = (Entity) iterator.next();
+
+            try {
+                Entity entity1 = NBTHelper.reloadEntity(entity, minX, minY, minZ);
+
+                schematic.addEntity(entity1);
+            } catch (NBTConversionException nbtconversionexception1) {
+                Reference.logger.error("Error while trying to save entity \'{}\'!", new Object[] { entity, nbtconversionexception1});
+            }
+        }
+
+    }
+
+    public boolean saveSchematic(EntityPlayer player, File directory, String filename, World world, BlockPos from, BlockPos to) {
+        try {
+            String e = "";
+
+            try {
+                String[] minX = filename.split(";");
+
+                if (minX.length == 2) {
+                    e = minX[0];
+                    filename = minX[1];
+                }
+            } catch (Exception exception) {
+                Reference.logger.error("Failed to parse icon data!", exception);
+            }
+
+            int minX1 = Math.min(from.getX(), to.getX());
+            int maxX = Math.max(from.getX(), to.getX());
+            int minY = Math.min(from.getY(), to.getY());
+            int maxY = Math.max(from.getY(), to.getY());
+            int minZ = Math.min(from.getZ(), to.getZ());
+            int maxZ = Math.max(from.getZ(), to.getZ());
+            short width = (short) (Math.abs(maxX - minX1) + 1);
+            short height = (short) (Math.abs(maxY - minY) + 1);
+            short length = (short) (Math.abs(maxZ - minZ) + 1);
+            Schematic schematic = new Schematic(SchematicUtil.getIconFromName(e), width, height, length);
+            SchematicContainer container = new SchematicContainer(schematic, player, world, new File(directory, filename), minX1, maxX, minY, maxY, minZ, maxZ);
+
+            QueueTickHandler.INSTANCE.queueSchematic(container);
+            return true;
+        } catch (Exception exception1) {
+            Reference.logger.error("Failed to save schematic!", exception1);
+            return false;
+        }
+    }
+
+    public abstract boolean loadSchematic(EntityPlayer entityplayer, File file, String s);
+
+    public abstract boolean reloadSchematic();
+
+    public abstract boolean isPlayerQuotaExceeded(EntityPlayer entityplayer);
+
+    public abstract File getPlayerSchematicDirectory(EntityPlayer entityplayer, boolean flag);
+}

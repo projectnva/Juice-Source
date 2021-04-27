@@ -1,0 +1,19 @@
+package clientname.gui.modmenu;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import clientname.gui.options.ModEntry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiListExtended;
+s
+public class ModList extends GuiListExtended {
+
+	public ModList(Minecraft mcIn, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn) {
+		super(mcIn, widthIn, heightIn, topIn, bottomIn, slotHeightIn);
+		// TODO Auto-generated constructor stub
+	}
+
+	private final List<ModEntry> entrys = new ArrayList<ModEntry>();
+	
+}

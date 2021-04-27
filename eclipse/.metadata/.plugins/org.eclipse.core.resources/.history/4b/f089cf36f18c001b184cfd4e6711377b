@@ -1,0 +1,29 @@
+package clientname.mods.impl.crosshair;
+
+import net.minecraft.client.settings.KeyBinding;
+
+public class CustomCrosshairMod {
+
+	    public static String NAME = "Custom Crosshair Mod";
+	    public static String MODID = "customcrosshairmod";
+	    public static String VERSION = "0.5.1-forge";
+	    //public static final String forumUrl = "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/2637819/";
+	    //public static final String curseForgeUrl = "http://www.curseforge.com/projects/242995/";
+	    //public static final String latestVersionUrl = "http://pastebin.com/raw/B2sL8QCh";
+	    private ModCrosshair crosshair;
+	    private static CustomCrosshairMod crosshairMod = new CustomCrosshairMod();
+	    private String guiKeyBind;
+	    public static KeyBinding guiEditKeyBind;
+	    public static boolean showMessage = true;
+	
+	    public void init() {
+	        CustomCrosshairMod.crosshairMod = this;
+	        this.crosshair = new Crosshair();
+	        this.setGuiKeyBind("GRAVE");
+	        CustomCrosshairMod.guiEditKeyBind = new KeyBinding("Open GUI", Keyboard.getKeyIndex(this.getGuiKeyBind()), "Custom Crosshair Mod");
+	        ClientRegistry.registerKeyBinding(CustomCrosshairMod.guiEditKeyBind);
+	        if (!SaveUtils.readSaveFile(this)) {
+	            SaveUtils.writeSaveFileDefault();
+	        }
+	    
+}

@@ -1,0 +1,50 @@
+package com.github.energizedab.basicgui.settings;
+
+import com.github.energizedab.pvptube.display.HUDElement;
+
+public class NumberSetting extends Setting<Number> {
+	
+	public Number min, max;
+	
+	public NumberSetting(String name, HUDElement parent, Number defaultValue, Number min, Number max) {
+		this.name = name;
+		this.element = parent;
+		this.value = defaultValue;
+		this.min = min;
+		this.max = max;
+		
+		if(min.intValue() > max.intValue()) {
+			int oldMin = this.min.intValue();
+			this.min = max;
+			this.max = oldMin;
+		}
+	}
+	
+	public Number getValue() {
+		return value;
+	}
+	
+	public int asInt() {
+		return value.intValue();
+	}
+	
+	public Number getMin() {
+		return min;
+	}
+	
+	public Number getMax() {
+		return max;
+	}
+	
+	public double asDouble() {
+		return value.doubleValue();
+	}
+	
+	public float asFloat() {
+		return value.floatValue();
+	}
+	
+	public void setValue(Number value) {
+		this.value = value;
+	}
+}

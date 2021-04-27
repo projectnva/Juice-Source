@@ -1,0 +1,54 @@
+package clientname.basicgui.settings;
+
+import java.util.ArrayList;
+
+import com.google.common.collect.Lists;
+
+import clientname.mods.ModDraggable;
+
+public class SettingsManager {
+
+	public ArrayList<Setting> settings = Lists.newArrayList();
+	
+	public void addSetting(Setting s) {
+		settings.add(s);
+	}
+	
+	public ArrayList<Setting> getSettings() {
+		return settings;
+	}
+	
+	public Setting getSettingFromName(String name) {
+		for(Setting s : settings) {
+			if(s.name.equalsIgnoreCase(name)) {
+				return s;
+			}
+		}
+		System.out.println("[WARNING]: No setting found: " + name);
+		return null;
+	}
+	
+	public Setting getSettingFromName(ModDraggable element, String name) {
+		for(Setting s : settings) {
+			if(s.name.equalsIgnoreCase(name) && s.element == element) {
+				return s;
+			}
+		}
+		System.out.println("[WARNING]: No setting found: " + name);
+		return null;
+	}
+	
+	public void removeSetting(Setting s) {
+		settings.remove(s);
+	}
+
+	public ArrayList<Setting> getSettingsInElement(ModDraggable parentElement) {
+		ArrayList<Setting> sets = new ArrayList<Setting>();
+		for(Setting s : settings) {
+			if(s.element == parentElement ) {
+				sets.add(s);
+			}
+		}
+		return sets;
+	}
+}

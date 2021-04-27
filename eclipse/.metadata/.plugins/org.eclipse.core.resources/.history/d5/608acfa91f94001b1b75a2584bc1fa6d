@@ -1,0 +1,9 @@
+package clientname.mods.impl;
+
+public class ModBlockOverlay {
+
+	public boolean blockoverlayEnabled = false;
+
+	
+	
+}

@@ -1,0 +1,32 @@
+package clientname.mods.impl;
+
+import clientname.gui.hud.ScreenPosition;
+import clientname.mods.ModDraggable;
+
+public class ModBlockOverlay extends ModDraggable{
+
+	public int width = 20;
+	public int height = 20;
+	public static boolean blockoverlayEnabled = true;
+
+	public int getWidth() {
+		return width;
+	}
+	
+	public int getHeight() {
+		return height;
+	}
+	
+	public void render(ScreenPosition pos) {
+		
+		font.drawString("Protest", pos.getAbsoluteX(), pos.getAbsoluteY(), 0x0000FF00);
+		
+	}
+
+	public void renderDummy(ScreenPosition pos) {
+		
+		font.drawString("Protest", pos.getAbsoluteX(), pos.getAbsoluteY(), 0x00FF0000);
+		
+	}
+	
+}

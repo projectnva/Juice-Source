@@ -1,0 +1,17 @@
+package clientname.basicgui.elements;
+
+import clientname.basicgui.HUDElement;
+import clientname.basicgui.HUDElementCategory;
+
+public class FPS extends HUDElement {
+
+	public FPS() {
+		super("FPS", "1.1", HUDElementCategory.INFO);
+		setEnabled(true);
+	}
+	
+	
+	
+	
+
+}

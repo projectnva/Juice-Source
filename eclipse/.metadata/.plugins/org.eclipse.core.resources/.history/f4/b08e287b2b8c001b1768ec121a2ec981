@@ -1,0 +1,45 @@
+package com.github.lunatrius.schematica.network.message;
+
+import com.github.lunatrius.schematica.Schematica;
+import com.github.lunatrius.schematica.handler.DownloadHandler;
+import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import io.netty.buffer.ByteBuf;
+import java.io.File;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+
+public class MessageDownloadEnd implements IMessage, IMessageHandler {
+
+    public String name;
+
+    public MessageDownloadEnd() {}
+
+    public MessageDownloadEnd(String name) {
+        this.name = name;
+    }
+
+    public void fromBytes(ByteBuf buf) {
+        this.name = ByteBufUtils.readUTF8String(buf);
+    }
+
+    public void toBytes(ByteBuf buf) {
+        ByteBufUtils.writeUTF8String(buf, this.name);
+    }
+
+    public IMessage onMessage(MessageDownloadEnd message, MessageContext ctx) {
+        File directory = Schematica.proxy.getPlayerSchematicDirectory((EntityPlayer) null, true);
+        boolean success = SchematicFormat.writeToFile(directory, message.name, DownloadHandler.INSTANCE.schematic);
+
+        if (success) {
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentTranslation("schematica.command.download.downloadSucceeded", new Object[] { message.name}));
+        }
+
+        DownloadHandler.INSTANCE.schematic = null;
+        return null;
+    }
+}

@@ -1,0 +1,50 @@
+package com.github.energizedab.basicgui.comp.impl;
+
+import java.awt.Color;
+
+import com.github.energizedab.basicgui.SettingsWindow;
+import com.github.energizedab.basicgui.comp.Component;
+import com.github.energizedab.basicgui.settings.ModeSetting;
+import com.github.energizedab.basicgui.utils.Colors;
+import com.github.energizedab.basicgui.utils.RenderUtils;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+
+
+public class ComboBox extends Component {
+
+	public int x, y;
+	public ModeSetting set;
+	public SettingsWindow window;
+	
+    public ComboBox(int x, int y, ModeSetting set, SettingsWindow window) {
+        this.x = x;
+        this.y = y;
+        this.set = set;
+        this.window = window;
+    }
+
+    @Override
+    public void draw(int mouseX, int mouseY) {
+    	FontRenderer ufr = Minecraft.getMinecraft().fontRendererObj;
+        RenderUtils.drawRoundedRect(x, y, x + 150, y + 16, 3, new Color(Colors.getDarkerGuiBackgroundColor()));
+        ufr.drawString(set.name + " : " + set.getValue(),x + 2, y + 1, Color.black.getRGB());
+    }
+
+    @Override
+    public void mouseClicked(int mouseX, int mouseY, int button) {
+        if(isWithinComponent(mouseX, mouseY)){
+            int index = set.getOptions().indexOf(set.getValue());
+            if(index + 1 >= set.getOptions().size()){
+                set.setValue(set.getOptions().get(0));
+            }else {
+                set.setValue(set.getOptions().get(index + 1));
+            }
+        }
+    }
+
+    public boolean isWithinComponent(int mouseX, int mouseY){
+        return mouseX > x && mouseX < x + 80 && mouseY > y && mouseY < y + 20;
+    }
+}

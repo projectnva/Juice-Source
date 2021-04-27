@@ -1,0 +1,29 @@
+package clientname.mods.impl;
+
+import clientname.gui.hud.ScreenPosition;
+import clientname.mods.ModDraggable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.GameSettings;
+
+public class ModFullbright extends ModDraggable {
+
+	public ModFullbright() {
+		
+	}
+
+	@Override
+	public int getWidth() {
+		return 0;
+	}
+
+	@Override
+	public int getHeight() {
+		return 0;
+	}
+
+	@Override
+	public void render(ScreenPosition pos) {
+		return;
+	}
+
+}

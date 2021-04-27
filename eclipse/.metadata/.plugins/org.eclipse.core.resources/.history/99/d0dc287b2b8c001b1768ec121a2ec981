@@ -1,0 +1,46 @@
+package com.github.lunatrius.schematica.network.message;
+
+import com.github.lunatrius.schematica.Schematica;
+import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
+import com.github.lunatrius.schematica.reference.Reference;
+import io.netty.buffer.ByteBuf;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+
+public class MessageCapabilities implements IMessage, IMessageHandler {
+
+    public boolean isPrinterEnabled;
+    public boolean isSaveEnabled;
+    public boolean isLoadEnabled;
+
+    public MessageCapabilities() {
+        this(false, false, false);
+    }
+
+    public MessageCapabilities(boolean isPrinterEnabled, boolean isSaveEnabled, boolean isLoadEnabled) {
+        this.isPrinterEnabled = isPrinterEnabled;
+        this.isSaveEnabled = isSaveEnabled;
+        this.isLoadEnabled = isLoadEnabled;
+    }
+
+    public void fromBytes(ByteBuf buf) {
+        this.isPrinterEnabled = buf.readBoolean();
+        this.isSaveEnabled = buf.readBoolean();
+        this.isLoadEnabled = buf.readBoolean();
+    }
+
+    public void toBytes(ByteBuf buf) {
+        buf.writeBoolean(this.isPrinterEnabled);
+        buf.writeBoolean(this.isSaveEnabled);
+        buf.writeBoolean(this.isLoadEnabled);
+    }
+
+    public IMessage onMessage(MessageCapabilities message, MessageContext ctx) {
+        SchematicPrinter.INSTANCE.setEnabled(message.isPrinterEnabled);
+        Schematica.proxy.isSaveEnabled = message.isSaveEnabled;
+        Schematica.proxy.isLoadEnabled = message.isLoadEnabled;
+        Reference.logger.info("Server capabilities{printer={}, save={}, load={}}", new Object[] { Boolean.valueOf(message.isPrinterEnabled), Boolean.valueOf(message.isSaveEnabled), Boolean.valueOf(message.isLoadEnabled)});
+        return null;
+    }
+}

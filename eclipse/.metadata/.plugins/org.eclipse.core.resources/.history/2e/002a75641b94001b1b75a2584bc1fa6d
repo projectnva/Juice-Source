@@ -1,0 +1,131 @@
+package me.aycy.blockoverlay.visual;
+
+import java.io.IOException;
+import me.aycy.blockoverlay.BlockOverlay;
+import me.aycy.blockoverlay.util.BlockOverlayMode;
+import me.aycy.blockoverlay.util.GuiSlideControl;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+
+public class BlockOverlayGui extends GuiScreen {
+
+    private BlockOverlay mod;
+    private BlockOverlayRender render;
+    private BlockOverlayMode prevMode;
+    private BlockOverlayMode tempMode;
+    private GuiButton buttonMode;
+    private GuiButton buttonDone;
+    private GuiButton buttonCancel;
+    private GuiButton buttonColor;
+    private GuiButton lastPressed;
+    private GuiSlideControl lineWidth;
+
+    public BlockOverlayGui(BlockOverlay mod, BlockOverlayRender render) {
+        this.mod = mod;
+        this.render = render;
+        this.prevMode = mod.getMode();
+        this.tempMode = mod.getMode();
+    }
+
+    public void initGui() {
+        int x = super.width / 2;
+        int y = super.height / 2;
+
+        super.buttonList.add(this.buttonColor = new GuiButton(3, x - 100, this.getRowPos(3), "Color"));
+        super.buttonList.add(this.buttonMode = new GuiButton(0, x - 100, this.getRowPos(4), "Mode: " + this.tempMode.getName()));
+        super.buttonList.add(this.buttonDone = new GuiButton(1, x - 100, this.getRowPos(5), "Done"));
+        super.buttonList.add(this.buttonCancel = new GuiButton(2, x - 100, this.getRowPos(6), "Cancel"));
+        this.lineWidth = new GuiSlideControl(10, x - 100, this.getRowPos(2), 200, 20, "Line Width: ", 2.0F, 5.0F, this.render.getWidth(), false);
+        this.buttonList.add(this.lineWidth);
+    }
+
+    public int getRowPos(int rowNumber) {
+        return this.height / 4 + (24 * rowNumber - 24) - 16;
+    }
+
+    public int getCenter() {
+        return this.width / 2;
+    }
+
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        int x = super.width / 2;
+        int y = super.height / 2;
+
+        this.drawDefaultBackground();
+        this.drawCenteredString(this.fontRendererObj, "Block Overlay", x, y - 80, 16777215);
+        this.updateComponents();
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    protected void mouseReleased(int mouseX, int mouseY, int which) {
+        if (this.lastPressed != null && which == 0) {
+            this.lastPressed.mouseReleased(mouseX, mouseY);
+
+            try {
+                this.actionPerformed_MouseUp(this.lastPressed);
+            } catch (IOException ioexception) {
+                ioexception.printStackTrace();
+            }
+
+            this.lastPressed = null;
+        }
+
+    }
+
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        if (mouseButton == 0) {
+            for (int l = 0; l < this.buttonList.size(); ++l) {
+                GuiButton guibutton = (GuiButton) this.buttonList.get(l);
+
+                if (guibutton.mousePressed(this.mc, mouseX, mouseY)) {
+                    this.lastPressed = guibutton;
+                    this.actionPerformed(guibutton);
+                }
+            }
+        } else {
+            super.mouseClicked(mouseX, mouseY, mouseButton);
+        }
+
+    }
+
+    protected void actionPerformed_MouseUp(GuiButton button) throws IOException {
+        if (button instanceof GuiSlideControl) {
+            this.actionPerformed(button);
+        }
+
+    }
+
+    protected void actionPerformed(GuiButton button) throws IOException {
+        switch (button.id) {
+        case 0:
+            this.tempMode = this.tempMode.getNextMode(this.tempMode);
+            this.updateComponents();
+            this.mod.setMode(this.tempMode);
+            break;
+
+        case 1:
+            this.mod.setMode(this.tempMode);
+            Minecraft.getMinecraft().displayGuiScreen((GuiScreen) null);
+            break;
+
+        case 3:
+            this.mod.openColorGui();
+            break;
+
+        case 10:
+            this.render.setWidth(this.lineWidth.GetValueAsFloat());
+        }
+
+    }
+
+    public void onGuiClosed() {
+        this.mod.saveConfig();
+    }
+
+    public void updateComponents() {
+        this.buttonMode.displayString = "Mode: " + this.tempMode.getName();
+        this.buttonColor.visible = this.tempMode == BlockOverlayMode.FULL || this.tempMode == BlockOverlayMode.OUTLINE;
+        this.lineWidth.visible = this.tempMode == BlockOverlayMode.FULL || this.tempMode == BlockOverlayMode.OUTLINE;
+    }
+}

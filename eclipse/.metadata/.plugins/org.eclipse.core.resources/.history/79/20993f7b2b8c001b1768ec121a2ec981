@@ -1,0 +1,506 @@
+package com.github.lunatrius.schematica.client.printer;
+
+import com.github.lunatrius.core.util.BlockPosHelper;
+import com.github.lunatrius.core.util.MBlockPos;
+import com.github.lunatrius.schematica.block.state.BlockStateHelper;
+import com.github.lunatrius.schematica.client.printer.nbtsync.NBTSync;
+import com.github.lunatrius.schematica.client.printer.nbtsync.SyncRegistry;
+import com.github.lunatrius.schematica.client.printer.registry.PlacementData;
+import com.github.lunatrius.schematica.client.printer.registry.PlacementRegistry;
+import com.github.lunatrius.schematica.client.util.BlockStateToItemStack;
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.proxy.ClientProxy;
+import com.github.lunatrius.schematica.reference.Reference;
+import com.orbitclient.imsoogood.ez.orbitclient.modules.AutoTick;
+import com.orbitclient.imsoogood.ez.orbitclient.modules.BreakBadDispensers;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockDispenser;
+import net.minecraft.block.BlockFenceGate;
+import net.minecraft.block.BlockPistonBase;
+import net.minecraft.block.BlockRedstoneComparator;
+import net.minecraft.block.BlockRedstoneRepeater;
+import net.minecraft.block.BlockSlab;
+import net.minecraft.block.BlockTrapDoor;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemBucket;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.C0BPacketEntityAction;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
+import net.minecraftforge.fluids.BlockFluidBase;
+
+public class SchematicPrinter {
+
+    public static final SchematicPrinter INSTANCE = new SchematicPrinter();
+    private final Minecraft minecraft = Minecraft.getMinecraft();
+    private boolean isEnabled = true;
+    private boolean isPrinting = true;
+    long repeaterTimeout = 0L;
+    private SchematicWorld schematic = null;
+    private byte[][][] timeout = (byte[][][]) null;
+    private final HashMap syncBlacklist = new HashMap();
+
+    public boolean isEnabled() {
+        return this.isEnabled;
+    }
+
+    public void setEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
+    }
+
+    public boolean togglePrinting() {
+        this.isPrinting = !this.isPrinting && this.schematic != null;
+        return this.isPrinting;
+    }
+
+    public boolean isPrinting() {
+        return this.isPrinting;
+    }
+
+    public void setPrinting(boolean isPrinting) {
+        this.isPrinting = isPrinting;
+    }
+
+    public SchematicWorld getSchematic() {
+        return this.schematic;
+    }
+
+    public void setSchematic(SchematicWorld schematic) {
+        this.isPrinting = false;
+        this.schematic = schematic;
+        this.refresh();
+    }
+
+    public void refresh() {
+        if (this.schematic != null) {
+            this.timeout = new byte[this.schematic.getWidth()][this.schematic.getHeight()][this.schematic.getLength()];
+        } else {
+            this.timeout = (byte[][][]) null;
+        }
+
+        this.syncBlacklist.clear();
+    }
+
+    public boolean print(WorldClient world, EntityPlayerSP player) {
+        double dX = ClientProxy.playerPosition.x - (double) this.schematic.position.x;
+        double dY = ClientProxy.playerPosition.y - (double) this.schematic.position.y;
+        double dZ = ClientProxy.playerPosition.z - (double) this.schematic.position.z;
+        int x = (int) Math.floor(dX);
+        int y = (int) Math.floor(dY);
+        int z = (int) Math.floor(dZ);
+        int range = ConfigurationHandler.placeDistance;
+        int minX = Math.max(0, x - range);
+        int maxX = Math.min(this.schematic.getWidth() - 1, x + range);
+        int minY = Math.max(0, y - range);
+        int maxY = Math.min(this.schematic.getHeight() - 1, y + range);
+        int minZ = Math.max(0, z - range);
+        int maxZ = Math.min(this.schematic.getLength() - 1, z + range);
+
+        if (minX <= maxX && minY <= maxY && minZ <= maxZ) {
+            int slot = player.inventory.currentItem;
+            boolean isSneaking = player.isSneaking();
+            boolean isRenderingLayer = this.schematic.isRenderingLayer;
+            int renderingLayer = this.schematic.renderingLayer;
+
+            if (isRenderingLayer) {
+                if (renderingLayer > maxY || renderingLayer < minY) {
+                    return false;
+                }
+
+                maxY = renderingLayer;
+                minY = renderingLayer;
+            }
+
+            this.syncSneaking(player, true);
+            double blockReachDistance = (double) this.minecraft.playerController.getBlockReachDistance() - 0.1D;
+            double blockReachDistanceSq = blockReachDistance * blockReachDistance;
+            Iterator iterator = BlockPosHelper.getAllInBoxXZY(minX, minY, minZ, maxX, maxY, maxZ).iterator();
+
+            while (iterator.hasNext()) {
+                MBlockPos pos = (MBlockPos) iterator.next();
+
+                if (pos.distanceSqToCenter(dX, dY, dZ) <= blockReachDistanceSq) {
+                    try {
+                        if (this.placeBlock(world, player, pos)) {
+                            return this.syncSlotAndSneaking(player, slot, isSneaking, true);
+                        }
+                    } catch (Exception exception) {
+                        Reference.logger.error("Could not place block!", exception);
+                        return this.syncSlotAndSneaking(player, slot, isSneaking, false);
+                    }
+                }
+            }
+
+            return this.syncSlotAndSneaking(player, slot, isSneaking, true);
+        } else {
+            return false;
+        }
+    }
+
+    private boolean syncSlotAndSneaking(EntityPlayerSP player, int slot, boolean isSneaking, boolean success) {
+        player.inventory.currentItem = slot;
+        this.syncSneaking(player, isSneaking);
+        return success;
+    }
+
+    private boolean placeBlock(WorldClient world, EntityPlayerSP player, BlockPos pos) {
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+
+        if (this.timeout[x][y][z] > 0) {
+            --this.timeout[x][y][z];
+            return false;
+        } else {
+            int wx = this.schematic.position.x + x;
+            int wy = this.schematic.position.y + y;
+            int wz = this.schematic.position.z + z;
+            BlockPos realPos = new BlockPos(wx, wy, wz);
+            IBlockState blockState = this.schematic.getBlockState(pos);
+            IBlockState realBlockState = world.getBlockState(realPos);
+            Block realBlock = realBlockState.getBlock();
+
+            if (BlockStateHelper.areBlockStatesEqual(blockState, realBlockState)) {
+                NBTSync nbtsync = SyncRegistry.INSTANCE.getHandler(realBlock);
+
+                if (nbtsync != null) {
+                    this.timeout[x][y][z] = (byte) ConfigurationHandler.timeout;
+                    Integer tries = (Integer) this.syncBlacklist.get(realPos);
+
+                    if (tries == null) {
+                        tries = Integer.valueOf(0);
+                    } else if (tries.intValue() >= 10) {
+                        return false;
+                    }
+
+                    Reference.logger.trace("Trying to sync block at {} {}", new Object[] { realPos, tries});
+                    boolean success = nbtsync.execute(this.schematic, pos, world, realPos);
+
+                    if (success) {
+                        this.syncBlacklist.put(realPos, Integer.valueOf(tries.intValue() + 1));
+                    }
+
+                    return success;
+                } else {
+                    return false;
+                }
+            } else {
+                boolean flag;
+
+                if (realBlock instanceof BlockRedstoneRepeater && blockState.getBlock() instanceof BlockRedstoneRepeater && AutoTick.INSTANCE.isEnabled()) {
+                    if (AutoTick.mcc) {
+                        if (!this.swapToItem(player.inventory, new ItemStack(Items.bone))) {
+                            return false;
+                        }
+                    } else if (!this.swapToItem(player.inventory, (ItemStack) null)) {
+                        return false;
+                    }
+
+                    flag = this.minecraft.playerController.onPlayerRightClick(player, world, player.getCurrentEquippedItem(), realPos, EnumFacing.UP, new Vec3(0.0D, 0.0D, 0.0D));
+                    if (flag) {
+                        this.timeout[x][y][z] = (byte) ConfigurationHandler.timeout;
+                        player.swingItem();
+                        return !ConfigurationHandler.placeInstantly;
+                    } else {
+                        return false;
+                    }
+                } else if (realBlock instanceof BlockTrapDoor && blockState.getBlock() instanceof BlockTrapDoor && AutoTick.INSTANCE.isEnabled()) {
+                    if (AutoTick.mcc) {
+                        if (!this.swapToItem(player.inventory, new ItemStack(Items.bone))) {
+                            return false;
+                        }
+                    } else if (!this.swapToItem(player.inventory, (ItemStack) null)) {
+                        return false;
+                    }
+
+                    flag = this.minecraft.playerController.onPlayerRightClick(player, world, player.getCurrentEquippedItem(), realPos, EnumFacing.UP, new Vec3(0.0D, 0.0D, 0.0D));
+                    if (flag) {
+                        this.timeout[x][y][z] = (byte) ConfigurationHandler.timeout;
+                        player.swingItem();
+                        return !ConfigurationHandler.placeInstantly;
+                    } else {
+                        return false;
+                    }
+                } else if (realBlock instanceof BlockFenceGate && blockState.getBlock() instanceof BlockFenceGate && AutoTick.INSTANCE.isEnabled()) {
+                    if (AutoTick.mcc) {
+                        if (!this.swapToItem(player.inventory, new ItemStack(Items.bone))) {
+                            return false;
+                        }
+                    } else if (!this.swapToItem(player.inventory, (ItemStack) null)) {
+                        return false;
+                    }
+
+                    flag = this.minecraft.playerController.onPlayerRightClick(player, world, player.getCurrentEquippedItem(), realPos, EnumFacing.UP, new Vec3(0.0D, 0.0D, 0.0D));
+                    if (flag) {
+                        this.timeout[x][y][z] = (byte) ConfigurationHandler.timeout;
+                        player.swingItem();
+                        return !ConfigurationHandler.placeInstantly;
+                    } else {
+                        return false;
+                    }
+                } else if (realBlock instanceof BlockRedstoneComparator && blockState.getBlock() instanceof BlockRedstoneComparator && AutoTick.INSTANCE.isEnabled()) {
+                    if (AutoTick.mcc) {
+                        if (!this.swapToItem(player.inventory, new ItemStack(Items.bone))) {
+                            return false;
+                        }
+                    } else if (!this.swapToItem(player.inventory, (ItemStack) null)) {
+                        return false;
+                    }
+
+                    flag = this.minecraft.playerController.onPlayerRightClick(player, world, player.getCurrentEquippedItem(), realPos, EnumFacing.UP, new Vec3(0.0D, 0.0D, 0.0D));
+                    if (flag) {
+                        this.timeout[x][y][z] = (byte) ConfigurationHandler.timeout;
+                        player.swingItem();
+                        return !ConfigurationHandler.placeInstantly;
+                    } else {
+                        return false;
+                    }
+                } else if (ConfigurationHandler.destroyBlocks && !world.isAirBlock(realPos) && this.minecraft.playerController.isInCreativeMode()) {
+                    this.minecraft.playerController.clickBlock(realPos, EnumFacing.DOWN);
+                    this.timeout[x][y][z] = (byte) ConfigurationHandler.timeout;
+                    return !ConfigurationHandler.destroyInstantly;
+                } else {
+                    if (BreakBadDispensers.INSTANCE.isEnabled() && !world.isAirBlock(realPos) && this.minecraft.playerController.isInCreativeMode()) {
+                        if (realBlock instanceof BlockDispenser && blockState.getBlock() instanceof BlockDispenser && BreakBadDispensers.dispensers) {
+                            this.minecraft.playerController.clickBlock(realPos, EnumFacing.DOWN);
+                            this.timeout[x][y][z] = (byte) ConfigurationHandler.timeout;
+                            return false;
+                        }
+
+                        if (realBlock instanceof BlockPistonBase && blockState.getBlock() instanceof BlockPistonBase && BreakBadDispensers.pistons) {
+                            this.minecraft.playerController.clickBlock(realPos, EnumFacing.DOWN);
+                            this.timeout[x][y][z] = (byte) ConfigurationHandler.timeout;
+                            return false;
+                        }
+
+                        if (realBlock instanceof BlockSlab && blockState.getBlock() instanceof BlockSlab && BreakBadDispensers.slabs) {
+                            this.minecraft.playerController.clickBlock(realPos, EnumFacing.DOWN);
+                            this.timeout[x][y][z] = (byte) ConfigurationHandler.timeout;
+                            return false;
+                        }
+                    }
+
+                    if (this.schematic.isAirBlock(pos)) {
+                        return false;
+                    } else if (!realBlock.isReplaceable(world, realPos)) {
+                        return false;
+                    } else {
+                        ItemStack itemStack = BlockStateToItemStack.getItemStack(blockState, new MovingObjectPosition(player), this.schematic, pos);
+
+                        if (itemStack != null && itemStack.getItem() != null) {
+                            if (this.placeBlock(world, player, realPos, blockState, itemStack)) {
+                                this.timeout[x][y][z] = (byte) ConfigurationHandler.timeout;
+                                return !ConfigurationHandler.placeInstantly;
+                            } else {
+                                return false;
+                            }
+                        } else {
+                            Reference.logger.debug("{} is missing a mapping!", new Object[] { blockState});
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isSolid(World world, BlockPos pos, EnumFacing side) {
+        BlockPos offset = pos.offset(side);
+        IBlockState blockState = world.getBlockState(offset);
+        Block block = blockState.getBlock();
+
+        return block == null ? false : (block.isAir(world, offset) ? false : (block instanceof BlockFluidBase ? false : !block.isReplaceable(world, offset)));
+    }
+
+    private List getSolidSides(World world, BlockPos pos) {
+        if (!ConfigurationHandler.placeAdjacent) {
+            return Arrays.asList(EnumFacing.VALUES);
+        } else {
+            ArrayList list = new ArrayList();
+            EnumFacing[] aenumfacing = EnumFacing.VALUES;
+            int i = aenumfacing.length;
+
+            for (int j = 0; j < i; ++j) {
+                EnumFacing side = aenumfacing[j];
+
+                if (this.isSolid(world, pos, side)) {
+                    list.add(side);
+                }
+            }
+
+            return list;
+        }
+    }
+
+    private boolean placeBlock(WorldClient world, EntityPlayerSP player, BlockPos pos, IBlockState blockState, ItemStack itemStack) {
+        if (itemStack.getItem() instanceof ItemBucket) {
+            ;
+        }
+
+        PlacementData data = PlacementRegistry.INSTANCE.getPlacementData(blockState, itemStack);
+
+        if (data != null && !data.isValidPlayerFacing(blockState, player, pos, world)) {
+            return false;
+        } else {
+            List solidSides = this.getSolidSides(world, pos);
+
+            if (solidSides.size() == 0) {
+                return false;
+            } else {
+                EnumFacing direction;
+                float offsetX;
+                float offsetY;
+                float offsetZ;
+                int extraClicks;
+
+                if (data != null) {
+                    List validDirections = data.getValidBlockFacings(solidSides, blockState);
+
+                    if (validDirections.size() == 0) {
+                        return false;
+                    }
+
+                    direction = (EnumFacing) validDirections.get(0);
+                    offsetX = data.getOffsetX(blockState);
+                    offsetY = data.getOffsetY(blockState);
+                    offsetZ = data.getOffsetZ(blockState);
+                    extraClicks = data.getExtraClicks(blockState);
+                } else {
+                    direction = (EnumFacing) solidSides.get(0);
+                    offsetX = 0.5F;
+                    offsetY = 0.5F;
+                    offsetZ = 0.5F;
+                    extraClicks = 0;
+                }
+
+                return !this.swapToItem(player.inventory, itemStack) ? false : this.placeBlock(world, player, pos, direction, offsetX, offsetY, offsetZ, extraClicks);
+            }
+        }
+    }
+
+    private boolean placeBlock(WorldClient world, EntityPlayerSP player, BlockPos pos, EnumFacing direction, float offsetX, float offsetY, float offsetZ, int extraClicks) {
+        ItemStack itemStack = player.getCurrentEquippedItem();
+        boolean success = false;
+
+        if (!this.minecraft.playerController.isInCreativeMode() && itemStack != null && itemStack.stackSize <= extraClicks) {
+            return false;
+        } else {
+            BlockPos offset = pos.offset(direction);
+            EnumFacing side = direction.getOpposite();
+            Vec3 hitVec = new Vec3((double) ((float) offset.getX() + offsetX), (double) ((float) offset.getY() + offsetY), (double) ((float) offset.getZ() + offsetZ));
+
+            success = this.placeBlock(world, player, itemStack, offset, side, hitVec);
+
+            for (int i = 0; success && i < extraClicks; ++i) {
+                success = this.placeBlock(world, player, itemStack, offset, side, hitVec);
+            }
+
+            if (itemStack != null && itemStack.stackSize == 0 && success) {
+                player.inventory.mainInventory[player.inventory.currentItem] = null;
+            }
+
+            return success;
+        }
+    }
+
+    private boolean placeBlock(WorldClient world, EntityPlayerSP player, ItemStack itemStack, BlockPos pos, EnumFacing side, Vec3 hitVec) {
+        boolean success = !ForgeEventFactory.onPlayerInteract(player, Action.RIGHT_CLICK_BLOCK, world, pos, side).isCanceled();
+
+        if (success) {
+            success = this.minecraft.playerController.onPlayerRightClick(player, world, itemStack, pos, side, hitVec);
+            if (success) {
+                player.swingItem();
+                this.schematic.markBlockForUpdate(pos);
+            }
+        }
+
+        return success;
+    }
+
+    private void syncSneaking(EntityPlayerSP player, boolean isSneaking) {
+        player.setSneaking(isSneaking);
+        player.sendQueue.addToSendQueue(new C0BPacketEntityAction(player, isSneaking ? net.minecraft.network.play.client.C0BPacketEntityAction.Action.START_SNEAKING : net.minecraft.network.play.client.C0BPacketEntityAction.Action.STOP_SNEAKING));
+    }
+
+    public boolean swapToItem(InventoryPlayer inventory, ItemStack itemStack) {
+        return this.swapToItem(inventory, itemStack, true);
+    }
+
+    private boolean swapToItem(InventoryPlayer inventory, ItemStack itemStack, boolean swapSlots) {
+        int slot;
+
+        if (itemStack == null) {
+            slot = inventory.getFirstEmptyStack();
+            if (slot == -1) {
+                return false;
+            }
+        } else {
+            slot = this.getInventorySlotWithItem(inventory, itemStack);
+        }
+
+        if (this.minecraft.playerController.isInCreativeMode() && (slot < 0 || slot >= 9) && ConfigurationHandler.swapSlotsQueue.size() > 0) {
+            inventory.currentItem = this.getNextSlot();
+            if (itemStack == null) {
+                inventory.setInventorySlotContents(inventory.currentItem, (ItemStack) null);
+            } else {
+                inventory.setInventorySlotContents(inventory.currentItem, itemStack.copy());
+            }
+
+            this.minecraft.playerController.sendSlotPacket(inventory.getStackInSlot(inventory.currentItem), 36 + inventory.currentItem);
+            return true;
+        } else if (slot >= 0 && slot < 9) {
+            inventory.currentItem = slot;
+            return true;
+        } else {
+            return swapSlots && slot >= 9 && slot < 36 && this.swapSlots(slot) ? this.swapToItem(inventory, itemStack, false) : false;
+        }
+    }
+
+    private int getInventorySlotWithItem(InventoryPlayer inventory, ItemStack itemStack) {
+        for (int i = 0; i < inventory.mainInventory.length; ++i) {
+            if (inventory.mainInventory[i] != null && inventory.mainInventory[i].isItemEqual(itemStack)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private boolean swapSlots(int from) {
+        if (ConfigurationHandler.swapSlotsQueue.size() > 0) {
+            int slot = this.getNextSlot();
+
+            this.swapSlots(from, slot);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private int getNextSlot() {
+        int slot = ((Integer) ConfigurationHandler.swapSlotsQueue.poll()).intValue() % 9;
+
+        ConfigurationHandler.swapSlotsQueue.offer(Integer.valueOf(slot));
+        return slot;
+    }
+
+    private boolean swapSlots(int from, int to) {
+        return this.minecraft.playerController.windowClick(this.minecraft.thePlayer.inventoryContainer.windowId, from, to, 2, this.minecraft.thePlayer) == null;
+    }
+}

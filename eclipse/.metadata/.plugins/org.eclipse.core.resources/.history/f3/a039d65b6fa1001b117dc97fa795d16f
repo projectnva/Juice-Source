@@ -1,0 +1,32 @@
+package clientname.gui.modmenu;
+
+import com.lukflug.panelstudio.ClickGUI;
+import com.lukflug.panelstudio.mc8forge.MinecraftGUI;
+import com.lukflug.panelstudio.mc8forge.MinecraftGUI.GUIInterface;
+import com.lukflug.panelstudio.settings.Toggleable;
+import com.lukflug.panelstudio.theme.Theme;
+
+
+public class GuiClickModMenu extends MinecraftGUI {
+	
+		private final Toggleable colorToggle;
+		private final GUIInterface guiInterface;
+		private final Theme theme;
+		private final ClickGUI gui;
+		
+		@Override
+		protected ClickGUI getGUI() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		@Override
+		protected GUIInterface getInterface() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		@Override
+		protected int getScrollSpeed() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+}

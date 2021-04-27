@@ -1,0 +1,88 @@
+package com.github.lunatrius.schematica.client.world.chunk;
+
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.IProgressUpdate;
+import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.EmptyChunk;
+import net.minecraft.world.chunk.IChunkProvider;
+
+public class ChunkProviderSchematic implements IChunkProvider {
+
+    private final SchematicWorld world;
+    private final Chunk emptyChunk;
+    private final Map chunks = new ConcurrentHashMap();
+
+    public ChunkProviderSchematic(SchematicWorld world) {
+        this.world = world;
+        this.emptyChunk = new EmptyChunk(world, 0, 0);
+    }
+
+    public boolean chunkExists(int x, int z) {
+        return x >= 0 && z >= 0 && x < this.world.getWidth() && z < this.world.getLength();
+    }
+
+    public Chunk provideChunk(int x, int z) {
+        if (this.chunkExists(x, z)) {
+            long key = ChunkCoordIntPair.chunkXZ2Int(x, z);
+            ChunkSchematic chunk = (ChunkSchematic) this.chunks.get(Long.valueOf(key));
+
+            if (chunk == null) {
+                chunk = new ChunkSchematic(this.world, x, z);
+                this.chunks.put(Long.valueOf(key), chunk);
+            }
+
+            return chunk;
+        } else {
+            return this.emptyChunk;
+        }
+    }
+
+    public Chunk provideChunk(BlockPos pos) {
+        return this.provideChunk(pos.getX() >> 4, pos.getZ() >> 4);
+    }
+
+    public void populate(IChunkProvider provider, int x, int z) {}
+
+    public boolean populateChunk(IChunkProvider chunkProvider, Chunk chunk, int x, int z) {
+        return false;
+    }
+
+    public boolean saveChunks(boolean saveExtra, IProgressUpdate progressUpdate) {
+        return true;
+    }
+
+    public boolean unloadQueuedChunks() {
+        return false;
+    }
+
+    public boolean canSave() {
+        return false;
+    }
+
+    public String makeString() {
+        return "SchematicChunkCache";
+    }
+
+    public List getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos) {
+        return null;
+    }
+
+    public BlockPos getStrongholdGen(World world, String name, BlockPos pos) {
+        return null;
+    }
+
+    public int getLoadedChunkCount() {
+        return this.world.getWidth() * this.world.getLength();
+    }
+
+    public void recreateStructures(Chunk chunk, int x, int z) {}
+
+    public void saveExtraData() {}
+}

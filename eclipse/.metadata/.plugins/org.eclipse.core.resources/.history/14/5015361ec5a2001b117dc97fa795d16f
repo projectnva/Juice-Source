@@ -1,0 +1,63 @@
+package clientname.gui.clickgui.monsoon.newgui.components;
+
+
+
+import java.awt.Color;
+
+import org.lwjgl.opengl.GL11;
+
+import clientname.Client;
+import clientname.util.render.DrawUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.renderer.GlStateManager;
+
+
+
+public class SmallButton extends GuiButton {
+  protected boolean hovered;
+  
+  //public static VoyageFontFromAsset font = new VoyageFontFromAsset(new ResourceLocation("Voyage/font/AntipastoPro-DemiBold_trial.ttf"), 23.0F);
+  private FontRenderer font = Minecraft.getMinecraft().fontRendererObj;
+  
+  public SmallButton(int buttonId, int x, int y, int widthIn, int heightIn, String buttonText) {
+    super(buttonId, x, y, widthIn, heightIn, buttonText);
+    this.width = 200;
+    this.height = 20;
+    this.enabled = true;
+    this.visible = true;
+    this.id = buttonId;
+    this.xPosition = x;
+    this.yPosition = y;
+    this.width = widthIn;
+    this.height = heightIn;
+    this.displayString = buttonText;
+  }
+  
+  public SmallButton(int buttonId, int x, int y, String buttonText) {
+    this(buttonId, x, y, 100, 20, buttonText);
+  }
+  
+  public void drawButton(Minecraft p_146112_1_, int p_146112_2_, int p_146112_3_) {
+    this.hovered = (p_146112_2_ >= this.xPosition && p_146112_3_ >= this.yPosition && p_146112_2_ < this.xPosition + this.width && p_146112_3_ < this.yPosition + this.height);
+    if (this.visible) {
+      int j = 14737632;
+      if (!this.enabled) {
+        j = 10526880;
+      } else if (this.hovered) {
+        j = 16777120;
+      } 
+      mouseDragged(p_146112_1_, p_146112_2_, p_146112_3_);
+      DrawUtil.drawBorderedRoundedRect(this.xPosition, this.yPosition, (this.xPosition + this.width - 35), (this.yPosition + this.height + 5), 10, new Color(0, 0, 0, 255).getRGB(), new Color(255, 255, 255, 70).getRGB());
+      font.drawString(this.displayString, (this.xPosition + this.width / 2 - this.font.getStringWidth(this.displayString) / 2 - 1  - 17), (this.yPosition + this.height - 12), Client.currentTheme.getSecondaryColor());
+      GlStateManager.resetColor();
+      GlStateManager.clearColor(1.0F, 1.0F, 1.0F, 1.0F);
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+    } 
+  }
+  
+  public boolean isMouseOver() {
+    return this.hovered;
+  }
+}

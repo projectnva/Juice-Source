@@ -1,0 +1,339 @@
+package com.github.lunatrius.schematica.proxy;
+
+import com.github.lunatrius.core.util.MBlockPos;
+import com.github.lunatrius.core.util.vector.Vector3d;
+import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.client.printer.SchematicLiquidPrinter;
+import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
+import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import com.github.lunatrius.schematica.command.client.CommandSchematicaReplace;
+import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.handler.client.GuiHandler;
+import com.github.lunatrius.schematica.handler.client.InputHandler;
+import com.github.lunatrius.schematica.handler.client.OverlayHandler;
+import com.github.lunatrius.schematica.handler.client.RenderTickHandler;
+import com.github.lunatrius.schematica.handler.client.TickHandler;
+import com.github.lunatrius.schematica.handler.client.WorldHandler;
+import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import com.orbitclient.imsoogood.ez.orbitclient.OrbitClient;
+import com.orbitclient.imsoogood.ez.orbitclient.modules.SchemShare;
+import com.orbitclient.imsoogood.ez.orbitclient.util.ChatColor;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Property;
+import net.minecraftforge.fml.client.config.GuiConfigEntries.NumberSliderEntry;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
+public class ClientProxy extends CommonProxy {
+
+    public static boolean isRenderingGuide = false;
+    public static boolean isPendingReset = false;
+    public static final Vector3d playerPosition = new Vector3d();
+    public static EnumFacing orientation = null;
+    public static int rotationRender = 0;
+    public static SchematicWorld schematic = null;
+    public static SchematicWorld schematic2 = null;
+    public static File loadedDirectory2 = null;
+    public static String loadedFilename2 = null;
+    public static final MBlockPos pointA = new MBlockPos();
+    public static final MBlockPos pointB = new MBlockPos();
+    public static final MBlockPos pointMin = new MBlockPos();
+    public static final MBlockPos pointMax = new MBlockPos();
+    public static EnumFacing axisFlip = EnumFacing.UP;
+    public static EnumFacing axisRotation = EnumFacing.UP;
+    public static EntityPlayer loadedPlayer = null;
+    public static File loadedDirectory = null;
+    public static String loadedFilename = null;
+    public static MovingObjectPosition movingObjectPosition = null;
+    private static final Minecraft MINECRAFT = Minecraft.getMinecraft();
+
+    public static void setPlayerData(EntityPlayer player, float partialTicks) {
+        ClientProxy.playerPosition.x = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double) partialTicks;
+        ClientProxy.playerPosition.y = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double) partialTicks;
+        ClientProxy.playerPosition.z = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double) partialTicks;
+        ClientProxy.orientation = getOrientation(player);
+        ClientProxy.rotationRender = MathHelper.floor_double((double) (player.rotationYaw / 90.0F)) & 3;
+    }
+
+    private static EnumFacing getOrientation(EntityPlayer player) {
+        if (player.rotationPitch > 45.0F) {
+            return EnumFacing.DOWN;
+        } else if (player.rotationPitch < -45.0F) {
+            return EnumFacing.UP;
+        } else {
+            switch (MathHelper.floor_double((double) player.rotationYaw / 90.0D + 0.5D) & 3) {
+            case 0:
+                return EnumFacing.SOUTH;
+
+            case 1:
+                return EnumFacing.WEST;
+
+            case 2:
+                return EnumFacing.NORTH;
+
+            case 3:
+                return EnumFacing.EAST;
+
+            default:
+                return null;
+            }
+        }
+    }
+
+    public static void updatePoints() {
+        ClientProxy.pointMin.x = Math.min(ClientProxy.pointA.x, ClientProxy.pointB.x);
+        ClientProxy.pointMin.y = Math.min(ClientProxy.pointA.y, ClientProxy.pointB.y);
+        ClientProxy.pointMin.z = Math.min(ClientProxy.pointA.z, ClientProxy.pointB.z);
+        ClientProxy.pointMax.x = Math.max(ClientProxy.pointA.x, ClientProxy.pointB.x);
+        ClientProxy.pointMax.y = Math.max(ClientProxy.pointA.y, ClientProxy.pointB.y);
+        ClientProxy.pointMax.z = Math.max(ClientProxy.pointA.z, ClientProxy.pointB.z);
+    }
+
+    public static void sendMessage(String message, Object... replacements) {
+        if (Minecraft.getMinecraft().thePlayer != null) {
+            try {
+                message = String.format(message, replacements);
+            } catch (Exception exception) {
+                ;
+            }
+
+            Minecraft.getMinecraft().thePlayer.addChatComponentMessage(new ChatComponentText(ChatColor.translateAlternateColorCodes('&', message)));
+        }
+    }
+
+    public static void sendMessage(ChatComponentText message) {
+        if (Minecraft.getMinecraft().thePlayer != null) {
+            Minecraft.getMinecraft().thePlayer.addChatComponentMessage(message);
+        }
+    }
+
+    public static void movePointToPlayer(MBlockPos point) {
+        point.x = (int) Math.floor(ClientProxy.playerPosition.x);
+        point.y = (int) Math.floor(ClientProxy.playerPosition.y);
+        point.z = (int) Math.floor(ClientProxy.playerPosition.z);
+        switch (ClientProxy.rotationRender) {
+        case 0:
+            --point.x;
+            ++point.z;
+            break;
+
+        case 1:
+            --point.x;
+            --point.z;
+            break;
+
+        case 2:
+            ++point.x;
+            --point.z;
+            break;
+
+        case 3:
+            ++point.x;
+            ++point.z;
+        }
+
+    }
+
+    public static void moveSchematicToPlayer(SchematicWorld schematic) {
+        if (schematic != null) {
+            MBlockPos position = schematic.position;
+
+            position.x = (int) Math.floor(ClientProxy.playerPosition.x);
+            position.y = (int) Math.floor(ClientProxy.playerPosition.y);
+            position.z = (int) Math.floor(ClientProxy.playerPosition.z);
+            switch (ClientProxy.rotationRender) {
+            case 0:
+                position.x -= schematic.getWidth();
+                ++position.z;
+                break;
+
+            case 1:
+                position.x -= schematic.getWidth();
+                position.z -= schematic.getLength();
+                break;
+
+            case 2:
+                ++position.x;
+                position.z -= schematic.getLength();
+                break;
+
+            case 3:
+                ++position.x;
+                ++position.z;
+            }
+        }
+
+    }
+
+    public void preInit(FMLPreInitializationEvent event) {
+        super.preInit(event);
+        OrbitClient.INSTANCE.preinit();
+        Property[] sliders = new Property[] { ConfigurationHandler.propAlpha, ConfigurationHandler.propBlockDelta, ConfigurationHandler.propRenderDistance, ConfigurationHandler.propPlaceDelay, ConfigurationHandler.propTimeout, ConfigurationHandler.propPlaceDistance};
+        Property[] aproperty = sliders;
+        int i = sliders.length;
+
+        int j;
+
+        for (j = 0; j < i; ++j) {
+            Property keyBinding = aproperty[j];
+
+            keyBinding.setConfigEntryClass(NumberSliderEntry.class);
+        }
+
+        KeyBinding[] akeybinding = InputHandler.KEY_BINDINGS;
+
+        i = akeybinding.length;
+
+        for (j = 0; j < i; ++j) {
+            KeyBinding keybinding = akeybinding[j];
+
+            ClientRegistry.registerKeyBinding(keybinding);
+        }
+
+    }
+
+    public void init(FMLInitializationEvent event) {
+        super.init(event);
+        MinecraftForge.EVENT_BUS.register(InputHandler.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(TickHandler.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(ConfigurationHandler.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(RenderSchematic.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(GuiHandler.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(new OverlayHandler());
+        MinecraftForge.EVENT_BUS.register(new WorldHandler());
+        OrbitClient.INSTANCE.init();
+        ClientCommandHandler.instance.registerCommand(new CommandSchematicaReplace());
+    }
+
+    public void postInit(FMLPostInitializationEvent event) {
+        super.postInit(event);
+        OrbitClient.INSTANCE.postinit();
+        this.resetSettings();
+    }
+
+    public File getDataDirectory() {
+        File file = ClientProxy.MINECRAFT.mcDataDir;
+
+        try {
+            return file.getCanonicalFile();
+        } catch (IOException ioexception) {
+            Reference.logger.debug("Could not canonize path!", ioexception);
+            return file;
+        }
+    }
+
+    public void resetSettings() {
+        super.resetSettings();
+        SchematicPrinter.INSTANCE.setEnabled(true);
+        this.unloadSchematic();
+        ClientProxy.playerPosition.set(0.0D, 0.0D, 0.0D);
+        ClientProxy.orientation = null;
+        ClientProxy.rotationRender = 0;
+        ClientProxy.pointA.set(0, 0, 0);
+        ClientProxy.pointB.set(0, 0, 0);
+        updatePoints();
+    }
+
+    public void unloadSchematic() {
+        ClientProxy.schematic = null;
+        RenderSchematic.INSTANCE.setWorldAndLoadRenderers((SchematicWorld) null);
+        SchematicPrinter.INSTANCE.setSchematic((SchematicWorld) null);
+        SchematicLiquidPrinter.INSTANCE.setSchematic((SchematicWorld) null);
+    }
+
+    public boolean loadSchematic(EntityPlayer player, File directory, String filename) {
+        try {
+            SchemShare.currentFile = directory + "/" + filename;
+            ClientProxy.loadedDirectory = directory;
+            ClientProxy.loadedFilename = filename;
+            ClientProxy.loadedPlayer = player;
+            ISchematic err = SchematicFormat.readFromFile(directory, filename);
+
+            if (err == null) {
+                return false;
+            }
+
+            SchematicWorld world = new SchematicWorld(err);
+
+            Reference.logger.debug("Loaded {} [w:{},h:{},l:{}]", new Object[] { filename, Integer.valueOf(world.getWidth()), Integer.valueOf(world.getHeight()), Integer.valueOf(world.getLength())});
+            ClientProxy.schematic = world;
+            MinecraftForge.EVENT_BUS.register(this);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+
+        return true;
+    }
+
+    public static void switchSchematic() {
+        SchematicWorld schematictemp = ClientProxy.schematic;
+        File loadedDirectorytemp = ClientProxy.loadedDirectory;
+        String loadedFilenametemp = ClientProxy.loadedFilename;
+        ArrayList logtemp = new ArrayList(SchemShare.log);
+        String schemsharefiletemp = SchemShare.currentFile;
+
+        ClientProxy.schematic = ClientProxy.schematic2;
+        ClientProxy.loadedFilename = ClientProxy.loadedFilename2;
+        ClientProxy.loadedDirectory = ClientProxy.loadedDirectory2;
+        SchemShare.log = new ArrayList(SchemShare.log2);
+        SchemShare.currentFile = SchemShare.currentFile2;
+        ClientProxy.loadedDirectory2 = loadedDirectorytemp;
+        ClientProxy.loadedFilename2 = loadedFilenametemp;
+        ClientProxy.schematic2 = schematictemp;
+        SchemShare.log2 = new ArrayList(logtemp);
+        SchemShare.currentFile2 = schemsharefiletemp;
+        RenderSchematic.INSTANCE.setWorldAndLoadRenderers(ClientProxy.schematic);
+        SchematicPrinter.INSTANCE.setSchematic(ClientProxy.schematic);
+        SchematicLiquidPrinter.INSTANCE.setSchematic(ClientProxy.schematic);
+    }
+
+    @SubscribeEvent
+    public void onRender(RenderWorldLastEvent event) {
+        if (ClientProxy.schematic != null) {
+            RenderSchematic.INSTANCE.setWorldAndLoadRenderers(ClientProxy.schematic);
+            SchematicPrinter.INSTANCE.setSchematic(ClientProxy.schematic);
+            SchematicLiquidPrinter.INSTANCE.setSchematic(ClientProxy.schematic);
+            ClientProxy.schematic.isRendering = true;
+            SchematicWorld schem = ClientProxy.schematic;
+
+            if (schem != null) {
+                sendMessage(ChatColor.translateAlternateColorCodes('&', "&7(&9OrbitClient&7) Schematic has been loaded!"), new Object[0]);
+                SchemShare.clearLog();
+                moveSchematicToPlayer(schem);
+                SchemShare.INSTANCE.onloadComplete();
+            }
+        }
+
+        MinecraftForge.EVENT_BUS.unregister(this);
+    }
+
+    public boolean reloadSchematic() {
+        return this.loadSchematic(ClientProxy.loadedPlayer, ClientProxy.loadedDirectory, ClientProxy.loadedFilename);
+    }
+
+    public boolean isPlayerQuotaExceeded(EntityPlayer player) {
+        return false;
+    }
+
+    public File getPlayerSchematicDirectory(EntityPlayer player, boolean privateDirectory) {
+        return ConfigurationHandler.schematicDirectory;
+    }
+}

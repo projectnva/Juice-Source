@@ -1,0 +1,131 @@
+package me.aycy.blockoverlay.gui;
+
+import me.aycy.blockoverlay.BlockOverlay;
+import me.aycy.blockoverlay.utils.GuiUtil;
+import me.aycy.blockoverlay.utils.Overlay;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.fml.client.config.GuiButtonExt;
+import net.minecraftforge.fml.client.config.GuiSlider;
+import org.lwjgl.opengl.GL11;
+
+public class GuiBlockOverlay extends GuiScreen {
+
+    private GuiButtonExt buttonMode;
+    private GuiButtonExt buttonPersistent;
+    private GuiButtonExt buttonDepth;
+    private GuiButtonExt buttonChroma;
+    private GuiSlider sliderWidth;
+    private GuiSlider sliderRed;
+    private GuiSlider sliderGreen;
+    private GuiSlider sliderBlue;
+    private GuiSlider sliderAlpha;
+    private GuiSlider sliderSpeed;
+
+    public void initGui() {
+        boolean flag = BlockOverlay.config.isChroma();
+
+        super.buttonList.add(this.buttonMode = new GuiButtonExt(0, super.width - 110, super.height / 2 - 46, 100, 20, "Mode: " + BlockOverlay.config.getMode().name));
+        super.buttonList.add(this.buttonPersistent = new GuiButtonExt(1, super.width - 110, super.height / 2 - 22, 100, 20, "Persistent: " + GuiUtil.getState(BlockOverlay.config.isPersistent())));
+        super.buttonList.add(this.buttonDepth = new GuiButtonExt(2, super.width - 110, super.height / 2 + 2, 100, 20, "Ignore Depth: " + GuiUtil.getState(BlockOverlay.config.isIgnoreDepth())));
+        super.buttonList.add(this.buttonChroma = new GuiButtonExt(3, super.width - 110, super.height / 2 + 26, 100, 20, "Chroma: " + GuiUtil.getState(BlockOverlay.config.isChroma())));
+        super.buttonList.add(this.sliderWidth = new GuiSlider(4, 10, BlockOverlay.config.isChroma() ? super.height / 2 - 34 : super.height / 2 - 58, 100, 20, "Line Width: ", "", 0.0D, 3.0D, (double) BlockOverlay.config.getLineWidth(), false, true));
+        super.buttonList.add(this.sliderRed = new GuiSlider(5, 10, super.height / 2 - 34, 100, 20, "Red: ", "", 0.0D, 255.0D, (double) BlockOverlay.config.getRed(), false, true));
+        super.buttonList.add(this.sliderGreen = new GuiSlider(6, 10, super.height / 2 - 10, 100, 20, "Green: ", "", 0.0D, 255.0D, (double) BlockOverlay.config.getGreen(), false, true));
+        super.buttonList.add(this.sliderBlue = new GuiSlider(7, 10, super.height / 2 + 14, 100, 20, "Blue: ", "", 0.0D, 255.0D, (double) BlockOverlay.config.getBlue(), false, true));
+        super.buttonList.add(this.sliderAlpha = new GuiSlider(8, 10, BlockOverlay.config.isChroma() ? super.height / 2 - 10 : super.height / 2 + 38, 100, 20, "Alpha: ", "", 0.0D, 255.0D, (double) BlockOverlay.config.getAlpha(), false, true));
+        super.buttonList.add(this.sliderSpeed = new GuiSlider(9, 10, super.height / 2 + 14, 100, 20, "Speed: ", "", 1.0D, 10.0D, (double) BlockOverlay.config.getChromaSpeed(), false, true));
+        this.sliderRed.visible = !flag;
+        this.sliderRed.enabled = !flag;
+        this.sliderBlue.visible = !flag;
+        this.sliderBlue.enabled = !flag;
+        this.sliderGreen.visible = !flag;
+        this.sliderGreen.enabled = !flag;
+        this.sliderSpeed.visible = flag;
+        this.sliderSpeed.enabled = flag;
+    }
+
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        Gui.drawRect(0, 0, 120, super.height, Integer.MIN_VALUE);
+        Gui.drawRect(super.width - 120, 0, super.width, super.height, Integer.MIN_VALUE);
+        GL11.glPushMatrix();
+        GL11.glScalef(1.2F, 1.2F, 1.0F);
+        super.drawCenteredString(super.fontRendererObj, "Block Overlay", (int) ((float) (super.width / 2) / 1.2F), 7, -1);
+        GL11.glPopMatrix();
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    protected void actionPerformed(GuiButton button) {
+        switch (button.id) {
+        case 0:
+            BlockOverlay.config.setMode(Overlay.getNextMode());
+            this.buttonMode.displayString = "Mode: " + BlockOverlay.config.getMode().name;
+            break;
+
+        case 1:
+            BlockOverlay.config.setPersistent(!BlockOverlay.config.isPersistent());
+            this.buttonPersistent.displayString = "Persistent: " + GuiUtil.getState(BlockOverlay.config.isPersistent());
+            break;
+
+        case 2:
+            BlockOverlay.config.setIgnoreDepth(!BlockOverlay.config.isIgnoreDepth());
+            this.buttonDepth.displayString = "Ignore Depth: " + GuiUtil.getState(BlockOverlay.config.isIgnoreDepth());
+            break;
+
+        case 3:
+            BlockOverlay.config.setChroma(!BlockOverlay.config.isChroma());
+            boolean flag = BlockOverlay.config.isChroma();
+
+            this.buttonChroma.displayString = "Chroma: " + GuiUtil.getState(flag);
+            this.sliderWidth.yPosition = flag ? super.height / 2 - 34 : super.height / 2 - 58;
+            this.sliderAlpha.yPosition = flag ? super.height / 2 - 10 : super.height / 2 + 38;
+            this.sliderRed.visible = !flag;
+            this.sliderRed.enabled = !flag;
+            this.sliderBlue.visible = !flag;
+            this.sliderBlue.enabled = !flag;
+            this.sliderGreen.visible = !flag;
+            this.sliderGreen.enabled = !flag;
+            this.sliderSpeed.visible = flag;
+            this.sliderSpeed.enabled = flag;
+            break;
+
+        case 4:
+            BlockOverlay.config.setLineWidth((float) this.sliderWidth.getValue());
+            break;
+
+        case 5:
+            BlockOverlay.config.setRed(this.sliderRed.getValueInt());
+            break;
+
+        case 6:
+            BlockOverlay.config.setGreen(this.sliderGreen.getValueInt());
+            break;
+
+        case 7:
+            BlockOverlay.config.setBlue(this.sliderBlue.getValueInt());
+            break;
+
+        case 8:
+            BlockOverlay.config.setAlpha(this.sliderAlpha.getValueInt());
+            break;
+
+        case 9:
+            BlockOverlay.config.setChromaSpeed(this.sliderSpeed.getValueInt());
+        }
+
+    }
+
+    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+        BlockOverlay.config.setLineWidth((float) this.sliderWidth.getValue());
+        BlockOverlay.config.setRed(this.sliderRed.getValueInt());
+        BlockOverlay.config.setGreen(this.sliderGreen.getValueInt());
+        BlockOverlay.config.setBlue(this.sliderBlue.getValueInt());
+        BlockOverlay.config.setAlpha(this.sliderAlpha.getValueInt());
+        BlockOverlay.config.setChromaSpeed(this.sliderSpeed.getValueInt());
+    }
+
+    public void onGuiClosed() {
+        BlockOverlay.config.save();
+    }
+}

@@ -1,0 +1,43 @@
+package com.github.lunatrius.core.handler;
+
+import com.github.lunatrius.core.reference.Names;
+import java.io.File;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
+public class ConfigurationHandler {
+
+    public static Configuration configuration;
+    public static final boolean CHECK_FOR_UPDATES_DEFAULT = true;
+    public static boolean checkForUpdates = true;
+
+    public static void init(File configFile) {
+        if (ConfigurationHandler.configuration == null) {
+            ConfigurationHandler.configuration = new Configuration(configFile);
+            loadConfiguration();
+        }
+
+    }
+
+    private static void loadConfiguration() {
+        Property propCheckForUpdates = ConfigurationHandler.configuration.get("versioncheck", "checkForUpdates", true, "Should the mod check for updates?");
+
+        propCheckForUpdates.setLanguageKey(Names.Config.LANG_PREFIX + "." + "checkForUpdates");
+        propCheckForUpdates.setRequiresMcRestart(true);
+        ConfigurationHandler.checkForUpdates = propCheckForUpdates.getBoolean(true);
+        if (ConfigurationHandler.configuration.hasChanged()) {
+            ConfigurationHandler.configuration.save();
+        }
+
+    }
+
+    @SubscribeEvent
+    public void onConfigurationChangedEvent(OnConfigChangedEvent event) {
+        if (event.modID.equalsIgnoreCase("LunatriusCore")) {
+            loadConfiguration();
+        }
+
+    }
+}

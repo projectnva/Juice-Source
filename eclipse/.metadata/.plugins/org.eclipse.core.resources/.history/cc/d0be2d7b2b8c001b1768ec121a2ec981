@@ -1,0 +1,72 @@
+package com.github.lunatrius.schematica.handler;
+
+import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.chunk.SchematicContainer;
+import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import java.util.ArrayDeque;
+import java.util.Queue;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
+
+public class QueueTickHandler {
+
+    public static final QueueTickHandler INSTANCE = new QueueTickHandler();
+    private final Queue queue = new ArrayDeque();
+
+    @SubscribeEvent
+    public void onClientTick(ClientTickEvent event) {
+        if (event.phase != Phase.START) {
+            try {
+                EntityPlayerSP e = Minecraft.getMinecraft().thePlayer;
+
+                if (e != null && e.sendQueue != null && !e.sendQueue.getNetworkManager().isLocalChannel()) {
+                    this.processQueue();
+                }
+            } catch (Exception exception) {
+                Reference.logger.error("Something went wrong...", exception);
+            }
+
+        }
+    }
+
+    @SubscribeEvent
+    public void onServerTick(ServerTickEvent event) {
+        if (event.phase != Phase.START) {
+            this.processQueue();
+        }
+    }
+
+    private void processQueue() {
+        if (this.queue.size() != 0) {
+            SchematicContainer container = (SchematicContainer) this.queue.poll();
+
+            if (container != null) {
+                if (container.hasNext()) {
+                    if (container.isFirst()) {
+                        ChatComponentTranslation chatComponent = new ChatComponentTranslation("schematica.command.save.started", new Object[] { Integer.valueOf(container.chunkCount), container.file.getName()});
+
+                        container.player.addChatMessage(chatComponent);
+                    }
+
+                    container.next();
+                }
+
+                if (container.hasNext()) {
+                    this.queue.offer(container);
+                } else {
+                    SchematicFormat.writeToFileAndNotify(container.file, container.schematic, container.player);
+                }
+
+            }
+        }
+    }
+
+    public void queueSchematic(SchematicContainer container) {
+        this.queue.offer(container);
+    }
+}

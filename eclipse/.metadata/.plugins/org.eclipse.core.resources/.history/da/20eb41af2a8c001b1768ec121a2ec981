@@ -1,0 +1,35 @@
+package com.orbitclient.imsoogood.ez.orbitclient.util;
+
+import java.security.MessageDigest;
+
+public class HWID {
+
+    public static String getHWID() {
+        try {
+            String e = System.getenv("COMPUTERNAME") + System.getProperty("user.name") + System.getenv("PROCESSOR_IDENTIFIER") + System.getenv("PROCESSOR_LEVEL");
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            md.update(e.getBytes());
+            StringBuffer hexString = new StringBuffer();
+            byte[] byteData = md.digest();
+            byte[] abyte = byteData;
+            int i = byteData.length;
+
+            for (int j = 0; j < i; ++j) {
+                byte aByteData = abyte[j];
+                String hex = Integer.toHexString(255 & aByteData);
+
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return "Error";
+        }
+    }
+}

@@ -1,0 +1,245 @@
+[02:06:07] [Client thread/INFO]: Setting user: Player0
+[02:06:07] [Client thread/INFO]: (Session ID is token:0:Player0)
+[02:06:08] [Client thread/INFO]: Logging in with username & password
+[02:06:10] [Client thread/INFO]: [OptiFine] *** Reflector Forge ***
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.model.Attributes
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: mods.betterfoliage.client.BetterFoliageClient
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.fml.common.asm.transformers.BlamingTransformer
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.event.world.ChunkWatchEvent$UnWatch
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.fml.relauncher.CoreModManager
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.common.DimensionManager
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.event.GuiScreenEvent$DrawScreenEvent$Pre
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.event.GuiScreenEvent$DrawScreenEvent$Post
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.event.EntityViewRenderEvent$CameraSetup
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.event.EntityViewRenderEvent$FogColors
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.fml.common.eventhandler.Event
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.fml.common.eventhandler.EventBus
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.fml.common.eventhandler.Event$Result
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.common.property.ExtendedBlockState
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.fml.client.FMLClientHandler
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.fml.common.FMLCommonHandler
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.world.biome.BiomeGenBase.getWaterColorMultiplier
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.block.Block.addDestroyEffects
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.block.Block.addHitEffects
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.block.Block.canCreatureSpawn
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.block.Block.canRenderInLayer
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.block.Block.doesSideBlockRendering
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.block.Block.getBedDirection
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.block.Block.getExtendedState
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.block.Block.hasTileEntity
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.block.Block.isAir
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.block.Block.isBed
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.block.Block.isBedFoot
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.block.Block.isSideSolid
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.entity.Entity.canRiderInteract
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Field not present: net.minecraft.entity.Entity.captureDrops
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Field not present: net.minecraft.entity.Entity.capturedDrops
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.entity.Entity.shouldRenderInPass
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.entity.Entity.shouldRiderSit
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.event.ForgeEventFactory
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.common.ForgeHooks
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.ForgeHooksClient
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.item.Item.getDurabilityForDisplay
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.item.Item.getModel
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.item.Item.onEntitySwing
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.item.Item.shouldCauseReequipAnimation
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.item.Item.showDurabilityBar
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.item.ItemRecord.getRecordResource
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.common.ForgeModContainer
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.potion.PotionEffect.isCurativeItem
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.tileentity.TileEntity.canRenderBreaking
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.tileentity.TileEntity.getRenderBoundingBox
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.tileentity.TileEntity.hasFastRenderer
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.tileentity.TileEntity.shouldRenderInPass
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher.preDrawBatch
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher.drawBatch
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.client.renderer.vertex.VertexFormatElement$EnumUsage.preDraw
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.client.renderer.vertex.VertexFormatElement$EnumUsage.postDraw
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.world.World.countEntities
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.world.World.getPerWorldStorage
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.world.WorldProvider.getCloudRenderer
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.world.WorldProvider.getSkyRenderer
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Method not present: net.minecraft.world.WorldProvider.getWeatherRenderer
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.fml.client.GuiModList
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.model.IColoredBakedQuad
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.common.property.IExtendedBlockState
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.IRenderHandler
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.model.ISmartBlockModel
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.ItemModelMesherForge
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraft.launchwrapper.Launch
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.model.pipeline.LightUtil
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.common.MinecraftForge
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.MinecraftForgeClient
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.model.ModelLoader
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.event.RenderBlockOverlayEvent$OverlayType
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.fml.client.registry.RenderingRegistry
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.event.RenderItemInFrameEvent
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.event.RenderLivingEvent$Pre
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.event.RenderLivingEvent$Post
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.event.RenderLivingEvent$Specials$Pre
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.client.event.RenderLivingEvent$Specials$Post
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.fml.client.SplashProgress
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: net.minecraftforge.event.world.WorldEvent$Load
+[02:06:10] [Client thread/INFO]: [OptiFine] *** Reflector Vanilla ***
+[02:06:10] [Client thread/INFO]: [OptiFine] (Reflector) Class not present: optifine.OptiFineClassTransformer
+[02:06:10] [Client thread/INFO]: LWJGL Version: 2.9.4
+[02:06:10] [Client thread/INFO]: [OptiFine] 
+[02:06:10] [Client thread/INFO]: [OptiFine] OptiFine_1.8.8_HD_U_H8
+[02:06:10] [Client thread/INFO]: [OptiFine] Build: null
+[02:06:10] [Client thread/INFO]: [OptiFine] OS: Windows 10 (amd64) version 10.0
+[02:06:10] [Client thread/INFO]: [OptiFine] Java: 1.8.0_275, Eclipse OpenJ9
+[02:06:10] [Client thread/INFO]: [OptiFine] VM: Eclipse OpenJ9 VM (JRE 1.8.0 Windows 10 amd64-64-Bit Compressed References 20201112_897 (JIT enabled, AOT enabled)
+OpenJ9   - 0394ef754
+OMR      - 582366ae5
+JCL      - b52d2ff7ee based on jdk8u275-b01), Eclipse OpenJ9
+[02:06:10] [Client thread/INFO]: [OptiFine] LWJGL: 2.9.4
+[02:06:10] [Client thread/INFO]: [OptiFine] OpenGL: GeForce RTX 2070 SUPER/PCIe/SSE2, version 4.6.0 NVIDIA 457.09, NVIDIA Corporation
+[02:06:10] [Client thread/INFO]: [OptiFine] OpenGL Version: 4.6.0
+[02:06:10] [Client thread/INFO]: [OptiFine] Maximum texture size: 32768x32768
+[02:06:10] [Client thread/INFO]: [Shaders] ShadersMod version: 2.4.12
+[02:06:10] [Client thread/INFO]: [Shaders] OpenGL Version: 4.6.0 NVIDIA 457.09
+[02:06:10] [Client thread/INFO]: [Shaders] Vendor:  NVIDIA Corporation
+[02:06:10] [Client thread/INFO]: [Shaders] Renderer: GeForce RTX 2070 SUPER/PCIe/SSE2
+[02:06:10] [Client thread/INFO]: [Shaders] Capabilities:  2.0  2.1  3.0  3.2  4.0 
+[02:06:10] [Client thread/INFO]: [Shaders] GL_MAX_DRAW_BUFFERS: 8
+[02:06:10] [Client thread/INFO]: [Shaders] GL_MAX_COLOR_ATTACHMENTS_EXT: 8
+[02:06:10] [Client thread/INFO]: [Shaders] GL_MAX_TEXTURE_IMAGE_UNITS: 32
+[02:06:10] [Client thread/INFO]: [Shaders] Load ShadersMod configuration.
+[02:06:10] [Client thread/INFO]: [Shaders] No shaderpack loaded.
+[02:06:10] [Client thread/INFO]: Reloading ResourceManager: Default, Jylio Default §l§e[V&P] 1.8.9.zip
+[02:06:10] [Client thread/INFO]: [OptiFine] *** Reloading textures ***
+[02:06:10] [Client thread/INFO]: [OptiFine] Resource packs: Jylio Default §l§e[V&P] 1.8.9.zip
+[02:06:11] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[02:06:11] [Client thread/ERROR]: ########## GL ERROR ##########
+[02:06:11] [Client thread/ERROR]: @ Pre startup
+[02:06:11] [Client thread/ERROR]: 1281: Invalid value
+[02:06:11] [Thread-10/INFO]: Initializing LWJGL OpenAL
+[02:06:11] [Thread-10/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+[02:06:12] [Client thread/INFO]: [OptiFine] Mipmap levels: 4
+[02:06:12] [Client thread/INFO]: [OptiFine] Multitexture: false
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/black/black_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:black_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/black/black_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:black_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/black/glass_black.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/blue/blue_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:blue_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/blue/blue_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:blue_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/blue/glass_blue.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/brown/brown_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:brown_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/brown/brown_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:brown_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/brown/glass_brown.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/cyan/cyan_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:cyan_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/cyan/cyan_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:cyan_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/cyan/glass_cyan.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/gray/glass_gray.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/gray/gray_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:gray_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/gray/gray_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:gray_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/green/glass_green.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/green/green_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:green_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/green/green_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:green_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/light_blue/glass_light_blue.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/light_blue/light_blue_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:light_blue_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/light_blue/light_blue_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:light_blue_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/lime/glass_lime.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/lime/lime_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:lime_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/lime/lime_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:lime_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/magenta/glass_magenta.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/magenta/magenta_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:magenta_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/magenta/magenta_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:magenta_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/normal/glass.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/normal/glass_pane.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/orange/glass_orange.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/orange/orange_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:orange_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/orange/orange_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:orange_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/pink/glass_pink.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/pink/pink_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:pink_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/pink/pink_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:pink_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/purple/glass_purple.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/purple/purple_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:purple_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/purple/purple_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:purple_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/red/glass_red.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/red/red_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:red_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/red/red_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:red_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/silver/glass_silver.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/silver/silver_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:silver_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/silver/silver_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:silver_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/white/glass_white.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/white/white_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:white_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/white/white_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:white_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/yellow/glass_yellow.properties
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/yellow/yellow_stained_glass.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:yellow_stained_glass
+[02:06:12] [Client thread/INFO]: [OptiFine] ConnectedTextures: mcpatcher/ctm/glass/yellow/yellow_stained_glass_pane.properties
+[02:06:12] [Client thread/WARN]: [OptiFine] ConnectedTextures: Block not found for name: minecraft:yellow_stained_glass_pane
+[02:06:12] [Client thread/INFO]: [OptiFine] Multipass connected textures: false
+[02:06:12] [Client thread/INFO]: [OptiFine] Multipass connected textures: false
+[02:06:12] [Client thread/INFO]: Created: 1024x512 textures-atlas
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/cat/black.png, variants: 4
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/cat/red.png, variants: 3
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/cat/siamese.png, variants: 4
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/cow/cow.png, variants: 9
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/enderman/enderman.png, variants: 2
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/enderman/enderman_eyes.png, variants: 10
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/ghast/ghast.png, variants: 10
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/ghast/ghast_shooting.png, variants: 2
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/pig/pig.png, variants: 12
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/sheep/sheep.png, variants: 9
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/wolf/wolf.png, variants: 9
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/wolf/wolf_angry.png, variants: 10
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/wolf/wolf_tame.png, variants: 12
+[02:06:12] [Client thread/ERROR]: ########## GL ERROR ##########
+[02:06:12] [Client thread/ERROR]: @ Post startup
+[02:06:12] [Client thread/ERROR]: 1281: Invalid value
+[02:06:12] [Client thread/INFO]: [OptiFine] *** Reloading custom textures ***
+[02:06:12] [Client thread/INFO]: [OptiFine] CustomColors: Colormap mcpatcher/colormap/sky0.png
+[02:06:12] [Client thread/INFO]: [OptiFine] CustomColors: Colormap mcpatcher/lightmap/world-1.png
+[02:06:12] [Client thread/INFO]: [OptiFine] CustomColors: Colormap mcpatcher/lightmap/world0.png
+[02:06:12] [Client thread/INFO]: [OptiFine] CustomColors: Colormap mcpatcher/lightmap/world1.png
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/cat/black.png, variants: 4
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/cat/red.png, variants: 3
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/cat/siamese.png, variants: 4
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/cow/cow.png, variants: 9
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/enderman/enderman.png, variants: 2
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/enderman/enderman_eyes.png, variants: 10
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/ghast/ghast.png, variants: 10
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/ghast/ghast_shooting.png, variants: 2
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/pig/pig.png, variants: 12
+[02:06:12] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/sheep/sheep.png, variants: 9
+[02:06:13] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/wolf/wolf.png, variants: 9
+[02:06:13] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/wolf/wolf_angry.png, variants: 10
+[02:06:13] [Client thread/INFO]: [OptiFine] RandomMobs: textures/entity/wolf/wolf_tame.png, variants: 12
+[02:06:13] [Client thread/INFO]: [OptiFine] Enable face culling: acacia_leaves, birch_leaves, dark_oak_leaves, jungle_leaves, oak_leaves, spruce_leaves
+[02:06:51] [Sound Library Loader/WARN]: ERROR MESSAGE:
+[02:06:51] [Sound Library Loader/INFO]: SoundSystem did not load after 30 seconds.
+[02:06:51] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[02:06:51] [Thread-14/INFO]: Switching to No Sound
+[02:06:51] [Thread-14/INFO]: (Silent Mode)
+[02:06:51] [Sound Library Loader/INFO]: Sound engine started

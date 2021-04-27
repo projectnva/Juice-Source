@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<typeInfoHistroy>
+<typeInfo handle="=Client/src&lt;net.minecraft.world{World.java[World" modifiers="1025" timestamp="1615652157281"/>
+<typeInfo handle="=Client/src&lt;net.minecraft.entity{EntityLiving.java[EntityLiving" modifiers="1025" timestamp="1508474234056"/>
+<typeInfo handle="=Client/src&lt;net.minecraft.entity{EntityLivingBase.java[EntityLivingBase" modifiers="1025" timestamp="1615652153582"/>
+<typeInfo handle="=Client/src&lt;net.minecraft.client{Minecraft.java[Minecraft" modifiers="1" timestamp="1616600187069"/>
+<typeInfo handle="=Client/src&lt;net.minecraft.entity.item{EntityItem.java[EntityItem" modifiers="1" timestamp="1615921866410"/>
+<typeInfo handle="=Client/src&lt;clientname.mods.impl{ClassLoader.java[ClassLoader" modifiers="1" timestamp="1615938501907"/>
+<typeInfo handle="=Client/C:\/Program Files\/AdoptOpenJDK\/jdk-8.0.275.1-openj9\/jre\/lib\/rt.jar&lt;java.lang(ClassLoader.class[ClassLoader" modifiers="1057" timestamp="1605213994000"/>
+<typeInfo handle="=Client/C:\/Program Files\/AdoptOpenJDK\/jdk-8.0.275.1-openj9\/jre\/lib\/rt.jar&lt;com.sun.org.apache.bcel.internal.util(ClassLoader.class[ClassLoader" modifiers="33" timestamp="1605213994000"/>
+<typeInfo handle="=Client/src&lt;net.minecraft.entity.player{EntityPlayer.java[EntityPlayer" modifiers="1025" timestamp="1508474234067"/>
+<typeInfo handle="=Client/src&lt;net.minecraft.client.renderer.entity.layers{LayerCape.java[LayerCape" modifiers="1" timestamp="1616431780913"/>
+<typeInfo handle="=Client/src&lt;clientname.gui.options{GuiModToggle.java[GuiModToggle" modifiers="1" timestamp="1616445383167"/>
+<typeInfo handle="=Client/src&lt;clientname.gui.options{GuiCheckBox.java[GuiCheckBox" modifiers="1" timestamp="1616446010657"/>
+<typeInfo handle="=Client/src&lt;net.minecraft.client.settings{KeyBinding.java[KeyBinding" modifiers="1" timestamp="1616351297344"/>
+<typeInfo handle="=Client/src&lt;net.minecraft.client.entity{EntityPlayerSP.java[EntityPlayerSP" modifiers="1" timestamp="1616600165999"/>
+</typeInfoHistroy>

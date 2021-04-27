@@ -1,0 +1,169 @@
+package com.github.lunatrius.schematica.client.util;
+
+import com.github.lunatrius.core.util.BlockPosHelper;
+import com.github.lunatrius.core.util.MBlockPos;
+import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.block.state.BlockStateHelper;
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.storage.Schematic;
+import java.util.Iterator;
+import java.util.List;
+import net.minecraft.block.BlockLever.EnumOrientation;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Vec3i;
+import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import net.minecraftforge.fml.common.registry.GameData;
+
+public class FlipHelper {
+
+    public static final FlipHelper INSTANCE = new FlipHelper();
+    private static final FMLControlledNamespacedRegistry BLOCK_REGISTRY = GameData.getBlockRegistry();
+
+    public boolean flip(SchematicWorld world, EnumFacing axis, boolean forced) {
+        if (world == null) {
+            return false;
+        } else {
+            try {
+                ISchematic e = world.getSchematic();
+                Schematic schematicFlipped = this.flip(e, axis, forced);
+
+                world.setSchematic(schematicFlipped);
+                Iterator iterator = world.getTileEntities().iterator();
+
+                while (iterator.hasNext()) {
+                    TileEntity tileEntity = (TileEntity) iterator.next();
+
+                    world.initializeTileEntity(tileEntity);
+                }
+
+                return true;
+            } catch (FlipHelper.FlipException fliphelper_flipexception) {
+                Reference.logger.error(fliphelper_flipexception.getMessage());
+            } catch (Exception exception) {
+                Reference.logger.fatal("Something went wrong!", exception);
+            }
+
+            return false;
+        }
+    }
+
+    public Schematic flip(ISchematic schematic, EnumFacing axis, boolean forced) throws FlipHelper.FlipException {
+        Vec3i dimensionsFlipped = new Vec3i(schematic.getWidth(), schematic.getHeight(), schematic.getLength());
+        Schematic schematicFlipped = new Schematic(schematic.getIcon(), dimensionsFlipped.getX(), dimensionsFlipped.getY(), dimensionsFlipped.getZ());
+        MBlockPos tmp = new MBlockPos();
+        Iterator tileEntities = BlockPosHelper.getAllInBox(0, 0, 0, schematic.getWidth() - 1, schematic.getHeight() - 1, schematic.getLength() - 1).iterator();
+
+        while (tileEntities.hasNext()) {
+            MBlockPos pos = (MBlockPos) tileEntities.next();
+            IBlockState tileEntity = schematic.getBlockState(pos);
+            IBlockState pos1 = this.flipBlock(tileEntity, axis, forced);
+
+            schematicFlipped.setBlockState(this.flipPos(pos, axis, dimensionsFlipped, tmp), pos1);
+        }
+
+        List tileEntities1 = schematic.getTileEntities();
+        Iterator pos2 = tileEntities1.iterator();
+
+        while (pos2.hasNext()) {
+            TileEntity tileEntity1 = (TileEntity) pos2.next();
+            BlockPos pos3 = tileEntity1.getPos();
+
+            tileEntity1.setPos(new BlockPos(this.flipPos(pos3, axis, dimensionsFlipped, tmp)));
+            schematicFlipped.setTileEntity(tileEntity1.getPos(), tileEntity1);
+        }
+
+        return schematicFlipped;
+    }
+
+    private BlockPos flipPos(BlockPos pos, EnumFacing axis, Vec3i dimensions, MBlockPos flipped) throws FlipHelper.FlipException {
+        switch (axis) {
+        case DOWN:
+        case UP:
+            return flipped.set(pos.getX(), dimensions.getY() - 1 - pos.getY(), pos.getZ());
+
+        case NORTH:
+        case SOUTH:
+            return flipped.set(pos.getX(), pos.getY(), dimensions.getZ() - 1 - pos.getZ());
+
+        case WEST:
+        case EAST:
+            return flipped.set(dimensions.getX() - 1 - pos.getX(), pos.getY(), pos.getZ());
+
+        default:
+            throw new FlipHelper.FlipException("\'%s\' is not a valid axis!", new Object[] { axis.getName()});
+        }
+    }
+
+    private IBlockState flipBlock(IBlockState blockState, EnumFacing axis, boolean forced) throws FlipHelper.FlipException {
+        IProperty propertyFacing = BlockStateHelper.getProperty(blockState, "facing");
+
+        if (propertyFacing instanceof PropertyDirection) {
+            Comparable orientation = blockState.getValue(propertyFacing);
+
+            if (orientation instanceof EnumFacing) {
+                EnumFacing orientationRotated = getFlippedFacing(axis, (EnumFacing) orientation);
+
+                if (propertyFacing.getAllowedValues().contains(orientationRotated)) {
+                    return blockState.withProperty(propertyFacing, orientationRotated);
+                }
+            }
+        } else if (propertyFacing instanceof PropertyEnum) {
+            if (EnumOrientation.class.isAssignableFrom(propertyFacing.getValueClass())) {
+                EnumOrientation orientation1 = (EnumOrientation) blockState.getValue(propertyFacing);
+                EnumOrientation orientationRotated1 = getFlippedLeverFacing(axis, orientation1);
+
+                if (propertyFacing.getAllowedValues().contains(orientationRotated1)) {
+                    return blockState.withProperty(propertyFacing, orientationRotated1);
+                }
+            }
+        } else if (propertyFacing != null) {
+            Reference.logger.error("\'{}\': found \'facing\' property with unknown type {}", new Object[] { FlipHelper.BLOCK_REGISTRY.getNameForObject(blockState.getBlock()), propertyFacing.getClass().getSimpleName()});
+        }
+
+        if (!forced && propertyFacing != null) {
+            throw new FlipHelper.FlipException("\'%s\' cannot be flipped across \'%s\'", new Object[] { FlipHelper.BLOCK_REGISTRY.getNameForObject(blockState.getBlock()), axis});
+        } else {
+            return blockState;
+        }
+    }
+
+    private static EnumFacing getFlippedFacing(EnumFacing axis, EnumFacing side) {
+        return axis.getAxis() == side.getAxis() ? side.getOpposite() : side;
+    }
+
+    private static EnumOrientation getFlippedLeverFacing(EnumFacing source, EnumOrientation side) {
+        if (source.getAxis() != side.getFacing().getAxis()) {
+            return side;
+        } else {
+            EnumFacing facing;
+
+            if (side != EnumOrientation.UP_Z && side != EnumOrientation.DOWN_Z) {
+                if (side != EnumOrientation.UP_X && side != EnumOrientation.DOWN_X) {
+                    facing = side.getFacing();
+                } else {
+                    facing = EnumFacing.WEST;
+                }
+            } else {
+                facing = EnumFacing.NORTH;
+            }
+
+            EnumFacing facingFlipped = getFlippedFacing(source, side.getFacing());
+
+            return EnumOrientation.forFacings(facingFlipped, facing);
+        }
+    }
+
+    public static class FlipException extends Exception {
+
+        public FlipException(String message, Object... args) {
+            super(String.format(message, args));
+        }
+    }
+}

@@ -1,0 +1,385 @@
+package clientname.util.render;
+
+
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_FLAT;
+import static org.lwjgl.opengl.GL11.GL_LINES;
+import static org.lwjgl.opengl.GL11.GL_LINE_SMOOTH;
+import static org.lwjgl.opengl.GL11.GL_LINE_SMOOTH_HINT;
+import static org.lwjgl.opengl.GL11.GL_NICEST;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_POINT_SMOOTH;
+import static org.lwjgl.opengl.GL11.GL_POINT_SMOOTH_HINT;
+import static org.lwjgl.opengl.GL11.GL_POLYGON_SMOOTH;
+import static org.lwjgl.opengl.GL11.GL_POLYGON_SMOOTH_HINT;
+import static org.lwjgl.opengl.GL11.GL_QUADS;
+import static org.lwjgl.opengl.GL11.GL_SMOOTH;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLE_FAN;
+import static org.lwjgl.opengl.GL11.glBegin;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glColor4d;
+import static org.lwjgl.opengl.GL11.glColor4f;
+import static org.lwjgl.opengl.GL11.glDepthMask;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glEnd;
+import static org.lwjgl.opengl.GL11.glHint;
+import static org.lwjgl.opengl.GL11.glLineWidth;
+import static org.lwjgl.opengl.GL11.glPopMatrix;
+import static org.lwjgl.opengl.GL11.glPushMatrix;
+import static org.lwjgl.opengl.GL11.glScalef;
+import static org.lwjgl.opengl.GL11.glScissor;
+import static org.lwjgl.opengl.GL11.glShadeModel;
+import static org.lwjgl.opengl.GL11.glVertex2d;
+import static org.lwjgl.opengl.GL11.glVertex2f;
+import static org.lwjgl.opengl.GL11.glVertex3d;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
+import clientname.basicgui.HUDElementCategory;
+import clientname.basicgui.comp.CategoryDisplay;
+import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Timer;
+
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_ENABLE_BIT;
+import static org.lwjgl.opengl.GL11.GL_LINE_SMOOTH;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLE_FAN;
+import static org.lwjgl.opengl.GL11.glBegin;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glColor4f;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glEnd;
+import static org.lwjgl.opengl.GL11.glPopAttrib;
+import static org.lwjgl.opengl.GL11.glPushAttrib;
+import static org.lwjgl.opengl.GL11.glVertex2f;
+
+import java.awt.Color;
+import java.util.List;
+
+import org.lwjgl.opengl.GL11;
+
+import com.google.common.collect.Lists;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+
+public class RenderUtil {
+	
+	private static Minecraft mc = Minecraft.getMinecraft();
+
+    public static void drawImg(ResourceLocation loc, double posX, double posY, double width, double height) {
+        mc.getTextureManager().bindTexture(loc);
+        float f = 1.0F / (float) width;
+        float f1 = 1.0F / (float) height;
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+        worldrenderer.pos(posX, (posY + height), 0.0D).tex(0 * f, ((0 + (float) height) * f1)).endVertex();
+        worldrenderer.pos((posX + width), (posY + height), 0.0D).tex((0 + (float) width) * f, (0 + (float) height) * f1).endVertex();
+        worldrenderer.pos((posX + width), posY, 0.0D).tex((0 + (float) width) * f, 0 * f1).endVertex();
+        worldrenderer.pos(posX, posY, 0.0D).tex(0 * f, 0 * f1).endVertex();
+        tessellator.draw();
+    }
+
+    public static void drawGradientRect(double left, double top, double right, double bottom, int startColor, int endColor) {
+        float f = (float) (startColor >> 24 & 255) / 255.0F;
+        float f1 = (float) (startColor >> 16 & 255) / 255.0F;
+        float f2 = (float) (startColor >> 8 & 255) / 255.0F;
+        float f3 = (float) (startColor & 255) / 255.0F;
+        float f4 = (float) (endColor >> 24 & 255) / 255.0F;
+        float f5 = (float) (endColor >> 16 & 255) / 255.0F;
+        float f6 = (float) (endColor >> 8 & 255) / 255.0F;
+        float f7 = (float) (endColor & 255) / 255.0F;
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.shadeModel(7425);
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        worldrenderer.pos(right, top, 0.0D).color(f1, f2, f3, f).endVertex();
+        worldrenderer.pos(left, top, 0.0D).color(f1, f2, f3, f).endVertex();
+        worldrenderer.pos(left, bottom, 0.0D).color(f5, f6, f7, f4).endVertex();
+        worldrenderer.pos(right, bottom, 0.0D).color(f5, f6, f7, f4).endVertex();
+        tessellator.draw();
+        GlStateManager.shadeModel(7424);
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
+        GlStateManager.enableTexture2D();
+    }
+
+    public static void startSmooth() {
+        glEnable(GL_LINE_SMOOTH);
+        glEnable(GL_POLYGON_SMOOTH);
+        glEnable(GL_POINT_SMOOTH);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+        glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    }
+
+    public static void endSmooth() {
+        glDisable(GL_LINE_SMOOTH);
+        glDisable(GL_POLYGON_SMOOTH);
+        glEnable(GL_POINT_SMOOTH);
+    }
+
+    public static Color fade(final Color color, int index, int count) {
+        float[] hsb = new float[3];
+        Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsb);
+
+        float brightness = Math.abs((((System.currentTimeMillis() % 2000) / 1000F + (index / (float) count) * 2F) % 2F) - 1);
+        brightness = 0.5f + (0.5f * brightness);
+
+        hsb[2] = brightness % 2F;
+        return new Color(Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]));
+    }
+
+    public static void scissor(double x, double y, double width, double height) {
+        ScaledResolution sr = new ScaledResolution(mc, 0, 0);
+        final double scale = sr.getScaleFactor();
+
+        y = sr.getScaledHeight() - y;
+
+        x *= scale;
+        y *= scale;
+        width *= scale;
+        height *= scale;
+
+        glScissor((int) x, (int) (y - height), (int) width, (int) height);
+    }
+
+    public static int getOppositeColor(int color) {
+        int R = color & 255;
+        int G = (color >> 8) & 255;
+        int B = (color >> 16) & 255;
+        int A = (color >> 24) & 255;
+        R = 255 - R;
+        G = 255 - G;
+        B = 255 - B;
+        return R + (G << 8) + (B << 16) + (A << 24);
+    }
+
+    public static List<HUDElement> getElementsInCategory(HUDElementCategory category) {
+		List<HUDElement> el = Lists.newArrayList();
+		for(HUDElement element : Main.main.hud.getElements()) {
+			if(element.category == category) {
+				el.add(element);
+			}
+		}
+		return el;
+	}
+    
+
+	public static String formatCategoryName(HUDElementCategory category) {
+		String firstLetter = ("" + category.name().charAt(0)).toUpperCase();
+		String others = ("" + category.name().substring(1)).toLowerCase();
+		return firstLetter + others;
+	}
+	
+	public static FontRenderer getFontRenderer() {
+		return mc.fontRendererObj;
+	}
+	
+	public static void drawRectWH(int x, int y, int width, int height, int color) {
+		Gui.drawRect(x, y, x + width, y + height, color);
+	}
+	
+	public static void drawRectWH(int x, int y, int width, int height, Color color) {
+		Gui.drawRect(x, y, x + width, y + height, color.getRGB());
+	}
+public static Minecraft mc = Minecraft.getMinecraft();
+	
+	public static ScaledResolution getScaledResolution() {
+		return new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
+	}
+	
+	public static void drawCircle(float cx, float cy, float r, int num_segments, int c) {
+        GL11.glPushMatrix();
+        cx *= 2.0F;
+        cy *= 2.0F;
+        float f = (c >> 24 & 0xFF) / 255.0F;
+        float f1 = (c >> 16 & 0xFF) / 255.0F;
+        float f2 = (c >> 8 & 0xFF) / 255.0F;
+        float f3 = (c & 0xFF) / 255.0F;
+        float theta = (float) (6.2831852D / num_segments);
+        float p = (float) Math.cos(theta);
+        float s = (float) Math.sin(theta);
+        float x = r *= 2.0F;
+        float y = 0.0F;
+        enableGL2D();
+        GL11.glScalef(0.5F, 0.5F, 0.5F);
+        GL11.glColor4f(f1, f2, f3, f);
+        GL11.glBegin(2);
+        int ii = 0;
+        while (ii < num_segments) {
+            GL11.glVertex2f(x + cx, y + cy);
+            float t = x;
+            x = p * x - s * y;
+            y = s * t + p * y;
+            ii++;
+        }
+        GL11.glEnd();
+        GL11.glScalef(2.0F, 2.0F, 2.0F);
+        disableGL2D();
+        GlStateManager.color(1, 1, 1, 1);
+        GL11.glPopMatrix();
+    }
+	
+	public static void enableGL2D() {
+        GL11.glDisable(2929);
+        GL11.glEnable(3042);
+        GL11.glDisable(3553);
+        GL11.glBlendFunc(770, 771);
+        GL11.glDepthMask(true);
+        GL11.glEnable(2848);
+        GL11.glHint(3154, 4354);
+        GL11.glHint(3155, 4354);
+    }
+
+    public static void disableGL2D() {
+        GL11.glEnable(3553);
+        GL11.glDisable(3042);
+        GL11.glEnable(2929);
+        GL11.glDisable(2848);
+        GL11.glHint(3154, 4352);
+        GL11.glHint(3155, 4352);
+    }
+	
+	public static void drawFilledCircle(final int xx, final int yy, final float radius, final int sections,final Color color) {
+        double dAngle = 2 * Math.PI / sections;
+        float x, y;
+
+        glPushAttrib(GL_ENABLE_BIT);
+
+        glEnable(GL_BLEND);
+        glDisable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_LINE_SMOOTH);
+        glBegin(GL_TRIANGLE_FAN);
+
+        for (int i = 0; i < sections; i++) {
+            x = (float) (radius * Math.sin((i * dAngle)));
+            y = (float) (radius * Math.cos((i * dAngle)));
+
+            glColor4f(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F, color.getAlpha() / 255F);
+            glVertex2f(xx + x, yy + y);
+        }
+
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+        glEnd();
+
+        glPopAttrib();
+    }
+	
+	public static void drawRect(double left, double top, double right, double bottom, int color)
+    {
+        double var5;
+
+        if (left < right)
+        {
+            var5 = left;
+            left = right;
+            right = var5;
+        }
+
+        if (top < bottom)
+        {
+            var5 = top;
+            top = bottom;
+            bottom = var5;
+        }
+
+        float var11 = (float)(color >> 24 & 255) / 255.0F;
+        float var6 = (float)(color >> 16 & 255) / 255.0F;
+        float var7 = (float)(color >> 8 & 255) / 255.0F;
+        float var8 = (float)(color & 255) / 255.0F;
+        Tessellator var9 = Tessellator.getInstance();
+        WorldRenderer var10 = var9.getWorldRenderer();
+        GlStateManager.enableBlend();
+        GlStateManager.func_179090_x();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.color(var6, var7, var8, var11);
+        var10.startDrawingQuads();
+        var10.addVertex((double)left, (double)bottom, 0.0D);
+        var10.addVertex((double)right, (double)bottom, 0.0D);
+        var10.addVertex((double)right, (double)top, 0.0D);
+        var10.addVertex((double)left, (double)top, 0.0D);
+        var9.draw();
+        GlStateManager.func_179098_w();
+        GlStateManager.disableBlend();
+    }
+	
+	 public static void drawRoundedRect(float left, float top, float right, float bottom, int smooth,Color color){
+	        drawRect(left + smooth, top, right - smooth, bottom, color.getRGB());
+	        drawRect(left, top + smooth, right, bottom - smooth, color.getRGB());
+	        drawFilledCircle((int)left + smooth, (int)top + smooth, smooth, color);
+	        drawFilledCircle((int)right - smooth, (int)top + smooth, smooth, color);
+	        drawFilledCircle((int)right - smooth, (int)bottom - smooth, smooth, color);
+	        drawFilledCircle((int)left + smooth, (int)bottom - smooth, smooth, color);
+
+	 }
+	 
+	 public static void drawFilledCircle(final int xx, final int yy, final float radius, final Color color) {
+	        int sections = 50;
+	        double dAngle = 2 * Math.PI / sections;
+	        float x, y;
+
+	        glPushAttrib(GL_ENABLE_BIT);
+
+	        glEnable(GL_BLEND);
+	        glDisable(GL_TEXTURE_2D);
+	        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	        glEnable(GL_LINE_SMOOTH);
+	        glBegin(GL_TRIANGLE_FAN);
+
+	        for (int i = 0; i < sections; i++) {
+	            x = (float) (radius * Math.sin((i * dAngle)));
+	            y = (float) (radius * Math.cos((i * dAngle)));
+
+	            glColor4f(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F, color.getAlpha() / 255F);
+	            glVertex2f(xx + x, yy + y);
+	        }
+
+	        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+	        glEnd();
+
+	        glPopAttrib();
+	    }
+
+}

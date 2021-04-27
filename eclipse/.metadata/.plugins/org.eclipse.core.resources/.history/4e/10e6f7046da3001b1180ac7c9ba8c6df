@@ -1,0 +1,58 @@
+package clientname.basicgui;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import clientname.basicgui.comp.CategoryDisplay;
+import clientname.basicgui.utils.Colors;
+import clientname.basicgui.utils.RenderUtils;
+import com.github.energizedab.pvptube.Main;
+import com.github.energizedab.pvptube.display.HUDElementCategory;
+import com.google.common.collect.Lists;
+
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.EnumChatFormatting;
+
+public class BasicGUI extends GuiScreen {
+
+	public ArrayList<CategoryDisplay> categoryDisplays = Lists.newArrayList();
+	public HUDElementCategory renderedCategory;
+	
+	@Override
+	public void initGui() {
+		int x = 44;
+		int y = 44;
+		for(HUDElementCategory cat : HUDElementCategory.values()) {
+			if(RenderUtils.getElementsInCategory(cat).isEmpty()) continue;
+			categoryDisplays.add(new CategoryDisplay(x, y, cat));
+			y += 12;
+		}
+	}
+	
+	@Override
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		Gui.drawRect(40, 20, RenderUtils.getScaledResolution().getScaledWidth() - 40, 40, Colors.getDarkerGuiBackgroundColor());
+		RenderUtils.getFontRenderer().drawString(Client.main.name + " v" + Client.main.version, 41, 21, Colors.getTextColor());
+		Gui.drawRect(40, 40, RenderUtils.getScaledResolution().getScaledWidth() - 40, RenderUtils.getScaledResolution().getScaledHeight() - 40, Colors.getGuiBackgroundColor());
+		Gui.drawRect(40, 40, 125, RenderUtils.getScaledResolution().getScaledHeight() - 40, Colors.getDarkerGuiBackgroundColor());
+		
+		for(CategoryDisplay cat : categoryDisplays) {
+			cat.draw(mouseX, mouseY);
+		}
+	}
+	
+	@Override
+	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+		for(CategoryDisplay cat : categoryDisplays) {
+			cat.mouseClicked(mouseX, mouseY, mouseButton);
+		}
+	}
+	
+	@Override
+	protected void mouseReleased(int mouseX, int mouseY, int state) {
+		for(CategoryDisplay cat : categoryDisplays) {
+			cat.mouseRelease(state);
+		}
+	}
+}

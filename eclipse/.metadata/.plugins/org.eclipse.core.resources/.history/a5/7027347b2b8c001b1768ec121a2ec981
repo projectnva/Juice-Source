@@ -1,0 +1,278 @@
+package com.github.lunatrius.schematica.client.util;
+
+import com.github.lunatrius.core.util.BlockPosHelper;
+import com.github.lunatrius.core.util.MBlockPos;
+import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.block.state.BlockStateHelper;
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.storage.Schematic;
+import java.util.Iterator;
+import java.util.List;
+import net.minecraft.block.BlockLever.EnumOrientation;
+import net.minecraft.block.BlockLog.EnumAxis;
+import net.minecraft.block.BlockQuartz.EnumType;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Vec3i;
+import net.minecraft.util.EnumFacing.Axis;
+import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import net.minecraftforge.fml.common.registry.GameData;
+
+public class RotationHelper {
+
+    public static final RotationHelper INSTANCE = new RotationHelper();
+    private static final FMLControlledNamespacedRegistry BLOCK_REGISTRY = GameData.getBlockRegistry();
+    private static final EnumFacing[][] FACINGS = new EnumFacing[EnumFacing.VALUES.length][];
+    private static final Axis[][] AXISES = new Axis[Axis.values().length][];
+    private static final EnumAxis[][] AXISES_LOG = new EnumAxis[Axis.values().length][];
+    private static final EnumType[][] AXISES_QUARTZ = new EnumType[Axis.values().length][];
+
+    public boolean rotate(SchematicWorld world, EnumFacing axis, boolean forced) {
+        if (world == null) {
+            return false;
+        } else {
+            try {
+                ISchematic e = world.getSchematic();
+                Schematic schematicRotated = this.rotate(e, axis, forced);
+
+                this.updatePosition(world, axis);
+                world.setSchematic(schematicRotated);
+                Iterator iterator = world.getTileEntities().iterator();
+
+                while (iterator.hasNext()) {
+                    TileEntity tileEntity = (TileEntity) iterator.next();
+
+                    world.initializeTileEntity(tileEntity);
+                }
+
+                return true;
+            } catch (RotationHelper.RotationException rotationhelper_rotationexception) {
+                Reference.logger.error(rotationhelper_rotationexception.getMessage());
+            } catch (Exception exception) {
+                Reference.logger.fatal("Something went wrong!", exception);
+            }
+
+            return false;
+        }
+    }
+
+    private void updatePosition(SchematicWorld world, EnumFacing axis) {
+        int offset;
+
+        switch (axis) {
+        case DOWN:
+        case UP:
+            offset = (world.getWidth() - world.getLength()) / 2;
+            world.position.x += offset;
+            world.position.z -= offset;
+            break;
+
+        case NORTH:
+        case SOUTH:
+            offset = (world.getWidth() - world.getHeight()) / 2;
+            world.position.x += offset;
+            world.position.y -= offset;
+            break;
+
+        case WEST:
+        case EAST:
+            offset = (world.getHeight() - world.getLength()) / 2;
+            world.position.y += offset;
+            world.position.z -= offset;
+        }
+
+    }
+
+    public Schematic rotate(ISchematic schematic, EnumFacing axis, boolean forced) throws RotationHelper.RotationException {
+        Vec3i dimensionsRotated = this.rotateDimensions(axis, schematic.getWidth(), schematic.getHeight(), schematic.getLength());
+        Schematic schematicRotated = new Schematic(schematic.getIcon(), dimensionsRotated.getX(), dimensionsRotated.getY(), dimensionsRotated.getZ());
+        MBlockPos tmp = new MBlockPos();
+        Iterator tileEntities = BlockPosHelper.getAllInBox(0, 0, 0, schematic.getWidth() - 1, schematic.getHeight() - 1, schematic.getLength() - 1).iterator();
+
+        while (tileEntities.hasNext()) {
+            MBlockPos pos = (MBlockPos) tileEntities.next();
+            IBlockState tileEntity = schematic.getBlockState(pos);
+            IBlockState pos1 = this.rotateBlock(tileEntity, axis, forced);
+
+            schematicRotated.setBlockState(this.rotatePos(pos, axis, dimensionsRotated, tmp), pos1);
+        }
+
+        List tileEntities1 = schematic.getTileEntities();
+        Iterator pos2 = tileEntities1.iterator();
+
+        while (pos2.hasNext()) {
+            TileEntity tileEntity1 = (TileEntity) pos2.next();
+            BlockPos pos3 = tileEntity1.getPos();
+
+            tileEntity1.setPos(new BlockPos(this.rotatePos(pos3, axis, dimensionsRotated, tmp)));
+            schematicRotated.setTileEntity(tileEntity1.getPos(), tileEntity1);
+        }
+
+        return schematicRotated;
+    }
+
+    private Vec3i rotateDimensions(EnumFacing axis, int width, int height, int length) throws RotationHelper.RotationException {
+        switch (axis) {
+        case DOWN:
+        case UP:
+            return new Vec3i(length, height, width);
+
+        case NORTH:
+        case SOUTH:
+            return new Vec3i(height, width, length);
+
+        case WEST:
+        case EAST:
+            return new Vec3i(width, length, height);
+
+        default:
+            throw new RotationHelper.RotationException("\'%s\' is not a valid axis!", new Object[] { axis.getName()});
+        }
+    }
+
+    private BlockPos rotatePos(BlockPos pos, EnumFacing axis, Vec3i dimensions, MBlockPos rotated) throws RotationHelper.RotationException {
+        switch (axis) {
+        case DOWN:
+            return rotated.set(pos.getZ(), pos.getY(), dimensions.getZ() - 1 - pos.getX());
+
+        case UP:
+            return rotated.set(dimensions.getX() - 1 - pos.getZ(), pos.getY(), pos.getX());
+
+        case NORTH:
+            return rotated.set(dimensions.getX() - 1 - pos.getY(), pos.getX(), pos.getZ());
+
+        case SOUTH:
+            return rotated.set(pos.getY(), dimensions.getY() - 1 - pos.getX(), pos.getZ());
+
+        case WEST:
+            return rotated.set(pos.getX(), dimensions.getY() - 1 - pos.getZ(), pos.getY());
+
+        case EAST:
+            return rotated.set(pos.getX(), pos.getZ(), dimensions.getZ() - 1 - pos.getY());
+
+        default:
+            throw new RotationHelper.RotationException("\'%s\' is not a valid axis!", new Object[] { axis.getName()});
+        }
+    }
+
+    private IBlockState rotateBlock(IBlockState blockState, EnumFacing axisRotation, boolean forced) throws RotationHelper.RotationException {
+        IProperty propertyFacing = BlockStateHelper.getProperty(blockState, "facing");
+
+        if (propertyFacing instanceof PropertyDirection) {
+            Comparable propertyAxis = blockState.getValue(propertyFacing);
+
+            if (propertyAxis instanceof EnumFacing) {
+                EnumFacing propertyVariant = getRotatedFacing(axisRotation, (EnumFacing) propertyAxis);
+
+                if (propertyFacing.getAllowedValues().contains(propertyVariant)) {
+                    return blockState.withProperty(propertyFacing, propertyVariant);
+                }
+            }
+        } else if (propertyFacing instanceof PropertyEnum) {
+            if (EnumOrientation.class.isAssignableFrom(propertyFacing.getValueClass())) {
+                EnumOrientation propertyAxis1 = (EnumOrientation) blockState.getValue(propertyFacing);
+                EnumOrientation propertyVariant1 = getRotatedLeverFacing(axisRotation, propertyAxis1);
+
+                if (propertyFacing.getAllowedValues().contains(propertyVariant1)) {
+                    return blockState.withProperty(propertyFacing, propertyVariant1);
+                }
+            }
+        } else if (propertyFacing != null) {
+            Reference.logger.error("\'{}\': found \'facing\' property with unknown type {}", new Object[] { RotationHelper.BLOCK_REGISTRY.getNameForObject(blockState.getBlock()), propertyFacing.getClass().getSimpleName()});
+        }
+
+        IProperty propertyAxis2 = BlockStateHelper.getProperty(blockState, "axis");
+
+        if (propertyAxis2 instanceof PropertyEnum) {
+            if (Axis.class.isAssignableFrom(propertyAxis2.getValueClass())) {
+                Axis propertyVariant3 = (Axis) blockState.getValue(propertyAxis2);
+                Axis type1 = getRotatedAxis(axisRotation, propertyVariant3);
+
+                return blockState.withProperty(propertyAxis2, type1);
+            }
+
+            if (EnumAxis.class.isAssignableFrom(propertyAxis2.getValueClass())) {
+                EnumAxis propertyVariant2 = (EnumAxis) blockState.getValue(propertyAxis2);
+                EnumAxis type = getRotatedLogAxis(axisRotation, propertyVariant2);
+
+                return blockState.withProperty(propertyAxis2, type);
+            }
+        } else if (propertyAxis2 != null) {
+            Reference.logger.error("\'{}\': found \'axis\' property with unknown type {}", new Object[] { RotationHelper.BLOCK_REGISTRY.getNameForObject(blockState.getBlock()), propertyAxis2.getClass().getSimpleName()});
+        }
+
+        IProperty propertyVariant4 = BlockStateHelper.getProperty(blockState, "variant");
+
+        if (propertyVariant4 instanceof PropertyEnum && EnumType.class.isAssignableFrom(propertyVariant4.getValueClass())) {
+            EnumType type2 = (EnumType) blockState.getValue(propertyVariant4);
+            EnumType typeRotated = getRotatedQuartzType(axisRotation, type2);
+
+            return blockState.withProperty(propertyVariant4, typeRotated);
+        } else if (!forced && (propertyFacing != null || propertyAxis2 != null)) {
+            throw new RotationHelper.RotationException("\'%s\' cannot be rotated around \'%s\'", new Object[] { RotationHelper.BLOCK_REGISTRY.getNameForObject(blockState.getBlock()), axisRotation});
+        } else {
+            return blockState;
+        }
+    }
+
+    private static EnumFacing getRotatedFacing(EnumFacing source, EnumFacing side) {
+        return RotationHelper.FACINGS[source.ordinal()][side.ordinal()];
+    }
+
+    private static Axis getRotatedAxis(EnumFacing source, Axis axis) {
+        return RotationHelper.AXISES[source.getAxis().ordinal()][axis.ordinal()];
+    }
+
+    private static EnumAxis getRotatedLogAxis(EnumFacing source, EnumAxis axis) {
+        return RotationHelper.AXISES_LOG[source.getAxis().ordinal()][axis.ordinal()];
+    }
+
+    private static EnumType getRotatedQuartzType(EnumFacing source, EnumType type) {
+        return RotationHelper.AXISES_QUARTZ[source.getAxis().ordinal()][type.ordinal()];
+    }
+
+    private static EnumOrientation getRotatedLeverFacing(EnumFacing source, EnumOrientation side) {
+        EnumFacing facing;
+
+        if (source.getAxis().isVertical() && side.getFacing().getAxis().isVertical()) {
+            facing = side != EnumOrientation.UP_X && side != EnumOrientation.DOWN_X ? EnumFacing.WEST : EnumFacing.NORTH;
+        } else {
+            facing = side.getFacing();
+        }
+
+        EnumFacing facingRotated = getRotatedFacing(source, side.getFacing());
+
+        return EnumOrientation.forFacings(facingRotated, facing);
+    }
+
+    static {
+        RotationHelper.FACINGS[EnumFacing.DOWN.ordinal()] = new EnumFacing[] { EnumFacing.DOWN, EnumFacing.UP, EnumFacing.WEST, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.NORTH};
+        RotationHelper.FACINGS[EnumFacing.UP.ordinal()] = new EnumFacing[] { EnumFacing.DOWN, EnumFacing.UP, EnumFacing.EAST, EnumFacing.WEST, EnumFacing.NORTH, EnumFacing.SOUTH};
+        RotationHelper.FACINGS[EnumFacing.NORTH.ordinal()] = new EnumFacing[] { EnumFacing.EAST, EnumFacing.WEST, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.DOWN, EnumFacing.UP};
+        RotationHelper.FACINGS[EnumFacing.SOUTH.ordinal()] = new EnumFacing[] { EnumFacing.WEST, EnumFacing.EAST, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.UP, EnumFacing.DOWN};
+        RotationHelper.FACINGS[EnumFacing.WEST.ordinal()] = new EnumFacing[] { EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.UP, EnumFacing.DOWN, EnumFacing.WEST, EnumFacing.EAST};
+        RotationHelper.FACINGS[EnumFacing.EAST.ordinal()] = new EnumFacing[] { EnumFacing.SOUTH, EnumFacing.NORTH, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.WEST, EnumFacing.EAST};
+        RotationHelper.AXISES[Axis.X.ordinal()] = new Axis[] { Axis.X, Axis.Z, Axis.Y};
+        RotationHelper.AXISES[Axis.Y.ordinal()] = new Axis[] { Axis.Z, Axis.Y, Axis.X};
+        RotationHelper.AXISES[Axis.Z.ordinal()] = new Axis[] { Axis.Y, Axis.X, Axis.Z};
+        RotationHelper.AXISES_LOG[Axis.X.ordinal()] = new EnumAxis[] { EnumAxis.X, EnumAxis.Z, EnumAxis.Y, EnumAxis.NONE};
+        RotationHelper.AXISES_LOG[Axis.Y.ordinal()] = new EnumAxis[] { EnumAxis.Z, EnumAxis.Y, EnumAxis.X, EnumAxis.NONE};
+        RotationHelper.AXISES_LOG[Axis.Z.ordinal()] = new EnumAxis[] { EnumAxis.Y, EnumAxis.X, EnumAxis.Z, EnumAxis.NONE};
+        RotationHelper.AXISES_QUARTZ[Axis.X.ordinal()] = new EnumType[] { EnumType.DEFAULT, EnumType.CHISELED, EnumType.LINES_Z, EnumType.LINES_X, EnumType.LINES_Y};
+        RotationHelper.AXISES_QUARTZ[Axis.Y.ordinal()] = new EnumType[] { EnumType.DEFAULT, EnumType.CHISELED, EnumType.LINES_Y, EnumType.LINES_Z, EnumType.LINES_X};
+        RotationHelper.AXISES_QUARTZ[Axis.Z.ordinal()] = new EnumType[] { EnumType.DEFAULT, EnumType.CHISELED, EnumType.LINES_X, EnumType.LINES_Y, EnumType.LINES_Z};
+    }
+
+    public static class RotationException extends Exception {
+
+        public RotationException(String message, Object... args) {
+            super(String.format(message, args));
+        }
+    }
+}

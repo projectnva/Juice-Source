@@ -1,0 +1,8 @@
+package me.aycy.blockoverlay.utils;
+
+public class GuiUtil {
+
+    public static String getState(boolean bool) {
+        return bool ? "On" : "Off";
+    }
+}

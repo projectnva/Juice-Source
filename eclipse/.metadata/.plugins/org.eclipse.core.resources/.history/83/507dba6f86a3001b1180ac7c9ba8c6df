@@ -1,0 +1,78 @@
+package clientname.basicgui;
+
+public class HUDElement {
+
+	public String name, version;
+	public HUDElementCategory category;
+	
+	public boolean enabled;
+	
+	public int x, y, width , height, x2, y2;
+	
+	public HUDElement(String name, String version, HUDElementCategory category) {
+		this.name = name;
+		this.version = version;
+		this.category = category;
+		onInit();
+	}
+	
+	public void toggle() {
+		enabled = !enabled;
+		if(enabled) {
+			onEnable();
+		}
+		else
+		{
+			onDisable();
+		}
+	}
+	
+	public void onEnable() {
+		
+	}
+	
+	public void onDisable() {
+			
+	}
+	
+	private void onInit() {
+		
+	}
+	
+	public void draw() {
+			
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public HUDElementCategory getCategory() {
+		return category;
+	}
+
+	public void setCategory(HUDElementCategory category) {
+		this.category = category;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+	
+}

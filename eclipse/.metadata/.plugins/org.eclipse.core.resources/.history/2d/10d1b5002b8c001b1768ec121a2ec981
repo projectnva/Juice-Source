@@ -1,0 +1,47 @@
+package com.orbitclient.imsoogood.ez.orbitclient.util.patchcrumbsv2;
+
+import java.util.HashMap;
+import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
+
+public class WallCoord {
+
+    public int x;
+    public int z;
+    public int y;
+    public double firstVelocityX;
+    public double firstVelocityZ;
+    public double firstYLevel;
+    public long expiresAt;
+    public AxisAlignedBB boundingBOX;
+    public HashMap tntSpots;
+
+    public WallCoord(EntityTNTPrimed entityTNTPrimed) {
+        this.x = MathHelper.floor_double(entityTNTPrimed.posX);
+        this.z = MathHelper.floor_double(entityTNTPrimed.posZ);
+        this.y = MathHelper.floor_double(entityTNTPrimed.posY);
+        this.firstYLevel = entityTNTPrimed.posY;
+        this.tntSpots = new HashMap();
+        this.tntSpots.put(entityTNTPrimed.getUniqueID(), new TNTSpot(entityTNTPrimed));
+        this.expiresAt = System.currentTimeMillis() + 4500L;
+        this.boundingBOX = entityTNTPrimed.getEntityBoundingBox();
+        this.firstVelocityX = entityTNTPrimed.prevPosX - entityTNTPrimed.posX;
+        this.firstVelocityZ = entityTNTPrimed.prevPosZ - entityTNTPrimed.posZ;
+    }
+
+    public void addTNT(EntityTNTPrimed tnt) {
+        if (!this.tntSpots.containsKey(tnt.getUniqueID())) {
+            this.tntSpots.put(tnt.getUniqueID(), new TNTSpot(tnt));
+        }
+    }
+
+    public boolean testTNT(EntityTNTPrimed tnt) {
+        if (MathHelper.floor_double(tnt.posX) == this.x && MathHelper.floor_double(tnt.posZ) == this.z) {
+            this.addTNT(tnt);
+            return true;
+        } else {
+            return false;
+        }
+    }
+}

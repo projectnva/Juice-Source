@@ -1,0 +1,14 @@
+package dev.voyageclient.theme.themes;
+
+import java.awt.Color;
+
+import dev.voyageclient.theme.Theme;
+import net.minecraft.util.ResourceLocation;
+
+public class YoutubeTheme extends Theme {
+
+	public YoutubeTheme() {
+		super("YouTube", 0.1, new ResourceLocation("Voyage/background/ytbg.png"), new Color(255, 0, 0, 255).getRGB(), -1);
+	}
+
+}

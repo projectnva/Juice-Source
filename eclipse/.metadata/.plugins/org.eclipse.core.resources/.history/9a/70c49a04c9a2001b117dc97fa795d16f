@@ -1,0 +1,5 @@
+package clientname.mods.module;
+
+public class ModuleManager {
+
+}

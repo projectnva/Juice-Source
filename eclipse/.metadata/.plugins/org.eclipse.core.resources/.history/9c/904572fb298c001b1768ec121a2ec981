@@ -1,0 +1,6 @@
+package com.orbitclient.imsoogood.ez.orbitclient.util.patchcrumbsv2;
+
+public enum Direction {
+
+    NORTHSOUTH, EASTWEST;
+}

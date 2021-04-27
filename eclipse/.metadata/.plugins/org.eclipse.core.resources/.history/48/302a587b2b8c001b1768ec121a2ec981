@@ -1,0 +1,120 @@
+package com.github.lunatrius.core.client.gui;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
+
+public class GuiScreenBase extends GuiScreen {
+
+    protected final GuiScreen parentScreen;
+    protected List textFields;
+
+    public GuiScreenBase() {
+        this((GuiScreen) null);
+    }
+
+    public GuiScreenBase(GuiScreen parentScreen) {
+        this.textFields = new ArrayList();
+        this.parentScreen = parentScreen;
+    }
+
+    public void initGui() {
+        this.buttonList.clear();
+        this.textFields.clear();
+    }
+
+    protected void mouseClicked(int mouseX, int mouseY, int mouseEvent) throws IOException {
+        Iterator iterator = this.buttonList.iterator();
+
+        while (iterator.hasNext()) {
+            GuiButton textField = (GuiButton) iterator.next();
+
+            if (textField instanceof GuiNumericField) {
+                GuiNumericField numericField = (GuiNumericField) textField;
+
+                numericField.mouseClicked(mouseX, mouseY, mouseEvent);
+            }
+        }
+
+        iterator = this.textFields.iterator();
+
+        while (iterator.hasNext()) {
+            GuiTextField textField1 = (GuiTextField) iterator.next();
+
+            textField1.mouseClicked(mouseX, mouseY, mouseEvent);
+        }
+
+        super.mouseClicked(mouseX, mouseY, mouseEvent);
+    }
+
+    protected void keyTyped(char character, int code) throws IOException {
+        if (code == 1) {
+            this.mc.displayGuiScreen(this.parentScreen);
+        } else {
+            Iterator iterator = this.buttonList.iterator();
+
+            while (iterator.hasNext()) {
+                GuiButton textField = (GuiButton) iterator.next();
+
+                if (textField instanceof GuiNumericField) {
+                    GuiNumericField numericField = (GuiNumericField) textField;
+
+                    numericField.keyTyped(character, code);
+                    if (numericField.isFocused()) {
+                        this.actionPerformed(numericField);
+                    }
+                }
+            }
+
+            iterator = this.textFields.iterator();
+
+            while (iterator.hasNext()) {
+                GuiTextField textField1 = (GuiTextField) iterator.next();
+
+                textField1.textboxKeyTyped(character, code);
+            }
+
+            super.keyTyped(character, code);
+        }
+    }
+
+    public void updateScreen() {
+        super.updateScreen();
+        Iterator iterator = this.buttonList.iterator();
+
+        while (iterator.hasNext()) {
+            GuiButton textField = (GuiButton) iterator.next();
+
+            if (textField instanceof GuiNumericField) {
+                GuiNumericField numericField = (GuiNumericField) textField;
+
+                numericField.updateCursorCounter();
+            }
+        }
+
+        iterator = this.textFields.iterator();
+
+        while (iterator.hasNext()) {
+            GuiTextField textField1 = (GuiTextField) iterator.next();
+
+            textField1.updateCursorCounter();
+        }
+
+    }
+
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        super.drawScreen(mouseX, mouseY, partialTicks);
+        Iterator iterator = this.textFields.iterator();
+
+        while (iterator.hasNext()) {
+            GuiTextField textField = (GuiTextField) iterator.next();
+
+            textField.drawTextBox();
+        }
+
+    }
+}

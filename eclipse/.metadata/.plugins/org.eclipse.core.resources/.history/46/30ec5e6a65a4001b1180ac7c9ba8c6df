@@ -1,0 +1,26 @@
+package clientname.basicgui.basicgui.utils;
+
+import java.awt.Color;
+
+public class Colors {
+
+	public static int getGuiBackgroundColor() {
+		return Color.darkGray.darker().getRGB();
+	}
+	
+	public static int getEnabledElementColor() {
+		return Color.green.darker().getRGB();
+	}
+	
+	public static int getDarkerGuiBackgroundColor() {
+		return new Color(Colors.getGuiBackgroundColor()).darker().getRGB();
+	}
+	
+	public static int getBrighterGuiBackgroundColor() {
+		return new Color(Colors.getGuiBackgroundColor()).brighter().getRGB();
+	}
+	
+	public static int getTextColor() {
+		return Color.white.getRGB();
+	}
+}

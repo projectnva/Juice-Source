@@ -1,0 +1,47 @@
+package com.github.lunatrius.schematica.network.message;
+
+import com.github.lunatrius.schematica.handler.DownloadHandler;
+import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+
+public class MessageDownloadChunkAck implements IMessage, IMessageHandler {
+
+    private int baseX;
+    private int baseY;
+    private int baseZ;
+
+    public MessageDownloadChunkAck() {}
+
+    public MessageDownloadChunkAck(int baseX, int baseY, int baseZ) {
+        this.baseX = baseX;
+        this.baseY = baseY;
+        this.baseZ = baseZ;
+    }
+
+    public void fromBytes(ByteBuf buf) {
+        this.baseX = buf.readShort();
+        this.baseY = buf.readShort();
+        this.baseZ = buf.readShort();
+    }
+
+    public void toBytes(ByteBuf buf) {
+        buf.writeShort(this.baseX);
+        buf.writeShort(this.baseY);
+        buf.writeShort(this.baseZ);
+    }
+
+    public IMessage onMessage(MessageDownloadChunkAck message, MessageContext ctx) {
+        EntityPlayerMP player = ctx.getServerHandler().playerEntity;
+        SchematicTransfer transfer = (SchematicTransfer) DownloadHandler.INSTANCE.transferMap.get(player);
+
+        if (transfer != null) {
+            transfer.confirmChunk(message.baseX, message.baseY, message.baseZ);
+        }
+
+        return null;
+    }
+}

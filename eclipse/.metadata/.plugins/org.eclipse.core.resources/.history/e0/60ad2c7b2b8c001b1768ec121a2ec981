@@ -1,0 +1,47 @@
+package com.github.lunatrius.schematica.handler.client;
+
+import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import com.github.lunatrius.schematica.proxy.ClientProxy;
+import com.github.lunatrius.schematica.reference.Reference;
+import net.minecraft.world.IWorldAccess;
+import net.minecraft.world.World;
+import net.minecraftforge.event.world.WorldEvent.Load;
+import net.minecraftforge.event.world.WorldEvent.Unload;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
+public class WorldHandler {
+
+    @SubscribeEvent
+    public void onLoad(Load event) {
+        if (event.world.isRemote && !(event.world instanceof SchematicWorld)) {
+            RenderSchematic.INSTANCE.setWorldAndLoadRenderers(ClientProxy.schematic);
+            addWorldAccess(event.world, RenderSchematic.INSTANCE);
+        }
+
+    }
+
+    @SubscribeEvent
+    public void onUnload(Unload event) {
+        if (event.world.isRemote) {
+            removeWorldAccess(event.world, RenderSchematic.INSTANCE);
+        }
+
+    }
+
+    public static void addWorldAccess(World world, IWorldAccess schematic) {
+        if (world != null && schematic != null) {
+            Reference.logger.debug("Adding world access to {}", new Object[] { world});
+            world.addWorldAccess(schematic);
+        }
+
+    }
+
+    public static void removeWorldAccess(World world, IWorldAccess schematic) {
+        if (world != null && schematic != null) {
+            Reference.logger.debug("Removing world access from {}", new Object[] { world});
+            world.removeWorldAccess(schematic);
+        }
+
+    }
+}

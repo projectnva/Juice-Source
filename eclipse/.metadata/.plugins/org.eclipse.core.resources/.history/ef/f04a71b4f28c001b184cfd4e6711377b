@@ -1,0 +1,8 @@
+package sparkless101.crosshairmod.utils;
+
+public class GuiTheme {
+
+    public static final RGBA PRIMARY = new RGBA(23, 107, 192, 255);
+    public static final RGBA PRIMARY_T = new RGBA(23, 107, 192, 128);
+    public static final RGBA SECONDARY = new RGBA(255, 255, 255, 255);
+}

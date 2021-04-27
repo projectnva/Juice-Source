@@ -1,0 +1,103 @@
+package sparkless101.crosshairmod.gui.items;
+
+import java.util.ArrayList;
+import java.util.List;
+import net.minecraft.client.gui.GuiScreen;
+
+public class GuiItem {
+
+    private int actionID;
+    private int posX;
+    private int posY;
+    private int width;
+    private int height;
+    private String displayText;
+    private GuiScreen currentScreen;
+    protected List helpText;
+
+    public GuiItem(GuiScreen screen) {
+        this(screen, -1, "no-name", 0, 0, 10, 10);
+    }
+
+    public GuiItem(GuiScreen screen, int id) {
+        this(screen, id, "no-name", 0, 0, 10, 10);
+    }
+
+    public GuiItem(GuiScreen screen, int id, String displayText, int posX, int posY, int width, int height) {
+        this.actionID = id;
+        this.posX = posX;
+        this.posY = posY;
+        this.width = width;
+        this.height = height;
+        this.displayText = displayText;
+        this.setCurrentScreen(screen);
+        this.helpText = new ArrayList();
+    }
+
+    public void mouseClicked(int mouseX, int mouseY) {}
+
+    public void mouseReleased(int mouseX, int mouseY) {}
+
+    public void drawItem(int mouseX, int mouseY) {}
+
+    public void setCurrentScreen(GuiScreen screen) {
+        this.currentScreen = screen;
+    }
+
+    public GuiScreen getCurrentScreen() {
+        return this.currentScreen;
+    }
+
+    public int getActionID() {
+        return this.actionID;
+    }
+
+    public void setPosition(int newPosX, int newPosY) {
+        this.setPosX(newPosX);
+        this.setPosY(newPosY);
+    }
+
+    public int getPosX() {
+        return this.posX;
+    }
+
+    public void setPosX(int newPosX) {
+        this.posX = newPosX;
+    }
+
+    public int getPosY() {
+        return this.posY;
+    }
+
+    public void setPosY(int newPosY) {
+        this.posY = newPosY;
+    }
+
+    public int getWidth() {
+        return this.width;
+    }
+
+    public void setWidth(int newWidth) {
+        this.width = newWidth;
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
+
+    public void setHeight(int newHeight) {
+        this.height = newHeight;
+    }
+
+    public String getDisplayText() {
+        return this.displayText;
+    }
+
+    public void setDisplayText(String newDisplayText) {
+        this.displayText = newDisplayText;
+    }
+
+    public List getHelpText() {
+        return this.helpText;
+    }
+}

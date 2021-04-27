@@ -1,0 +1,95 @@
+package clientname.gui.modmenu;
+
+import java.awt.Color;
+import java.awt.Point;
+
+import com.lukflug.panelstudio.ClickGUI;
+import com.lukflug.panelstudio.CollapsibleContainer;
+import com.lukflug.panelstudio.DraggableContainer;
+import com.lukflug.panelstudio.SettingsAnimation;
+import com.lukflug.panelstudio.mc8forge.MinecraftGUI;
+import com.lukflug.panelstudio.settings.BooleanComponent;
+import com.lukflug.panelstudio.settings.ColorComponent;
+import com.lukflug.panelstudio.settings.ColorSetting;
+import com.lukflug.panelstudio.settings.EnumComponent;
+import com.lukflug.panelstudio.settings.EnumSetting;
+import com.lukflug.panelstudio.settings.KeybindComponent;
+import com.lukflug.panelstudio.settings.NumberComponent;
+import com.lukflug.panelstudio.settings.NumberSetting;
+import com.lukflug.panelstudio.settings.SimpleToggleable;
+import com.lukflug.panelstudio.settings.Toggleable;
+import com.lukflug.panelstudio.theme.GameSenseTheme;
+import com.lukflug.panelstudio.theme.SettingsColorScheme;
+import com.lukflug.panelstudio.theme.Theme;
+
+
+public class GuiClickModMenu extends MinecraftGUI {
+		
+		private final Toggleable colorToggle;
+		private final GUIInterface guiInterface;
+		private final Theme theme;
+		private final ClickGUI gui;
+		
+		public GuiClickModMenu() {
+			guiInterface=new GUIInterface(true) {
+				
+				@Override
+				protected String getResourcePrefix() {
+					return "coolhack:gui/";
+				}
+				
+				@Override
+				public void drawString(Point pos, String s, Color c) {
+					end();
+					CoolFont.drawString(s,pos.x,pos.y,c);
+					begin();
+				}
+				
+				@Override
+				public int getFontWidth(String s) {
+					return CoolFont.getFontWidth(s);
+				}
+
+				@Override
+				public int getFontHeight() {
+					return CoolFont.getFontHeight();
+				}
+
+			};
+			theme=new GameSenseTheme(new SettingsColorScheme(CoolSettings.activeColor,CoolSettings.inactiveColor,CoolSettings.backgroundColor,CoolSettings.outlineColor,CoolSettings.fontColor,CoolSettings.opacity),height,2,5); // <-- Can be replaced by another theme (could be a custom one)
+			gui=new ClickGUI(guiInterface,null);
+			// Populate the ClickGUI with modules and settings
+			for (CoolCategory category: categories) {
+				DraggableContainer panel=new DraggableContainer(category.name,null,theme.getPanelRenderer(),new SimpleToggleable(false),new SettingsAnimation(CoolSettings.animationSpeed),null,new Point(x,y),width); // <-- Width and default position of the panels needs to be defined
+				gui.addComponent(panel);
+				for (CoolModule module: category) {
+					CollapsibleContainer container=new CollapsibleContainer(module.name,null,theme.getContainerRenderer(),new SimpleToggleable(false),new SettingsAnimation(CoolSettings.animationSpeed),module); // <-- It is recommended that the module-class implements Toggleable
+					panel.addComponent(container);
+					for (CoolSetting setting: module) {
+						if (setting instanceof Toggleable) container.addComponent(new BooleanComponent(setting.name,null,theme.getComponentRenderer(),(Toggleable)setting));
+						else if (setting instanceof NumberSetting) container.addComponent(new NumberComponent(setting.name,null,theme.getComponentRenderer(),(NumberSetting)setting,setting.min,setting.max));
+						else if (setting instanceof EnumSetting) container.addComponent(new EnumComponent(setting.name,null,theme.getComponentRenderer(),(EnumSetting)setting));
+						else if (setting instanceof ColorSetting) container.addComponent(new ColorComponent(setting.name,null,theme.getContainerRenderer(),new SettingsAnimation(CoolSettings.animationSpeed),theme.getComponentRenderer(),(ColorSetting)setting,setting.alpha,setting.rainbowEnabled,colorToggle));
+					}
+					container.addComponent(new KeybindComponent(theme.getComponentRenderer(),module.getKeybind()));
+				}
+			}
+		}
+		
+		
+		@Override
+		protected ClickGUI getGUI() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		@Override
+		protected GUIInterface getInterface() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		@Override
+		protected int getScrollSpeed() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+}

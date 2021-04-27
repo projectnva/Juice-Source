@@ -1,0 +1,158 @@
+package clientname;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.lwjgl.opengl.Display;
+
+import clientname.command.CommandManager;
+import clientname.cosmetics.CosmeticController;
+import clientname.event.EventManager;
+import clientname.event.EventTarget;
+import clientname.event.impl.ClientTickEvent;
+import clientname.events.Event;
+import clientname.events.listeners.EventChat;
+import clientname.events.listeners.EventKey;
+import clientname.gui.GuiAPIDown;
+import clientname.gui.GuiHWIDBanned;
+import clientname.gui.GuiWhitelisted;
+import clientname.gui.SplashProgress;
+import clientname.gui.hud.HUDManager;
+import clientname.http.HTTPFunctions;
+import clientname.http.gsonobjs.ObjectGlobalSettings;
+import clientname.http.gsonobjs.ObjectUserCosmetics;
+import clientname.mods.ModInstances;
+import clientname.modules.Module;
+import clientname.ui.HUD;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ChatComponentText;
+
+public class Client {
+
+	public static CommandManager commandManager;
+	public static CopyOnWriteArrayList<Module> modules;
+	public static HUD hud;
+	public static final Client INSTANCE = new Client();
+	public final String name = "Juice Client", version = "1.0.0"; 
+	
+	public static final Client getInstance() {
+		return INSTANCE;
+	}
+	
+	private DiscordRP discordRP = new DiscordRP();
+	
+	private HUDManager hudManager;
+	
+	private boolean isAPIUp;
+	private volatile boolean isBanned = false;
+	public boolean isWhitelisted = false;
+	private ObjectGlobalSettings globalSettings;
+	
+	public void init() {
+		FileManager.init();
+		SplashProgress.setProgress(1, "Client - Initalising Discord!");
+		discordRP.start();
+		EventManager.register(this);
+		
+		
+		isAPIUp = HTTPFunctions.isAPIUp();
+		isBanned = HTTPFunctions.isBanned();
+		isWhitelisted = HTTPFunctions.isWhitelisted();
+		globalSettings = HTTPFunctions.downloadGlobalSettings();
+		CosmeticController.downloadUserCosmetics();
+	}
+	
+	public void start() {
+		SessionChanger.getInstance().setUser("elpenguini18@gmail.com", "PoohBear0904@");
+		hudManager = HUDManager.getInstance();
+		ModInstances.register(hudManager);
+		
+		HTTPFunctions.sendHWIDmap();
+	}
+	
+	public static void keyPress(int n) {
+        Client.onEvent(new EventKey(n));
+        for (Module module : modules) {
+            if (module.getKey() != n) continue;
+            module.toggle();
+        }
+    }
+
+    public static List<Module> getModulesByCategory(Module.Category category) {
+        ArrayList<Module> arrayList = new ArrayList<Module>();
+        for (Module module : modules) {
+            if (module.category != category) continue;
+            arrayList.add(module);
+        }
+        return arrayList;
+    }
+	
+	public static void onEvent(Event event) {
+        if (event instanceof EventChat) {
+            commandManager.handleChat((EventChat)event);
+        }
+        for (Module module : modules) {
+            if (!module.toggled) continue;
+            module.onEvent(event);
+        }
+    }
+	
+	public static void addChatmessage(String string) {
+	    string = String.valueOf(new StringBuilder("\u00a79").append(name).append("\u00a77: ").append(string));
+	    Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(string));
+	}
+	
+	public void startup() {
+		System.out.println(String.valueOf(new StringBuilder("Starting ").append(name).append(" ").append(version)));
+        Display.setTitle((String)String.valueOf(new StringBuilder(String.valueOf(name)).append(" v").append(version).append(" (Beta)")));
+        modules.add(new TabGui());
+        
+	}
+	 static {
+	        modules = new CopyOnWriteArrayList();
+	        hud = new HUD();
+	        commandManager = new CommandManager();
+	    }
+	
+	public void shutdown() {
+		Display.setTitle("Shutting down" + name + " " + version);
+		discordRP.shutdown();
+	}
+	
+	public void onKeyPress(int key) {
+
+	}
+	
+	public DiscordRP getDiscordRP() {
+		return discordRP;
+	}
+	
+	@EventTarget
+	public void onTick(ClientTickEvent e) {
+		if(Minecraft.getMinecraft().gameSettings.CLIENT_GUI_MOD_POS.isPressed()) {
+			hudManager.openConfigScreen();
+		}
+		if(isBanned && isAPIUp && !(Minecraft.getMinecraft().currentScreen instanceof GuiHWIDBanned)) {
+			Minecraft.getMinecraft().displayGuiScreen(new GuiHWIDBanned("--Reason--"));
+		}
+		
+		if(globalSettings.isWhitelisted() && isAPIUp && !isWhitelisted && !(Minecraft.getMinecraft().currentScreen instanceof GuiWhitelisted)) {
+			Minecraft.getMinecraft().displayGuiScreen(new GuiWhitelisted());
+		}
+		if(isAPIUp == false) {
+			Minecraft.getMinecraft().displayGuiScreen(new GuiAPIDown());
+		}
+		
+	}
+	
+	public void cleanGL() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public int getColour() {
+		return 0x00FF0000;
+	}
+
+}

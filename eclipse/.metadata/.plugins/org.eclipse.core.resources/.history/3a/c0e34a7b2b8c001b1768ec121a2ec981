@@ -1,0 +1,25 @@
+package com.github.lunatrius.schematica;
+
+import com.github.lunatrius.schematica.proxy.ClientProxy;
+import com.github.lunatrius.schematica.proxy.CommonProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+
+public class Schematica {
+
+    public static Schematica instance = new Schematica();
+    public static CommonProxy proxy = new ClientProxy();
+
+    public void preInit(FMLPreInitializationEvent event) {
+        Schematica.proxy.preInit(event);
+    }
+
+    public void init(FMLInitializationEvent event) {
+        Schematica.proxy.init(event);
+    }
+
+    public void postInit(FMLPostInitializationEvent event) {
+        Schematica.proxy.postInit(event);
+    }
+}

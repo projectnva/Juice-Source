@@ -1,0 +1,24 @@
+package clientname.module;
+
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class ModuleManager {
+
+	public CopyOnWriteArrayList<Module> modules = new CopyOnWriteArrayList<>();
+	
+	public ModuleManager() {
+		
+	}
+	
+	public CopyOnWriteArrayList<Module> getModules() {
+		return modules;
+	}
+	
+	public CopyOnWriteArrayList<Module> getEnabledModules() {
+		for(Module m : getModules()) {
+			CopyOnWriteArrayList<Module> enabledModules = new CopyOnWriteArrayList<>();
+		}
+		return enabledModules;
+	}
+	
+}

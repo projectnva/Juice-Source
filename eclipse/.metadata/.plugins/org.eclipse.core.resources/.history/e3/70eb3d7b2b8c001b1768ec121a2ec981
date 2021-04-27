@@ -1,0 +1,25 @@
+package com.github.lunatrius.schematica.client.printer.nbtsync;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.network.Packet;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+
+public abstract class NBTSync {
+
+    protected final Minecraft minecraft = Minecraft.getMinecraft();
+
+    public abstract boolean execute(World world, BlockPos blockpos, World world1, BlockPos blockpos1);
+
+    public final boolean sendPacket(Packet packet) {
+        NetHandlerPlayClient netHandler = this.minecraft.getNetHandler();
+
+        if (netHandler == null) {
+            return false;
+        } else {
+            netHandler.addToSendQueue(packet);
+            return true;
+        }
+    }
+}

@@ -1,0 +1,5 @@
+package clientname.ui;
+
+public class HUD {
+
+}

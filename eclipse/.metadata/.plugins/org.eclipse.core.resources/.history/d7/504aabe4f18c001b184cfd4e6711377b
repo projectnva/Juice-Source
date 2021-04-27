@@ -1,0 +1,191 @@
+package clientname.mods.impl.crosshair;
+
+import org.lwjgl.opengl.GL11;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+
+public class ModCrosshair {
+
+	private boolean enabled;
+    private RGBA colour;
+    private Crosshair.CrosshairType crosshairType;
+    private boolean visibleHiddenGui;
+    private boolean visibleDefault;
+    private boolean visibleDebug;
+    private boolean visibleSpectator;
+    private boolean visibleThirdPerson;
+    private boolean outline;
+    private RGBA colourOutline;
+    private boolean dot;
+    private RGBA colourDot;
+    private int width;
+    private int height;
+    private int gap;
+    private int thickness;
+    private int rotation;
+    private boolean highlightPassive;
+    private RGBA colourHighlightPassive;
+    private boolean highlightHostile;
+    private RGBA colourHighlightHostile;
+    private boolean highlightPlayer;
+    private RGBA colourHighlightPlayer;
+    private boolean dynamicBow;
+    private boolean rainbowCrosshair;
+    private int rainbowSpeed;
+    private int rainbowColourTick;
+    private Minecraft mc = Minecraft.getMinecraft();
+
+    public void Crosshair() {
+        this.setCrosshairType(Crosshair.CrosshairType.CROSS);
+        this.enabled(true);
+        this.setColour(new RGBA(255, 255, 255, 255));
+        this.setVisibleDefault(true);
+        this.setVisibleHiddenGui(true);
+        this.setVisibleDebug(true);
+        this.setVisibleSpectator(true);
+        this.setVisibleThirdPerson(false);
+        this.setOutline(true);
+        this.setOutlineColour(new RGBA(0, 0, 0, 255));
+        this.setDot(false);
+        this.setDotColour(new RGBA(255, 255, 255, 255));
+        this.setWidth(5);
+        this.setHeight(5);
+        this.setGap(3);
+        this.setThickness(1);
+        this.setHighlightHostile(true);
+        this.setHighlightHostileColour(new RGBA(255, 0, 0, 255));
+        this.setHighlightPassive(true);
+        this.setHighlightPassiveColour(new RGBA(0, 255, 0, 255));
+        this.setHighlightPlayer(true);
+        this.setHighlightPlayerColour(new RGBA(0, 0, 255, 255));
+        this.setDynamicBow(true);
+        this.setRainbowCrosshair(false);
+        this.setRainbowSpeed(500);
+        this.rainbowColourTick = 0;
+        
+}
+        
+		public void drawCrosshair() {
+            if (CustomCrosshairMod.showMessage) {
+                String screenSize = CustomCrosshairMod.getCrosshairMod().sendLatestVersionGetRequest();
+
+                if (screenSize != null && !screenSize.equals(CustomCrosshairMod.VERSION)) {
+                    CustomCrosshairMod.getCrosshairMod().addChatMessage("New version available: " + screenSize + ".");
+                }
+
+                CustomCrosshairMod.showMessage = false;
+            }
+
+            int[] screenSize1 = GuiGraphics.getScreenSize();
+            int screenWidth = screenSize1[0] / 2;
+            int screenHeight = screenSize1[1] / 2;
+
+            if (!this.getEnabled() && !this.mc.gameSettings.hideGUI) {
+                if (this.mc.gameSettings.showDebugInfo) {
+                    this.drawDebugAxisCrosshair(screenWidth, screenHeight);
+                } else {
+                    this.drawDefaultCrosshair(screenWidth, screenHeight);
+                }
+            }
+
+            if (this.getEnabled() && (this.mc.gameSettings.thirdPersonView > 0 && this.getVisibleThirdPerson() || this.mc.gameSettings.thirdPersonView <= 0) && (this.mc.gameSettings.hideGUI && this.getVisibleHiddenGui() || !this.mc.gameSettings.hideGUI) && (this.mc.thePlayer.isSpectator() && this.getVisibleSpectator() || !this.mc.thePlayer.isSpectator())) {
+                if (!this.getVisibleDefault()) {
+                    return;
+                }
+
+                if (this.mc.gameSettings.hideGUI) {
+                    double[] renderColour = GuiGraphics.getScreenSizeDouble();
+
+                    GlStateManager.clear(256);
+                    GlStateManager.matrixMode(5889);
+                    GlStateManager.loadIdentity();
+                    GlStateManager.ortho(0.0D, renderColour[0], renderColour[1], 0.0D, 1000.0D, 3000.0D);
+                    GlStateManager.matrixMode(5888);
+                    GlStateManager.loadIdentity();
+                    GlStateManager.translate(0.0F, 0.0F, -2000.0F);
+                }
+
+                ++this.rainbowColourTick;
+                RGBA renderColour1 = this.getColour();
+                int renderGap = this.getGap();
+
+                if (this.mc.objectMouseOver != null && this.mc.objectMouseOver.typeOfHit == MovingObjectType.ENTITY) {
+                    if (this.mc.objectMouseOver.entityHit instanceof EntityPlayer && this.highlightPlayer) {
+                        renderColour1 = this.getHighlightPlayerColour();
+                    } else if (this.mc.objectMouseOver.entityHit instanceof EntityLiving) {
+                        if (EntityUtils.isEntityHostile(this.mc.objectMouseOver.entityHit) && this.highlightHostile) {
+                            renderColour1 = this.getHighlightHostileColour();
+                        } else if (this.highlightPassive) {
+                            renderColour1 = this.getHighlightPassiveColour();
+                        }
+                    }
+                }
+
+                int useCount;
+
+                if (this.getRainbowCrosshair()) {
+                    int item = (int) (Math.sin((double) ((float) this.rainbowSpeed / 100000.0F * (float) this.rainbowColourTick + 0.0F)) * 127.0D + 128.0D);
+
+                    useCount = (int) (Math.sin((double) ((float) this.rainbowSpeed / 100000.0F * (float) this.rainbowColourTick + 2.0F)) * 127.0D + 128.0D);
+                    int bowExtension = (int) (Math.sin((double) ((float) this.rainbowSpeed / 100000.0F * (float) this.rainbowColourTick + 4.0F)) * 127.0D + 128.0D);
+
+                    renderColour1 = new RGBA(item, useCount, bowExtension, 255);
+                }
+
+                if (!this.mc.thePlayer.isSpectator() && this.getDynamicBow() && this.mc.thePlayer.getHeldItem() != null) {
+                    ItemStack item1 = this.mc.thePlayer.getHeldItem();
+
+                    useCount = this.mc.thePlayer.getItemInUseCount();
+                    if (this.getDynamicBow() && this.mc.thePlayer.getHeldItem().getItem() == Items.bow) {
+                        float bowExtension1 = (float) (item1.getItem().getMaxItemUseDuration(item1) - useCount) / 20.0F;
+
+                        if (useCount == 0 || bowExtension1 > 1.0F) {
+                            bowExtension1 = 1.0F;
+                        }
+
+                        renderGap = this.getGap() + (int) ((1.0F - bowExtension1) * (float) (this.getGap() + 5) * 2.0F);
+                    }
+                }
+
+                if (this.mc.gameSettings.showDebugInfo && (!this.mc.gameSettings.showDebugInfo || !this.getVisibleDebug())) {
+                    this.drawDebugAxisCrosshair(screenWidth, screenHeight);
+                } else {
+                    switch (this.getCrosshairType()) {
+                    case CIRCLE:
+                        this.drawCircleCrosshair(screenWidth, screenHeight, renderGap, renderColour1);
+                        break;
+
+                    case SQUARE:
+                        this.drawSquareCrosshair(screenWidth, screenHeight, renderGap, renderColour1);
+                        break;
+
+                    case DEFAULT:
+                        this.drawDefaultCrosshair(screenWidth, screenHeight);
+                        break;
+
+                    case ARROW:
+                        this.drawArrowCrosshair(screenWidth, screenHeight, renderGap, renderColour1);
+                        break;
+
+                    default:
+                        this.drawCrossCrosshair(screenWidth, screenHeight, renderGap, renderColour1);
+                    }
+
+                    if (this.getDot() && this.getCrosshairType() != Crosshair.CrosshairType.DEFAULT) {
+                        GuiGraphics.drawFilledRectangle(screenWidth, screenHeight, screenWidth + 1, screenHeight + 1, this.getDotColour());
+                    }
+                }
+            }
+
+        }

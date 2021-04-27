@@ -1,0 +1,316 @@
+package com.github.lunatrius.schematica.client.gui.control;
+
+import com.github.lunatrius.core.client.gui.GuiNumericField;
+import com.github.lunatrius.core.client.gui.GuiScreenBase;
+import com.github.lunatrius.schematica.Schematica;
+import com.github.lunatrius.schematica.client.printer.SchematicLiquidPrinter;
+import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
+import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
+import com.github.lunatrius.schematica.client.util.FlipHelper;
+import com.github.lunatrius.schematica.client.util.RotationHelper;
+import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import com.github.lunatrius.schematica.proxy.ClientProxy;
+import com.orbitclient.imsoogood.ez.orbitclient.modules.MissingBlockESP;
+import com.orbitclient.imsoogood.ez.orbitclient.modules.SchemShare;
+import java.io.IOException;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.client.config.GuiUnicodeGlyphButton;
+
+public class GuiSchematicControl extends GuiScreenBase {
+
+    private final SchematicWorld schematic;
+    private final SchematicPrinter printer;
+    private final SchematicLiquidPrinter liquidPrinter;
+    private int centerX = 0;
+    private int centerY = 0;
+    private GuiNumericField numericX = null;
+    private GuiNumericField numericY = null;
+    private GuiNumericField numericZ = null;
+    private GuiButton btnShare = null;
+    private GuiButton btnUnload = null;
+    private GuiButton btnLayerMode = null;
+    private GuiNumericField nfLayer = null;
+    private GuiButton btnHide = null;
+    private GuiButton btnMove = null;
+    private GuiButton btnFlipDirection = null;
+    private GuiButton btnFlip = null;
+    private GuiButton btnRotateDirection = null;
+    private GuiButton btnRotate = null;
+    private GuiButton bntReload = null;
+    private GuiButton btnLiquidPrinter = null;
+    private GuiButton btnSchem1 = null;
+    private GuiButton btnSchem2 = null;
+    private GuiButton btnMissingESP = null;
+    private GuiButton btnMaterials = null;
+    private GuiButton btnPrint = null;
+    private final String strMoveSchematic = I18n.format("schematica.gui.moveschematic", new Object[0]);
+    private final String strOperations = I18n.format("schematica.gui.operations", new Object[0]);
+    private final String strUnload = I18n.format("schematica.gui.unload", new Object[0]);
+    private final String strAll = I18n.format("schematica.gui.all", new Object[0]);
+    private final String strLayers = I18n.format("schematica.gui.layers", new Object[0]);
+    private final String strMissingESP;
+    private final String strMaterials;
+    private final String strPrinter;
+    private final String strHide;
+    private final String strShow;
+    private final String strX;
+    private final String strY;
+    private final String strZ;
+    private final String strOn;
+    private final String strOff;
+
+    public GuiSchematicControl(GuiScreen guiScreen) {
+        super(guiScreen);
+        this.strMissingESP = MissingBlockESP.INSTANCE.isEnabled() ? "ON" : "OFF";
+        this.strMaterials = I18n.format("schematica.gui.materials", new Object[0]);
+        this.strPrinter = I18n.format("schematica.gui.printer", new Object[0]);
+        this.strHide = I18n.format("schematica.gui.hide", new Object[0]);
+        this.strShow = I18n.format("schematica.gui.show", new Object[0]);
+        this.strX = I18n.format("schematica.gui.x", new Object[0]);
+        this.strY = I18n.format("schematica.gui.y", new Object[0]);
+        this.strZ = I18n.format("schematica.gui.z", new Object[0]);
+        this.strOn = I18n.format("schematica.gui.on", new Object[0]);
+        this.strOff = I18n.format("schematica.gui.off", new Object[0]);
+        this.schematic = ClientProxy.schematic;
+        this.printer = SchematicPrinter.INSTANCE;
+        this.liquidPrinter = SchematicLiquidPrinter.INSTANCE;
+    }
+
+    public void initGui() {
+        this.centerX = this.width / 2;
+        this.centerY = this.height / 2;
+        this.buttonList.clear();
+        byte id = 0;
+        int i = id + 1;
+
+        this.numericX = new GuiNumericField(this.fontRendererObj, id, this.centerX - 50, this.centerY - 30, 100, 20);
+        this.buttonList.add(this.numericX);
+        this.numericY = new GuiNumericField(this.fontRendererObj, i++, this.centerX - 50, this.centerY - 5, 100, 20);
+        this.buttonList.add(this.numericY);
+        this.numericZ = new GuiNumericField(this.fontRendererObj, i++, this.centerX - 50, this.centerY + 20, 100, 20);
+        this.buttonList.add(this.numericZ);
+        this.btnUnload = new GuiButton(i++, this.width - 90, this.height - 200, 80, 20, this.strUnload);
+        this.buttonList.add(this.btnUnload);
+        this.btnShare = new GuiButton(i++, this.width - 90, this.height - 225, 80, 20, "Share");
+        this.buttonList.add(this.btnShare);
+        this.btnLayerMode = new GuiButton(i++, this.width - 90, this.height - 150 - 25, 80, 20, this.schematic != null && this.schematic.isRenderingLayer ? this.strLayers : this.strAll);
+        this.buttonList.add(this.btnLayerMode);
+        this.nfLayer = new GuiNumericField(this.fontRendererObj, i++, this.width - 90, this.height - 150, 80, 20);
+        this.buttonList.add(this.nfLayer);
+        this.btnHide = new GuiButton(i++, this.width - 90, this.height - 105, 80, 20, this.schematic != null && this.schematic.isRendering ? this.strHide : this.strShow);
+        this.buttonList.add(this.btnHide);
+        this.btnMove = new GuiButton(i++, this.width - 90, this.height - 80, 80, 20, I18n.format("schematica.gui.movehere", new Object[0]));
+        this.buttonList.add(this.btnMove);
+        this.bntReload = new GuiButton(i++, this.width - 180, this.height - 80, 80, 20, I18n.format("Reload", new Object[0]));
+        this.buttonList.add(this.bntReload);
+        this.btnFlipDirection = new GuiButton(i++, this.width - 180, this.height - 55, 80, 20, I18n.format("schematica.gui." + ClientProxy.axisFlip.getName(), new Object[0]));
+        this.buttonList.add(this.btnFlipDirection);
+        this.btnFlip = new GuiUnicodeGlyphButton(i++, this.width - 90, this.height - 55, 80, 20, " " + I18n.format("schematica.gui.flip", new Object[0]), "↔", 2.0F);
+        this.buttonList.add(this.btnFlip);
+        this.btnRotateDirection = new GuiButton(i++, this.width - 180, this.height - 30, 80, 20, I18n.format("schematica.gui." + ClientProxy.axisRotation.getName(), new Object[0]));
+        this.buttonList.add(this.btnRotateDirection);
+        this.btnRotate = new GuiUnicodeGlyphButton(i++, this.width - 90, this.height - 30, 80, 20, " " + I18n.format("schematica.gui.rotate", new Object[0]), "↻", 2.0F);
+        this.buttonList.add(this.btnRotate);
+        this.btnLiquidPrinter = new GuiButton(i++, 10, this.height - 150, 80, 20, this.liquidPrinter.isPrinting() ? "ON" : "OFF");
+        this.buttonList.add(this.btnLiquidPrinter);
+        this.btnMissingESP = new GuiButton(i++, 10, this.height - 110, 80, 20, this.strMissingESP);
+        this.buttonList.add(this.btnMissingESP);
+        this.btnMaterials = new GuiButton(i++, 10, this.height - 70, 80, 20, this.strMaterials);
+        this.buttonList.add(this.btnMaterials);
+        this.btnPrint = new GuiButton(i++, 10, this.height - 30, 80, 20, this.printer.isPrinting() ? this.strOn : this.strOff);
+        this.buttonList.add(this.btnPrint);
+        this.btnSchem1 = new GuiButton(i++, 10, 10, 80, 20, "Schem 1");
+        this.buttonList.add(this.btnSchem1);
+        this.btnSchem2 = new GuiButton(i++, 95, 10, 80, 20, "Schem 2");
+        this.buttonList.add(this.btnSchem2);
+        SchemShare schemshare = SchemShare.INSTANCE;
+
+        this.btnSchem1.enabled = SchemShare.currentschem != 1;
+        schemshare = SchemShare.INSTANCE;
+        this.btnSchem2.enabled = SchemShare.currentschem != 2;
+        this.numericX.setEnabled(this.schematic != null);
+        this.numericY.setEnabled(this.schematic != null);
+        this.numericZ.setEnabled(this.schematic != null);
+        this.btnUnload.enabled = this.schematic != null;
+        this.btnLayerMode.enabled = this.schematic != null;
+        this.nfLayer.setEnabled(this.schematic != null && this.schematic.isRenderingLayer);
+        this.btnMissingESP.enabled = this.schematic != null;
+        this.btnShare.enabled = this.schematic != null;
+        this.bntReload.enabled = this.schematic != null;
+        this.btnHide.enabled = this.schematic != null;
+        this.btnMove.enabled = this.schematic != null;
+        this.btnFlipDirection.enabled = this.schematic != null;
+        this.btnFlip.enabled = this.schematic != null;
+        this.btnRotateDirection.enabled = this.schematic != null;
+        this.btnRotate.enabled = this.schematic != null;
+        this.btnMaterials.enabled = this.schematic != null;
+        this.btnPrint.enabled = this.schematic != null && this.printer.isEnabled();
+        this.btnLiquidPrinter.enabled = this.schematic != null && this.printer.isEnabled();
+        this.setMinMax(this.numericX);
+        this.setMinMax(this.numericY);
+        this.setMinMax(this.numericZ);
+        if (this.schematic != null) {
+            this.setPoint(this.numericX, this.numericY, this.numericZ, this.schematic.position);
+        }
+
+        this.nfLayer.setMinimum(0);
+        this.nfLayer.setMaximum(this.schematic != null ? this.schematic.getHeight() - 1 : 0);
+        if (this.schematic != null) {
+            this.nfLayer.setValue(this.schematic.renderingLayer);
+        }
+
+    }
+
+    private void setMinMax(GuiNumericField numericField) {
+        numericField.setMinimum(-30000000);
+        numericField.setMaximum(30000000);
+    }
+
+    private void setPoint(GuiNumericField numX, GuiNumericField numY, GuiNumericField numZ, BlockPos point) {
+        numX.setValue(point.getX());
+        numY.setValue(point.getY());
+        numZ.setValue(point.getZ());
+    }
+
+    protected void actionPerformed(GuiButton guiButton) {
+        if (guiButton.enabled) {
+            SchemShare schemshare;
+
+            if (guiButton.id == this.btnSchem1.id) {
+                schemshare = SchemShare.INSTANCE;
+                SchemShare.currentschem = 1;
+                this.btnSchem1.enabled = false;
+                this.btnSchem2.enabled = true;
+                ClientProxy.switchSchematic();
+                Minecraft.getMinecraft().displayGuiScreen(new GuiSchematicControl((GuiScreen) null));
+            } else if (guiButton.id == this.btnSchem2.id) {
+                schemshare = SchemShare.INSTANCE;
+                SchemShare.currentschem = 2;
+                this.btnSchem1.enabled = true;
+                this.btnSchem2.enabled = false;
+                ClientProxy.switchSchematic();
+                Minecraft.getMinecraft().displayGuiScreen(new GuiSchematicControl((GuiScreen) null));
+            }
+
+            if (this.schematic == null) {
+                return;
+            }
+
+            if (guiButton.id == this.numericX.id) {
+                this.schematic.position.x = this.numericX.getValue();
+                RenderSchematic.INSTANCE.refresh();
+            } else if (guiButton.id == this.numericY.id) {
+                this.schematic.position.y = this.numericY.getValue();
+                RenderSchematic.INSTANCE.refresh();
+            } else if (guiButton.id == this.numericZ.id) {
+                this.schematic.position.z = this.numericZ.getValue();
+                RenderSchematic.INSTANCE.refresh();
+            } else if (guiButton.id == this.btnUnload.id) {
+                Schematica.proxy.unloadSchematic();
+                this.mc.displayGuiScreen(this.parentScreen);
+                MissingBlockESP.clearBlockPos();
+            } else if (guiButton.id == this.btnLayerMode.id) {
+                this.schematic.isRenderingLayer = !this.schematic.isRenderingLayer;
+                this.btnLayerMode.displayString = this.schematic.isRenderingLayer ? this.strLayers : this.strAll;
+                this.nfLayer.setEnabled(this.schematic.isRenderingLayer);
+                RenderSchematic.INSTANCE.refresh();
+            } else if (guiButton.id == this.nfLayer.id) {
+                this.schematic.renderingLayer = this.nfLayer.getValue();
+                RenderSchematic.INSTANCE.refresh();
+            } else if (guiButton.id == this.btnHide.id) {
+                this.btnHide.displayString = this.schematic.toggleRendering() ? this.strHide : this.strShow;
+                MissingBlockESP.clearBlockPos();
+            } else if (guiButton.id == this.btnMove.id) {
+                ClientProxy.moveSchematicToPlayer(this.schematic);
+                RenderSchematic.INSTANCE.refresh();
+                this.setPoint(this.numericX, this.numericY, this.numericZ, this.schematic.position);
+            } else {
+                EnumFacing[] posx;
+
+                if (guiButton.id == this.btnFlipDirection.id) {
+                    posx = EnumFacing.VALUES;
+                    ClientProxy.axisFlip = posx[(ClientProxy.axisFlip.ordinal() + 2) % posx.length];
+                    guiButton.displayString = I18n.format("schematica.gui." + ClientProxy.axisFlip.getName(), new Object[0]);
+                } else if (guiButton.id == this.btnFlip.id) {
+                    SchemShare.log("FLIP", ClientProxy.axisFlip.toString());
+                    if (FlipHelper.INSTANCE.flip(this.schematic, ClientProxy.axisFlip, isShiftKeyDown())) {
+                        RenderSchematic.INSTANCE.refresh();
+                        SchematicPrinter.INSTANCE.refresh();
+                    }
+                } else if (guiButton.id == this.btnRotateDirection.id) {
+                    posx = EnumFacing.VALUES;
+                    ClientProxy.axisRotation = posx[(ClientProxy.axisRotation.ordinal() + 1) % posx.length];
+                    guiButton.displayString = I18n.format("schematica.gui." + ClientProxy.axisRotation.getName(), new Object[0]);
+                } else if (guiButton.id == this.btnRotate.id) {
+                    SchemShare.log("ROTATE", ClientProxy.axisRotation.toString());
+                    if (RotationHelper.INSTANCE.rotate(this.schematic, ClientProxy.axisRotation, isShiftKeyDown())) {
+                        this.setPoint(this.numericX, this.numericY, this.numericZ, this.schematic.position);
+                        RenderSchematic.INSTANCE.refresh();
+                        SchematicPrinter.INSTANCE.refresh();
+                    }
+                } else if (guiButton.id == this.btnMaterials.id) {
+                    this.mc.displayGuiScreen(new GuiSchematicMaterials(this));
+                } else {
+                    boolean posx2;
+
+                    if (guiButton.id == this.btnPrint.id && this.printer.isEnabled()) {
+                        posx2 = this.printer.togglePrinting();
+                        this.btnPrint.displayString = posx2 ? this.strOn : this.strOff;
+                    } else if (guiButton.id == this.btnLiquidPrinter.id && this.liquidPrinter.isEnabled()) {
+                        posx2 = this.liquidPrinter.togglePrinting();
+                        this.btnLiquidPrinter.displayString = posx2 ? this.strOn : this.strOff;
+                    } else if (guiButton.id == this.btnMissingESP.id) {
+                        MissingBlockESP.INSTANCE.setEnabled(!MissingBlockESP.INSTANCE.isEnabled());
+                        this.btnMissingESP.displayString = MissingBlockESP.INSTANCE.isEnabled() ? "ON" : "OFF";
+                    } else if (guiButton.id == this.btnShare.id) {
+                        SchemShare.share();
+                    } else if (guiButton.id == this.bntReload.id) {
+                        double posx1 = Minecraft.getMinecraft().thePlayer.posX;
+                        double posy = Minecraft.getMinecraft().thePlayer.posY;
+                        double posz = Minecraft.getMinecraft().thePlayer.posZ;
+
+                        if (Minecraft.getMinecraft().thePlayer != null && !Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().getCurrentServerData().serverIP.indexOf("archon") == -1) {
+                            Minecraft.getMinecraft().getNetHandler().addToSendQueue(new C04PacketPlayerPosition(Minecraft.getMinecraft().thePlayer.posX + 1000.0D, Minecraft.getMinecraft().thePlayer.posY, Minecraft.getMinecraft().thePlayer.posZ, false));
+                        }
+
+                        RenderSchematic.INSTANCE.refresh();
+                        Minecraft.getMinecraft().renderGlobal.loadRenderers();
+                    }
+                }
+            }
+        }
+
+    }
+
+    public void handleKeyboardInput() throws IOException {
+        super.handleKeyboardInput();
+        if (this.btnFlip.enabled) {
+            this.btnFlip.packedFGColour = isShiftKeyDown() ? 16711680 : 0;
+        }
+
+        if (this.btnRotate.enabled) {
+            this.btnRotate.packedFGColour = isShiftKeyDown() ? 16711680 : 0;
+        }
+
+    }
+
+    public void drawScreen(int par1, int par2, float par3) {
+        this.drawCenteredString(this.fontRendererObj, "Liquid Printer", 50, this.height - 165, 16777215);
+        this.drawCenteredString(this.fontRendererObj, this.strMoveSchematic, this.centerX, this.centerY - 45, 16777215);
+        this.drawCenteredString(this.fontRendererObj, "Missing ESP", 50, this.height - 125, 16777215);
+        this.drawCenteredString(this.fontRendererObj, this.strMaterials, 50, this.height - 85, 16777215);
+        this.drawCenteredString(this.fontRendererObj, this.strPrinter, 50, this.height - 45, 16777215);
+        this.drawCenteredString(this.fontRendererObj, this.strLayers, this.width - 50, this.height - 165, 16777215);
+        this.drawCenteredString(this.fontRendererObj, this.strOperations, this.width - 50, this.height - 120, 16777215);
+        this.drawString(this.fontRendererObj, this.strX, this.centerX - 65, this.centerY - 24, 16777215);
+        this.drawString(this.fontRendererObj, this.strY, this.centerX - 65, this.centerY + 1, 16777215);
+        this.drawString(this.fontRendererObj, this.strZ, this.centerX - 65, this.centerY + 26, 16777215);
+        super.drawScreen(par1, par2, par3);
+    }
+}

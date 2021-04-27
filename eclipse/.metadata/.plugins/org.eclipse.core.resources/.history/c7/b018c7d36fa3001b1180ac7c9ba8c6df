@@ -1,0 +1,25 @@
+package clientname.basicgui;
+
+public class HUDElement {
+
+	public String name, version;
+	public HUDElementCategory category;
+	
+	public boolean enabled;
+	
+	public HUDElement(String name, String version, HUDElementCategory category) {
+		this.name = name;
+		this.version = version;
+		this.category = category;
+		onInit();
+	}
+	
+	private void onInit() {
+		
+	}
+
+	public void draw() {
+		
+	}
+	
+}

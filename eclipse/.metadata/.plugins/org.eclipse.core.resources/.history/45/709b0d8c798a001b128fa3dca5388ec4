@@ -1,0 +1,10 @@
+package clientname.module;
+
+public class Module {
+
+	public Module(String name, int key,) {
+		
+	}
+	
+	
+}

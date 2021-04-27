@@ -1,0 +1,58 @@
+package com.github.energizedab.basicgui.comp;
+
+import java.awt.Color;
+
+import com.github.energizedab.basicgui.SettingsWindow;
+import com.github.energizedab.basicgui.utils.Colors;
+import com.github.energizedab.basicgui.utils.RenderUtils;
+import com.github.energizedab.pvptube.display.HUDElement;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+
+public class ElementButton {
+
+	public int x, y;
+	public HUDElement element;
+	
+	public ElementButton(int x, int y, HUDElement element) {
+		this.x = x;
+		this.y = y;
+		this.element = element;
+	}
+	
+	
+	public void draw(int mouseX, int mouseY) {
+		FontRenderer fr = RenderUtils.getFontRenderer();
+		int rectColor = element.isEnabled() ? Colors.getEnabledElementColor() : Colors.getBrighterGuiBackgroundColor(); 
+		
+		RenderUtils.drawRoundedRect(x, y, x + fr.getStringWidth(element.getName()) + 8, y + 20, 5, new Color(rectColor));
+		fr.drawString(element.getName(), x + 4, y + 2, Colors.getTextColor());
+	}
+	
+	public void mouseClicked(int mouseX, int mouseY, int button) {
+		if(isHovered(mouseX, mouseY)) {
+			
+			if(button == 0) {
+				element.toggle();
+			}
+			
+			if(button == 1) {
+				Minecraft.getMinecraft().displayGuiScreen(new SettingsWindow(element));
+			}
+		}
+	}
+	
+	public boolean isHovered(int mouseX, int mouseY) {
+		if(mouseX >= x && mouseX <= x + RenderUtils.getFontRenderer().getStringWidth(element.getName()) + 8) {
+			if(mouseY >= y && mouseY <= y + 20) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void mouseRelease(int state) {
+		
+	}
+}

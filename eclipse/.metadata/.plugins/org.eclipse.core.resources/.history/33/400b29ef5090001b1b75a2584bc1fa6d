@@ -1,0 +1,23 @@
+package dev.voyageclient.login;
+
+import dev.voyageclient.Voyage;
+import dev.voyageclient.util.backend.HWID;
+
+public class UserChecker {
+	
+	
+	public boolean isUser() {
+		String hwid =  HWID.getHWID();
+		
+		for(User u : Voyage.getInstance().getUsers().getUsers()) {
+			if(u.getHwid() == hwid) {
+				return true;
+			}
+			else return false;
+		}
+		return false;
+
+	}
+	
+
+}

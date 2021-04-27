@@ -1,0 +1,9 @@
+package clientname.module;
+
+public enum Catagory {
+	COMBAT,
+	MOVEMENT,
+	RENDER,
+	PLAYER,
+	MISC
+}

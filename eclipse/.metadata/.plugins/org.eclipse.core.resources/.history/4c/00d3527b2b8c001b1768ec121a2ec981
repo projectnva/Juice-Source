@@ -1,0 +1,53 @@
+package com.github.lunatrius.core.proxy;
+
+import com.github.lunatrius.core.handler.ConfigurationHandler;
+import com.github.lunatrius.core.reference.Reference;
+import com.github.lunatrius.core.version.VersionChecker;
+import com.google.common.collect.UnmodifiableIterator;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLInterModComms;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLInterModComms.IMCEvent;
+import net.minecraftforge.fml.common.event.FMLInterModComms.IMCMessage;
+
+public abstract class CommonProxy {
+
+    public void preInit(FMLPreInitializationEvent event) {
+        Reference.logger = event.getModLog();
+        ConfigurationHandler.init(event.getSuggestedConfigurationFile());
+        FMLInterModComms.sendMessage("LunatriusCore", "checkUpdate", "11.15.0.1661");
+    }
+
+    public void init(FMLInitializationEvent event) {}
+
+    public void postInit() {
+        if (VersionChecker.isAllowedToCheck("Global") && ConfigurationHandler.checkForUpdates) {
+            VersionChecker.startVersionCheck();
+        }
+
+    }
+
+    public void processIMC(IMCEvent event) {
+        UnmodifiableIterator unmodifiableiterator = event.getMessages().iterator();
+
+        while (unmodifiableiterator.hasNext()) {
+            IMCMessage message = (IMCMessage) unmodifiableiterator.next();
+
+            if ("checkUpdate".equals(message.key) && message.isStringMessage()) {
+                this.processMessage(message.getSender(), message.getStringValue());
+            }
+        }
+
+    }
+
+    private void processMessage(String sender, String forgeVersion) {
+        ModContainer container = (ModContainer) Loader.instance().getIndexedModList().get(sender);
+
+        if (container != null) {
+            VersionChecker.registerMod(container, forgeVersion);
+        }
+
+    }
+}

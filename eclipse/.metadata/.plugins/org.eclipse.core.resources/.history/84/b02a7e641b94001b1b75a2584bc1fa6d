@@ -1,0 +1,41 @@
+package me.aycy.blockoverlay;
+
+import java.util.ArrayList;
+import java.util.List;
+import me.aycy.blockoverlay.visual.BlockOverlayGui;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+
+public class BlockOverlayCommand extends CommandBase {
+
+    private BlockOverlay mod;
+
+    public List getCommandAliases() {
+        ArrayList aliases = new ArrayList();
+
+        aliases.add("boverlay");
+        return aliases;
+    }
+
+    public BlockOverlayCommand(BlockOverlay mod) {
+        this.mod = mod;
+    }
+
+    public String getCommandName() {
+        return "blockoverlay";
+    }
+
+    public String getCommandUsage(ICommandSender sender) {
+        return "/blockoverlay";
+    }
+
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+        this.mod.setGui(new BlockOverlayGui(this.mod, this.mod.getRender()));
+        this.mod.setOpenGui(true);
+    }
+
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return true;
+    }
+}

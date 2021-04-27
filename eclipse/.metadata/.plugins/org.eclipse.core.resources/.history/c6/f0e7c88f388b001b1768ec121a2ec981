@@ -1,0 +1,25 @@
+package clientname.module.modules;
+
+import org.lwjgl.input.Keyboard;
+
+import clientname.event.Event;
+import clientname.module.Category;
+import clientname.module.Module;
+import net.minecraft.client.Minecraft;
+
+public class Fullbright extends Module {
+	    public Fullbright() {
+	        super("FullBright", Keyboard.KEY_O, Category.RENDER);
+	    }
+
+	    @Override
+	    public void onEnable() {
+	    	System.err.println("Fullbright enabled");
+	    	Minecraft.getMinecraft().gameSettings.gammaSetting = 100.0f;
+	    }
+
+	    @Override
+	    public void onDisable() {
+	        Minecraft.getMinecraft().gameSettings.gammaSetting = 0.0f;
+	    }
+}

@@ -1,0 +1,20 @@
+package clientname.theme;
+
+import clientname.theme.themes.NormalTheme;
+
+public class CurrentTheme {
+	
+	public static Theme current = new NormalTheme();
+	
+	public CurrentTheme() {
+	}
+
+	public static Theme getCurrent() {
+		return current;
+	}
+
+	public void setCurrent(Theme current) {
+		this.current = current;
+	}
+
+}

@@ -1,0 +1,259 @@
+package com.github.lunatrius.schematica.handler;
+
+import com.github.lunatrius.schematica.Schematica;
+import com.github.lunatrius.schematica.reference.Names;
+import com.github.lunatrius.schematica.reference.Reference;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.Set;
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import net.minecraftforge.fml.common.registry.GameData;
+
+public class ConfigurationHandler {
+
+    public static final ConfigurationHandler INSTANCE = new ConfigurationHandler();
+    public static final FMLControlledNamespacedRegistry BLOCK_REGISTRY = GameData.getBlockRegistry();
+    public static final String VERSION = "1";
+    public static Configuration configuration;
+    public static final boolean DUMP_BLOCK_LIST_DEFAULT = false;
+    public static final boolean SHOW_DEBUG_INFO_DEFAULT = true;
+    public static final boolean ENABLE_ALPHA_DEFAULT = false;
+    public static final double ALPHA_DEFAULT = 1.0D;
+    public static final boolean HIGHLIGHT_DEFAULT = true;
+    public static final boolean HIGHLIGHT_AIR_DEFAULT = true;
+    public static final double BLOCK_DELTA_DEFAULT = 0.005D;
+    public static final int RENDER_DISTANCE_DEFAULT = 8;
+    public static final int PLACE_DELAY_DEFAULT = 0;
+    public static final int TIMEOUT_DEFAULT = 2;
+    public static final int PLACE_DISTANCE_DEFAULT = 5;
+    public static final boolean PLACE_INSTANTLY_DEFAULT = true;
+    public static final boolean DESTROY_BLOCKS_DEFAULT = false;
+    public static final boolean DESTROY_INSTANTLY_DEFAULT = false;
+    public static final boolean PLACE_ADJACENT_DEFAULT = true;
+    public static final boolean[] SWAP_SLOTS_DEFAULT = new boolean[] { false, false, false, false, false, true, true, true, true};
+    public static final String SCHEMATIC_DIRECTORY_STR = "schematics";
+    public static final File SCHEMATIC_DIRECTORY_DEFAULT = new File(Schematica.proxy.getDataDirectory(), "schematics");
+    public static final String[] EXTRA_AIR_BLOCKS_DEFAULT = new String[0];
+    public static final String SORT_TYPE_DEFAULT = "";
+    public static final boolean PRINTER_ENABLED_DEFAULT = true;
+    public static final boolean SAVE_ENABLED_DEFAULT = true;
+    public static final boolean LOAD_ENABLED_DEFAULT = true;
+    public static final int PLAYER_QUOTA_KILOBYTES_DEFAULT = 8192;
+    public static boolean dumpBlockList = false;
+    public static boolean showDebugInfo = true;
+    public static boolean enableAlpha = false;
+    public static float alpha = 1.0F;
+    public static boolean highlight = true;
+    public static boolean highlightAir = true;
+    public static double blockDelta = 0.005D;
+    public static int renderDistance = 8;
+    public static int placeDelay = 0;
+    public static int timeout = 2;
+    public static int placeDistance = 5;
+    public static boolean placeInstantly = true;
+    public static boolean destroyBlocks = false;
+    public static boolean destroyInstantly = false;
+    public static boolean placeAdjacent = true;
+    public static boolean[] swapSlots = Arrays.copyOf(ConfigurationHandler.SWAP_SLOTS_DEFAULT, ConfigurationHandler.SWAP_SLOTS_DEFAULT.length);
+    public static final Queue swapSlotsQueue = new ArrayDeque();
+    public static File schematicDirectory = ConfigurationHandler.SCHEMATIC_DIRECTORY_DEFAULT;
+    public static String[] extraAirBlocks = (String[]) Arrays.copyOf(ConfigurationHandler.EXTRA_AIR_BLOCKS_DEFAULT, ConfigurationHandler.EXTRA_AIR_BLOCKS_DEFAULT.length);
+    public static String sortType = "";
+    public static boolean printerEnabled = true;
+    public static boolean saveEnabled = true;
+    public static boolean loadEnabled = true;
+    public static int playerQuotaKilobytes = 8192;
+    public static Property propDumpBlockList = null;
+    public static Property propShowDebugInfo = null;
+    public static Property propEnableAlpha = null;
+    public static Property propAlpha = null;
+    public static Property propHighlight = null;
+    public static Property propHighlightAir = null;
+    public static Property propBlockDelta = null;
+    public static Property propRenderDistance = null;
+    public static Property propPlaceDelay = null;
+    public static Property propTimeout = null;
+    public static Property propPlaceDistance = null;
+    public static Property propPlaceInstantly = null;
+    public static Property propDestroyBlocks = null;
+    public static Property propDestroyInstantly = null;
+    public static Property propPlaceAdjacent = null;
+    public static Property[] propSwapSlots = new Property[ConfigurationHandler.SWAP_SLOTS_DEFAULT.length];
+    public static Property propSchematicDirectory = null;
+    public static Property propExtraAirBlocks = null;
+    public static Property propSortType = null;
+    public static Property propPrinterEnabled = null;
+    public static Property propSaveEnabled = null;
+    public static Property propLoadEnabled = null;
+    public static Property propPlayerQuotaKilobytes = null;
+    private static final Set extraAirBlockList = new HashSet();
+
+    public static void init(File configFile) {
+        if (ConfigurationHandler.configuration == null) {
+            ConfigurationHandler.configuration = new Configuration(configFile, "1");
+            loadConfiguration();
+        }
+
+    }
+
+    public static void loadConfiguration() {
+        loadConfigurationDebug();
+        loadConfigurationRender();
+        loadConfigurationPrinter();
+        loadConfigurationSwapSlots();
+        loadConfigurationGeneral();
+        loadConfigurationServer();
+        Schematica.proxy.createFolders();
+        if (ConfigurationHandler.configuration.hasChanged()) {
+            ConfigurationHandler.configuration.save();
+        }
+
+    }
+
+    private static void loadConfigurationDebug() {
+        ConfigurationHandler.propDumpBlockList = ConfigurationHandler.configuration.get("debug", "dumpBlockList", false, "Dump all block states on startup.");
+        ConfigurationHandler.propDumpBlockList.setLanguageKey(Names.Config.LANG_PREFIX + "." + "dumpBlockList");
+        ConfigurationHandler.propDumpBlockList.requiresMcRestart();
+        ConfigurationHandler.dumpBlockList = ConfigurationHandler.propDumpBlockList.getBoolean(false);
+        ConfigurationHandler.propShowDebugInfo = ConfigurationHandler.configuration.get("debug", "showDebugInfo", true, "Display extra information on the debug screen (F3).");
+        ConfigurationHandler.propShowDebugInfo.setLanguageKey(Names.Config.LANG_PREFIX + "." + "showDebugInfo");
+        ConfigurationHandler.showDebugInfo = ConfigurationHandler.propShowDebugInfo.getBoolean(true);
+    }
+
+    private static void loadConfigurationRender() {
+        ConfigurationHandler.propEnableAlpha = ConfigurationHandler.configuration.get("render", "alphaEnabled", false, "Enable transparent textures.");
+        ConfigurationHandler.propEnableAlpha.setLanguageKey(Names.Config.LANG_PREFIX + "." + "alphaEnabled");
+        ConfigurationHandler.enableAlpha = ConfigurationHandler.propEnableAlpha.getBoolean(false);
+        ConfigurationHandler.propAlpha = ConfigurationHandler.configuration.get("render", "alpha", 1.0D, "Alpha value used when rendering the schematic (1.0 = opaque, 0.5 = half transparent, 0.0 = transparent).", 0.0D, 1.0D);
+        ConfigurationHandler.propAlpha.setLanguageKey(Names.Config.LANG_PREFIX + "." + "alpha");
+        ConfigurationHandler.alpha = (float) ConfigurationHandler.propAlpha.getDouble(1.0D);
+        ConfigurationHandler.propHighlight = ConfigurationHandler.configuration.get("render", "highlight", true, "Highlight invalid placed blocks and to be placed blocks.");
+        ConfigurationHandler.propHighlight.setLanguageKey(Names.Config.LANG_PREFIX + "." + "highlight");
+        ConfigurationHandler.highlight = ConfigurationHandler.propHighlight.getBoolean(true);
+        ConfigurationHandler.propHighlightAir = ConfigurationHandler.configuration.get("render", "highlightAir", true, "Highlight blocks that should be air.");
+        ConfigurationHandler.propHighlightAir.setLanguageKey(Names.Config.LANG_PREFIX + "." + "highlightAir");
+        ConfigurationHandler.highlightAir = ConfigurationHandler.propHighlightAir.getBoolean(true);
+        ConfigurationHandler.propBlockDelta = ConfigurationHandler.configuration.get("render", "blockDelta", 0.005D, "Delta value used for highlighting (if you experience z-fighting increase this).", 0.0D, 0.2D);
+        ConfigurationHandler.propBlockDelta.setLanguageKey(Names.Config.LANG_PREFIX + "." + "blockDelta");
+        ConfigurationHandler.blockDelta = ConfigurationHandler.propBlockDelta.getDouble(0.005D);
+        ConfigurationHandler.propRenderDistance = ConfigurationHandler.configuration.get("render", "renderDistance", 8, "Schematic render distance.", 2, 16);
+        ConfigurationHandler.propRenderDistance.setLanguageKey(Names.Config.LANG_PREFIX + "." + "renderDistance");
+        ConfigurationHandler.renderDistance = ConfigurationHandler.propRenderDistance.getInt(8);
+    }
+
+    private static void loadConfigurationPrinter() {
+        ConfigurationHandler.propPlaceDelay = ConfigurationHandler.configuration.get("printer", "placeDelay", 0, "Delay between placement attempts (in ticks).", 0, 20);
+        ConfigurationHandler.propPlaceDelay.setLanguageKey(Names.Config.LANG_PREFIX + "." + "placeDelay");
+        ConfigurationHandler.placeDelay = ConfigurationHandler.propPlaceDelay.getInt(0);
+        ConfigurationHandler.propTimeout = ConfigurationHandler.configuration.get("printer", "timeout", 2, "Timeout before re-trying failed blocks.", 0, 100);
+        ConfigurationHandler.propTimeout.setLanguageKey(Names.Config.LANG_PREFIX + "." + "timeout");
+        ConfigurationHandler.timeout = ConfigurationHandler.propTimeout.getInt(2);
+        ConfigurationHandler.propPlaceDistance = ConfigurationHandler.configuration.get("printer", "placeDistance", 5, "Maximum placement distance.", 1, 9);
+        ConfigurationHandler.propPlaceDistance.setLanguageKey(Names.Config.LANG_PREFIX + "." + "placeDistance");
+        ConfigurationHandler.placeDistance = ConfigurationHandler.propPlaceDistance.getInt(5);
+        ConfigurationHandler.propPlaceInstantly = ConfigurationHandler.configuration.get("printer", "placeInstantly", true, "Place all blocks that can be placed in one tick.");
+        ConfigurationHandler.propPlaceInstantly.setLanguageKey(Names.Config.LANG_PREFIX + "." + "placeInstantly");
+        ConfigurationHandler.placeInstantly = ConfigurationHandler.propPlaceInstantly.getBoolean(true);
+        ConfigurationHandler.propDestroyBlocks = ConfigurationHandler.configuration.get("printer", "destroyBlocks", false, "The printer will destroy blocks (creative mode only).");
+        ConfigurationHandler.propDestroyBlocks.setLanguageKey(Names.Config.LANG_PREFIX + "." + "destroyBlocks");
+        ConfigurationHandler.destroyBlocks = ConfigurationHandler.propDestroyBlocks.getBoolean(false);
+        ConfigurationHandler.propDestroyInstantly = ConfigurationHandler.configuration.get("printer", "destroyInstantly", false, "Destroy all blocks that can be destroyed in one tick.");
+        ConfigurationHandler.propDestroyInstantly.setLanguageKey(Names.Config.LANG_PREFIX + "." + "destroyInstantly");
+        ConfigurationHandler.destroyInstantly = ConfigurationHandler.propDestroyInstantly.getBoolean(false);
+        ConfigurationHandler.propPlaceAdjacent = ConfigurationHandler.configuration.get("printer", "placeAdjacent", true, "Place blocks only if there is an adjacent block next to them.");
+        ConfigurationHandler.propPlaceAdjacent.setLanguageKey(Names.Config.LANG_PREFIX + "." + "placeAdjacent");
+        ConfigurationHandler.placeAdjacent = ConfigurationHandler.propPlaceAdjacent.getBoolean(true);
+    }
+
+    private static void loadConfigurationSwapSlots() {
+        ConfigurationHandler.swapSlotsQueue.clear();
+
+        for (int i = 0; i < ConfigurationHandler.SWAP_SLOTS_DEFAULT.length; ++i) {
+            ConfigurationHandler.propSwapSlots[i] = ConfigurationHandler.configuration.get("printer.swapslots", "swapSlot" + i, ConfigurationHandler.SWAP_SLOTS_DEFAULT[i], "Allow the printer to use this hotbar slot.");
+            ConfigurationHandler.propSwapSlots[i].setLanguageKey(Names.Config.LANG_PREFIX + "." + "swapSlot" + i);
+            ConfigurationHandler.swapSlots[i] = ConfigurationHandler.propSwapSlots[i].getBoolean(ConfigurationHandler.SWAP_SLOTS_DEFAULT[i]);
+            if (ConfigurationHandler.swapSlots[i]) {
+                ConfigurationHandler.swapSlotsQueue.offer(Integer.valueOf(i));
+            }
+        }
+
+    }
+
+    private static void loadConfigurationGeneral() {
+        ConfigurationHandler.propSchematicDirectory = ConfigurationHandler.configuration.get("general", "schematicDirectory", "schematics", "Schematic directory.");
+        ConfigurationHandler.propSchematicDirectory.setLanguageKey(Names.Config.LANG_PREFIX + "." + "schematicDirectory");
+        ConfigurationHandler.schematicDirectory = new File(ConfigurationHandler.propSchematicDirectory.getString());
+
+        try {
+            ConfigurationHandler.schematicDirectory = ConfigurationHandler.schematicDirectory.getCanonicalFile();
+            String e = ConfigurationHandler.schematicDirectory.getAbsolutePath();
+            String dataPath = Schematica.proxy.getDataDirectory().getAbsolutePath();
+
+            if (e.contains(dataPath)) {
+                ConfigurationHandler.propSchematicDirectory.set(e.substring(dataPath.length()).replace("\\", "/").replaceAll("^/+", ""));
+            } else {
+                ConfigurationHandler.propSchematicDirectory.set(e.replace("\\", "/"));
+            }
+        } catch (IOException ioexception) {
+            Reference.logger.warn("Could not canonize path!", ioexception);
+        }
+
+        ConfigurationHandler.propExtraAirBlocks = ConfigurationHandler.configuration.get("general", "extraAirBlocks", ConfigurationHandler.EXTRA_AIR_BLOCKS_DEFAULT, "Extra blocks to consider as air for the schematic renderer.");
+        ConfigurationHandler.propExtraAirBlocks.setLanguageKey(Names.Config.LANG_PREFIX + "." + "extraAirBlocks");
+        ConfigurationHandler.extraAirBlocks = ConfigurationHandler.propExtraAirBlocks.getStringList();
+        ConfigurationHandler.propSortType = ConfigurationHandler.configuration.get("general", "sortType", "", "Default sort type for the material list.");
+        ConfigurationHandler.propSortType.setShowInGui(false);
+        ConfigurationHandler.sortType = ConfigurationHandler.propSortType.getString();
+        ConfigurationHandler.extraAirBlockList.clear();
+        String[] astring = ConfigurationHandler.extraAirBlocks;
+        int i = astring.length;
+
+        for (int j = 0; j < i; ++j) {
+            String name = astring[j];
+            Block block = (Block) ConfigurationHandler.BLOCK_REGISTRY.getObject(new ResourceLocation(name));
+
+            if (block != Blocks.air) {
+                ConfigurationHandler.extraAirBlockList.add(block);
+            }
+        }
+
+    }
+
+    private static void loadConfigurationServer() {
+        ConfigurationHandler.propPrinterEnabled = ConfigurationHandler.configuration.get("server", "printerEnabled", true, "Allow players to use the printer.");
+        ConfigurationHandler.propPrinterEnabled.setLanguageKey(Names.Config.LANG_PREFIX + "." + "printerEnabled");
+        ConfigurationHandler.printerEnabled = ConfigurationHandler.propPrinterEnabled.getBoolean(true);
+        ConfigurationHandler.propSaveEnabled = ConfigurationHandler.configuration.get("server", "saveEnabled", true, "Allow players to save schematics.");
+        ConfigurationHandler.propSaveEnabled.setLanguageKey(Names.Config.LANG_PREFIX + "." + "saveEnabled");
+        ConfigurationHandler.saveEnabled = ConfigurationHandler.propSaveEnabled.getBoolean(true);
+        ConfigurationHandler.propLoadEnabled = ConfigurationHandler.configuration.get("server", "loadEnabled", true, "Allow players to load schematics.");
+        ConfigurationHandler.propLoadEnabled.setLanguageKey(Names.Config.LANG_PREFIX + "." + "loadEnabled");
+        ConfigurationHandler.loadEnabled = ConfigurationHandler.propLoadEnabled.getBoolean(true);
+        ConfigurationHandler.propPlayerQuotaKilobytes = ConfigurationHandler.configuration.get("server", "playerQuotaKilobytes", 8192, "Amount of storage provided per-player for schematics on the server.");
+        ConfigurationHandler.propPlayerQuotaKilobytes.setLanguageKey(Names.Config.LANG_PREFIX + "." + "playerQuotaKilobytes");
+        ConfigurationHandler.playerQuotaKilobytes = ConfigurationHandler.propPlayerQuotaKilobytes.getInt(8192);
+    }
+
+    @SubscribeEvent
+    public void onConfigurationChangedEvent(OnConfigChangedEvent event) {
+        if (event.modID.equalsIgnoreCase("OrbitClient")) {
+            loadConfiguration();
+        }
+
+    }
+
+    public static boolean isExtraAirBlock(Block block) {
+        return ConfigurationHandler.extraAirBlockList.contains(block);
+    }
+}

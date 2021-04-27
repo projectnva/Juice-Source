@@ -1,0 +1,7 @@
+package juiceclient.server.packets.server;
+
+public class SPacketHelloWorld extends SPacket{
+
+	writePacket
+	
+}

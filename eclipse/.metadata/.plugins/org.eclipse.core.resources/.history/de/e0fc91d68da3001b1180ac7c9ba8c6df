@@ -1,0 +1,96 @@
+package clientname.basicgui;
+
+import java.awt.Color;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import com.google.common.collect.Lists;
+
+import clientname.Client;
+import clientname.basicgui.comp.Component;
+import clientname.basicgui.comp.impl.CheckBox;
+import clientname.basicgui.comp.impl.ComboBox;
+import clientname.basicgui.comp.impl.Slider;
+import clientname.basicgui.settings.BooleanSetting;
+import clientname.basicgui.settings.ModeSetting;
+import clientname.basicgui.settings.NumberSetting;
+import clientname.basicgui.settings.Setting;
+import clientname.basicgui.utils.Colors;
+import clientname.basicgui.utils.RenderUtils;
+
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
+
+public class SettingsWindow extends GuiScreen {
+
+	
+	
+	ArrayList<Component> components = Lists.newArrayList();
+    int yCount = 0;
+	public HUDElement parentElement;
+	int x = 200;
+    int y = 100;
+	
+	public SettingsWindow(HUDElement parentElement) {
+		this.parentElement = parentElement;
+		yCount = 0;
+        int count = 0;
+        for(Setting set : Client.INSTANCE.setmgr.getSettingsInElement(parentElement)) {
+            if(set.isBooleanSetting()){
+                this.components.add(new CheckBox(x + 5, y + 5 + count * 20, (BooleanSetting)set, this));
+            }else if(set.isModeSetting()){
+                this.components.add(new ComboBox(x + 5, y + 5 + count * 20, (ModeSetting)set, this));
+            }else if(set.isNumberSetting()){
+                this.components.add(new Slider(x + 5, y + 5 + count * 20, (NumberSetting)set, this));
+            }
+            count++;	
+
+        }
+	}
+
+	@Override
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		ScaledResolution sr = RenderUtils.getScaledResolution();
+
+        RenderUtils.drawRoundedRect(x, y, sr.getScaledWidth() - x, sr.getScaledHeight() - y, 5, new Color(Colors.getGuiBackgroundColor()));
+
+        for(Component c : components){
+            c.draw(mouseX, mouseY);
+        }
+	}
+	
+	@Override
+	public void initGui() {
+		if (OpenGlHelper.shadersSupported && mc.func_175606_aa() instanceof EntityPlayer) {
+			if (mc.entityRenderer.theShaderGroup != null) {
+				mc.entityRenderer.theShaderGroup.deleteShaderGroup();
+			}
+			//mc.entityRenderer.func_175069_a(new ResourceLocation("shaders/post/blur.json"));
+		}
+	}
+	
+	@Override
+	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+		for(Component c : components){
+            c.mouseClicked(mouseX, mouseY, mouseButton);
+        }
+	}
+	
+	@Override
+	protected void mouseReleased(int mouseX, int mouseY, int state) {
+		for(Component c : components){
+            c.mouseReleased(state);
+		}
+	}
+	
+	@Override
+	public void onGuiClosed() {
+		if (mc.entityRenderer.theShaderGroup != null) {
+			mc.entityRenderer.theShaderGroup.deleteShaderGroup();
+			mc.entityRenderer.theShaderGroup = null;
+		}
+	}
+}

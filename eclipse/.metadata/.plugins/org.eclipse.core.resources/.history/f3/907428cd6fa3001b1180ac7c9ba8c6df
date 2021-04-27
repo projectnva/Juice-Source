@@ -1,0 +1,16 @@
+package clientname.basicgui;
+
+public class HUDElement {
+
+	public String name, version;
+	public HUDElementCategory category;
+	
+	public HUDElement(String name, String version, HUDElementCategory category) {
+		
+	}
+	
+	public void draw() {
+		
+	}
+	
+}

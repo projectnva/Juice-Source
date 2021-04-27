@@ -1,0 +1,46 @@
+package clientname.mods.impl.crosshairmod.gui.items;
+
+import clientname.mods.impl.crosshairmod.utils.GuiGraphics;
+import clientname.mods.impl.crosshairmod.utils.RGBA;
+import net.minecraft.client.gui.GuiScreen;
+
+
+public class Tickbox extends GuiItem {
+
+    private boolean checked;
+
+    public Tickbox(GuiScreen screen) {
+        super(screen);
+        this.setWidth(10);
+        this.setHeight(10);
+    }
+
+    public Tickbox(GuiScreen screen, int id, String displayText, int posX, int posY) {
+        super(screen, id, displayText, posX, posY, 10, 10);
+    }
+
+    public void mouseClicked(int mouseX, int mouseY) {
+        this.toggleChecked();
+    }
+
+    public void drawItem(int mouseX, int mouseY) {
+        GuiGraphics.drawThemeBorderedRectangle(this.getPosX(), this.getPosY(), this.getPosX() + this.getWidth(), this.getPosY() + this.getHeight());
+        GuiGraphics.drawString(this.getDisplayText(), this.getPosX() + this.getWidth() + 3, this.getPosY() + this.getHeight() / 2 - 3, 16777215);
+        if (this.getChecked()) {
+            GuiGraphics.drawFilledRectangle(this.getPosX() + 2, this.getPosY() + 2, this.getPosX() + this.getWidth() - 1, this.getPosY() + this.getHeight() - 1, new RGBA(50, 255, 50, 255));
+        }
+
+    }
+
+    public boolean getChecked() {
+        return this.checked;
+    }
+
+    public void setChecked(boolean newChecked) {
+        this.checked = newChecked;
+    }
+
+    public void toggleChecked() {
+        this.checked = !this.checked;
+    }
+}
